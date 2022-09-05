@@ -4,7 +4,6 @@ import Foundation
 class FFIHash {
 
     func hash(input: String) -> String {
-        
         var errorCode: Int32 = -1
         
         let inputPointer = UnsafeMutablePointer<Int8>(mutating: (input as NSString).utf8String)
