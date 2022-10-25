@@ -10,8 +10,8 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         let input = "Hello World"
-        let result = FFIHash().hash(input: input)
-        Text(result).padding()
+        //let result = //FFIHash().hash(input: input)
+        //Text(result).padding()
     }
 }
 
