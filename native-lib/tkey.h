@@ -22,7 +22,7 @@
         void string_destroy(char *ptr);
         struct ShareStore* json_to_share_store(char* json, int* error_code);
         void share_store_free(struct ShareStore* ptr);
-        struct FFIStorageLayer* storage_layer(bool enable_logging, char* host_url, unsigned long int server_time_offset, char* (*network_callback)(char*, char*, int), int* error_code);
+        struct FFIStorageLayer* storage_layer(bool enable_logging, char* host_url, unsigned long int server_time_offset, char* (*network_callback)(char*, char*, int*), int* error_code);
         void storage_layer_free(struct FFIStorageLayer* ptr);
         struct ServiceProvider* service_provider(bool enable_logging, char* postbox_key, char* curve_n, int* error_code);
         void service_provider_free(struct ServiceProvider* prt);
