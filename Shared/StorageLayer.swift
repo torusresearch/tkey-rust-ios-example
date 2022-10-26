@@ -29,7 +29,7 @@ final class StorageLayer {
             request.addValue("*", forHTTPHeaderField: "Access-Control-Allow-Origin")
             request.addValue("GET, POST", forHTTPHeaderField: "Access-Control-Allow-Methods")
             request.addValue("Content-Type", forHTTPHeaderField: "Access-Control-Allow-Headers")
-            request.httpBody = dataString.data(using: <#T##String.Encoding#>)
+            request.httpBody = dataString.data(using: String.Encoding.utf8)
             
             //todo: parse methods
             
