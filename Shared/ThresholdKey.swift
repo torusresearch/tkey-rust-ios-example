@@ -14,15 +14,15 @@ final class ThresholdKey {
         self.pointer = pointer
     }
     
-    init(private_key: String, metadata: OpaquePointer, shares: OpaquePointer, storage_layer: StorageLayer, service_provider: ServiceProvider?, local_matadata_transitions: OpaquePointer, last_fetch_cloud_metadata: OpaquePointer, enable_logging: Bool, manual_sync: Bool) throws {
+    init(private_key: String, metadata: OpaquePointer? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider?, local_matadata_transitions:  OpaquePointer? = nil, last_fetch_cloud_metadata:  OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
         var errorCode: Int32 = -1
         
-        var keyPointer = UnsafeMutablePointer<Int8>(nil)
+        var keyPointer: UnsafeMutablePointer<Int8>? = nil
         if !private_key.isEmpty {
             keyPointer = UnsafeMutablePointer<Int8>(mutating: (private_key as NSString).utf8String)
         }
         
-        var providerPointer = OpaquePointer(UnsafeMutablePointer<Int8>(nil))
+        var providerPointer: OpaquePointer? = nil
         if case .some(let provider) = service_provider {
             providerPointer = provider.pointer
         }
@@ -36,15 +36,15 @@ final class ThresholdKey {
         pointer = result!
     }
     
-    public func initialize(import_share: String, input: OpaquePointer, never_initialize_new_key: Bool, service_provider: ServiceProvider?, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyResult
+    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, service_provider: ServiceProvider? = nil, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyResult
     {
         var errorCode: Int32 = -1
-        var sharePointer = UnsafeMutablePointer<Int8>(nil)
+        var sharePointer:UnsafeMutablePointer<Int8>? = nil
         if !import_share.isEmpty {
             sharePointer = UnsafeMutablePointer<Int8>(mutating: (import_share as NSString).utf8String)
         }
         
-        var providerPointer = OpaquePointer(UnsafeMutablePointer<Int8>(nil))
+        var providerPointer: OpaquePointer? = nil
         if case .some(let provider) = service_provider {
             providerPointer = provider.pointer
         }

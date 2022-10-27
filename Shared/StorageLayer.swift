@@ -25,13 +25,19 @@ final class StorageLayer {
             let session = URLSession.shared
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type") // change as per server requirements
             request.addValue("*", forHTTPHeaderField: "Access-Control-Allow-Origin")
             request.addValue("GET, POST", forHTTPHeaderField: "Access-Control-Allow-Methods")
             request.addValue("Content-Type", forHTTPHeaderField: "Access-Control-Allow-Headers")
-            request.httpBody = dataString.data(using: String.Encoding.utf8)
             
-            //todo: parse methods
+            if urlString.split(separator: "/").last == "bulk_set_stream"
+            {
+                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = dataString.data(using: String.Encoding.utf8)
+                
+            } else {
+                request.addValue("application/form-data", forHTTPHeaderField: "Content-Type")
+                request.httpBody = dataString.data(using: String.Encoding.utf8)
+            }
             
             var resultPointer = UnsafeMutablePointer<CChar>(nil)
             let task = session.dataTask(with: request) { data, response, error in
@@ -49,7 +55,6 @@ final class StorageLayer {
             task.resume()
             return resultPointer
         }
-        
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
             storage_layer(enable_logging, urlPointer, server_time_offset, network_interface, error)
                 })
@@ -60,6 +65,6 @@ final class StorageLayer {
     }
     
     deinit {
-        storage_layer_free(pointer)
+       storage_layer_free(pointer)
     }
 }
