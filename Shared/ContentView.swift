@@ -14,9 +14,7 @@ struct ContentView: View {
             let storage_layer = try! StorageLayer.init(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
         
         let threshold_key = try! ThresholdKey.init(
-            private_key: "",
             storage_layer: storage_layer,
-            service_provider: nil,
             enable_logging: true,
             manual_sync: true)
          
