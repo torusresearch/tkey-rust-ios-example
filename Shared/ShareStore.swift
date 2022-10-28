@@ -8,7 +8,7 @@
 import Foundation
 
 final class ShareStore {
-    private(set) var pointer: OpaquePointer
+    private(set) var pointer: OpaquePointer?
     
     init(pointer: OpaquePointer) {
         self.pointer = pointer
@@ -23,7 +23,7 @@ final class ShareStore {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ShareStore")
             }
-        pointer = result!
+        pointer = result
     }
     
     deinit {

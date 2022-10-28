@@ -8,7 +8,7 @@
 import Foundation
 
 final class ThresholdKey {
-    private(set) var pointer: OpaquePointer
+    private(set) var pointer: OpaquePointer?
     
     init(pointer: OpaquePointer) {
         self.pointer = pointer
@@ -33,7 +33,7 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey")
             }
-        pointer = result!
+        pointer = result
     }
     
     public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, service_provider: ServiceProvider? = nil, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyResult
@@ -41,7 +41,7 @@ final class ThresholdKey {
         var errorCode: Int32 = -1
         var sharePointer:UnsafeMutablePointer<Int8>? = nil
         if !import_share.isEmpty {
-            sharePointer = UnsafeMutablePointer<Int8>(mutating: (import_share as NSString).utf8String)
+            sharePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: import_share).utf8String)
         }
         
         var providerPointer: OpaquePointer? = nil
@@ -49,12 +49,12 @@ final class ThresholdKey {
             providerPointer = provider.pointer
         }
         
-        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: curve_n).utf8String)
         let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_initialize(pointer, sharePointer, input, never_initialize_new_key, providerPointer, include_local_metadata_transitions, curvePointer, error)})
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
             }
-        return KeyResult.init(pointer: result!);
+        return KeyResult(pointer: result);
     }
     
     public func reconstruct(curve_n: String) throws -> ReconstructionResult
@@ -66,7 +66,7 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Reconstruct")
             }
-        return ReconstructionResult.init(pointer: result!)
+        return ReconstructionResult(pointer: result)
     }
     
     deinit {

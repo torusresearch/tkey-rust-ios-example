@@ -8,9 +8,9 @@
 import Foundation
 
 final class ReconstructionResult {
-    private(set) var pointer: OpaquePointer
+    private(set) var pointer: OpaquePointer?
     
-    init(pointer: OpaquePointer) {
+    init(pointer: OpaquePointer?) {
         self.pointer = pointer
     }
     
