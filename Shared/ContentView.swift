@@ -19,7 +19,7 @@ struct ContentView: View {
             manual_sync: true)
         
         let _ = try! threshold_key.initialize(never_initialize_new_key: false, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141")
-        //let _ = try! threshold_key.reconstruct(curve_n: curve_n)
+        let _ = try! threshold_key.reconstruct(curve_n: "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141")
         Text("Hello").padding()
     }
 }

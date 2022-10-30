@@ -7,12 +7,33 @@
 
 import Foundation
 
+extension NSMutableData {
+    func appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
 final class StorageLayer {
     private(set) var pointer: OpaquePointer?
     
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
+    
+    static func createMultipartBody(data: Data, boundary: String, file: String) -> Data {
+          let body = NSMutableData()
+          let lineBreak = "\r\n"
+          let boundaryPrefix = "--\(boundary)\r\n"
+          body.appendString(boundaryPrefix)
+          body.appendString("Content-Disposition: form-data; name=\"\(file)\"\r\n")
+          body.appendString("Content-Type: \("application/json;charset=utf-8")\r\n\r\n")
+          body.append(data)
+          body.appendString("\r\n")
+          body.appendString("--\(boundary)--\(lineBreak)")
+          return body as Data
+      }
     
     init(enable_logging: Bool, host_url: String, server_time_offset: UInt) throws {
         var errorCode: Int32 = -1
@@ -32,8 +53,16 @@ final class StorageLayer {
             
             if urlString.split(separator: "/").last == "bulk_set_stream"
             {
-                request.addValue("application/form-data", forHTTPHeaderField: "Content-Type")
-                request.httpBody = dataString.data(using: String.Encoding.utf8)
+                let boundary = UUID().uuidString;
+                request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                                
+                let json = try! JSONSerialization.jsonObject(with: dataString.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [[String:Any]]
+                var requestData = Data()
+                for item in json {
+                        let dataItem = try! JSONSerialization.data(withJSONObject: item, options: .prettyPrinted)
+                    requestData.append(StorageLayer.createMultipartBody(data: dataItem, boundary: boundary, file: "multipartData"))
+                }
+                request.httpBody = requestData
             } else {
                 request.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.httpBody = dataString.data(using: String.Encoding.utf8)
