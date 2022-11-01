@@ -36,7 +36,7 @@ final class ThresholdKey {
         pointer = result
     }
     
-    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, service_provider: ServiceProvider? = nil, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyResult
+    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, service_provider: ServiceProvider? = nil, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
     {
         var errorCode: Int32 = -1
         var sharePointer:UnsafeMutablePointer<Int8>? = nil
@@ -54,10 +54,10 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
             }
-        return KeyResult(pointer: result);
+        return try! KeyDetails(pointer: result!);
     }
     
-    public func reconstruct(curve_n: String) throws -> ReconstructionResult
+    public func reconstruct(curve_n: String) throws -> KeyReconstructionDetails
     {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
@@ -66,7 +66,7 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Reconstruct")
             }
-        return ReconstructionResult(pointer: result)
+        return try! KeyReconstructionDetails(pointer: result!)
     }
     
     deinit {

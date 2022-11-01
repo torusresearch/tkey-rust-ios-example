@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B306A81929110FD100B3C8E6 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
+		B306A81B2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
+		B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
+		B306A81D2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
 		B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */; };
@@ -21,8 +25,8 @@
 		B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017582908600F005F577B /* ServiceProvider.swift */; };
 		B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175B2908602F005F577B /* StorageLayer.swift */; };
 		B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175E29086053005F577B /* ThresholdKey.swift */; };
-		B3A2ABCD290B8D320009C688 /* KeyResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyResult.swift */; };
-		B3A2ABCE290B8D320009C688 /* ReconstructionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* ReconstructionResult.swift */; };
+		B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyDetails.swift */; };
+		B3A2ABCE290B8D320009C688 /* KeyReconstructionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* KeyReconstructionDetails.swift */; };
 		B3A2ABCF290B8D320009C688 /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3EC55B828BE6427003596E5 /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
 		B3EC55B928BE6434003596E5 /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
@@ -35,10 +39,10 @@
 		B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175B2908602F005F577B /* StorageLayer.swift */; };
 		B3F0175F29086053005F577B /* ThresholdKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175E29086053005F577B /* ThresholdKey.swift */; };
 		B3F0176029086053005F577B /* ThresholdKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175E29086053005F577B /* ThresholdKey.swift */; };
-		B3F017622908606B005F577B /* KeyResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyResult.swift */; };
-		B3F017632908606B005F577B /* KeyResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyResult.swift */; };
-		B3F0176529086079005F577B /* ReconstructionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* ReconstructionResult.swift */; };
-		B3F0176629086079005F577B /* ReconstructionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* ReconstructionResult.swift */; };
+		B3F017622908606B005F577B /* KeyDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyDetails.swift */; };
+		B3F017632908606B005F577B /* KeyDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyDetails.swift */; };
+		B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* KeyReconstructionDetails.swift */; };
+		B3F0176629086079005F577B /* KeyReconstructionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* KeyReconstructionDetails.swift */; };
 		B3F0176829086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176929086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176A290865F6005F577B /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
@@ -62,6 +66,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B306A81829110FD100B3C8E6 /* PrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKey.swift; sourceTree = "<group>"; };
+		B306A81A2911174400B3C8E6 /* KeyPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPoint.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -83,8 +89,8 @@
 		B3F017582908600F005F577B /* ServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProvider.swift; sourceTree = "<group>"; };
 		B3F0175B2908602F005F577B /* StorageLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLayer.swift; sourceTree = "<group>"; };
 		B3F0175E29086053005F577B /* ThresholdKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdKey.swift; sourceTree = "<group>"; };
-		B3F017612908606B005F577B /* KeyResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyResult.swift; sourceTree = "<group>"; };
-		B3F0176429086079005F577B /* ReconstructionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconstructionResult.swift; sourceTree = "<group>"; };
+		B3F017612908606B005F577B /* KeyDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDetails.swift; sourceTree = "<group>"; };
+		B3F0176429086079005F577B /* KeyReconstructionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyReconstructionDetails.swift; sourceTree = "<group>"; };
 		B3F0176729086392005F577B /* RuntimeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -147,12 +153,14 @@
 				B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */,
 				B3EC55AE28BE5F3B003596E5 /* Tests macOS-Bridging-Header.h */,
 				B3F0175529085FF3005F577B /* ShareStore.swift */,
+				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
 				B3F017582908600F005F577B /* ServiceProvider.swift */,
 				B3F0175B2908602F005F577B /* StorageLayer.swift */,
 				B3F0175E29086053005F577B /* ThresholdKey.swift */,
-				B3F017612908606B005F577B /* KeyResult.swift */,
-				B3F0176429086079005F577B /* ReconstructionResult.swift */,
+				B3F017612908606B005F577B /* KeyDetails.swift */,
+				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
 				B3F0176729086392005F577B /* RuntimeError.swift */,
+				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -283,7 +291,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1340;
-				LastUpgradeCheck = 1340;
+				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					B30B6B1628BCC8AC00812C1E = {
 						CreatedOnToolsVersion = 13.4.1;
@@ -366,13 +374,15 @@
 			files = (
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				B3F017592908600F005F577B /* ServiceProvider.swift in Sources */,
-				B3F017622908606B005F577B /* KeyResult.swift in Sources */,
+				B3F017622908606B005F577B /* KeyDetails.swift in Sources */,
 				B3F0176829086392005F577B /* RuntimeError.swift in Sources */,
-				B3F0176529086079005F577B /* ReconstructionResult.swift in Sources */,
+				B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */,
 				B3F0175C2908602F005F577B /* StorageLayer.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
+				B306A81B2911174400B3C8E6 /* KeyPoint.swift in Sources */,
 				B3F0175629085FF3005F577B /* ShareStore.swift in Sources */,
 				B3F0175F29086053005F577B /* ThresholdKey.swift in Sources */,
+				B306A81929110FD100B3C8E6 /* PrivateKey.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,10 +401,11 @@
 			files = (
 				B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */,
 				B3F0175A2908600F005F577B /* ServiceProvider.swift in Sources */,
-				B3F017632908606B005F577B /* KeyResult.swift in Sources */,
+				B3F017632908606B005F577B /* KeyDetails.swift in Sources */,
 				B3F0176929086392005F577B /* RuntimeError.swift in Sources */,
-				B3F0176629086079005F577B /* ReconstructionResult.swift in Sources */,
+				B3F0176629086079005F577B /* KeyReconstructionDetails.swift in Sources */,
 				B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */,
+				B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */,
 				B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */,
 				B3F0175729085FF3005F577B /* ShareStore.swift in Sources */,
 				B3F0176029086053005F577B /* ThresholdKey.swift in Sources */,
@@ -409,8 +420,9 @@
 				B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */,
 				B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */,
 				B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */,
-				B3A2ABCD290B8D320009C688 /* KeyResult.swift in Sources */,
-				B3A2ABCE290B8D320009C688 /* ReconstructionResult.swift in Sources */,
+				B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */,
+				B3A2ABCE290B8D320009C688 /* KeyReconstructionDetails.swift in Sources */,
+				B306A81D2911174400B3C8E6 /* KeyPoint.swift in Sources */,
 				B3A2ABCF290B8D320009C688 /* RuntimeError.swift in Sources */,
 				B30B6B3728BCC8AC00812C1E /* Tests_macOSLaunchTests.swift in Sources */,
 				B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */,
@@ -466,6 +478,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -524,6 +537,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -635,6 +649,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = H5XG68FB7M;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -671,6 +686,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = H5XG68FB7M;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -773,6 +789,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = H5XG68FB7M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -806,6 +823,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = H5XG68FB7M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -43,6 +43,8 @@ final class StorageLayer {
             let sem = DispatchSemaphore.init(value: 0)
             let urlString = String.init(cString: url!)
             let dataString = String.init(cString: data!)
+            string_destroy(url);
+            string_destroy(data);
             let url = URL(string: urlString)!
             let session = URLSession.shared
             var request = URLRequest(url: url)
@@ -85,6 +87,7 @@ final class StorageLayer {
             // This line will wait until the semaphore has been signaled
               // which will be once the data task has completed
             sem.wait()
+
             return resultPointer
         }
         
