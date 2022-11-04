@@ -8,10 +8,34 @@
 import SwiftUI
 
 struct ContentView: View {
+
     var body: some View {
-        let input = "Hello World"
-        let result = FFIHash().hash(input: input)
-        Text(result).padding()
+        let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+        let key1 = try! PrivateKey.generate(curve_n: curve_n)
+        let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+        let service_provider = try! ServiceProvider(enable_logging: true, postbox_key: key1.hex, curve_n: curve_n)
+        let threshold_key = try! ThresholdKey(
+            storage_layer: storage_layer,
+            service_provider: service_provider,
+            enable_logging: true,
+            manual_sync: true)
+
+        let key_details = try! threshold_key.initialize(never_initialize_new_key: false, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
+        let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        var data = try! encoder.encode(key_details)
+        let initialize_output = String(data: data, encoding: .utf8)!
+        encoder.outputFormatting = .prettyPrinted
+        data = try! encoder.encode(key_reconstruction_details)
+        let reconstruct_output = String(data: data, encoding: .utf8)!
+        return VStack(alignment: .center, spacing: 10) {
+                Text(initialize_output)
+                Spacer()
+                Text(reconstruct_output)
+                Spacer()
+                Text("Success").font(.title)
+        }
     }
 }
 
