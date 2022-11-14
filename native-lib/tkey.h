@@ -10,6 +10,7 @@
 
         //Forward Declarations
         struct ShareStore;
+        struct ShareStoreMap;
         struct FFIStorageLayer;
         struct KeyReconstructionDetails;
         struct ServiceProvider;
@@ -26,7 +27,7 @@
         char* generate_private_key( char* curve_n, int* error_code);
         char* point_get_x(struct KeyPoint* point, int* error_code);
         char* point_get_y(struct KeyPoint* point, int* error_code);
-        void point_free(struct KeyPointPoint* point);
+        void point_free(struct KeyPoint* point);
         char* key_reconstruction_get_private_key(struct KeyReconstructionDetails* key_details, int* error_code);
         int key_reconstruction_get_seed_phrase_len(struct KeyReconstructionDetails* key_details, int* error_code);
         char* key_reconstruction_get_seed_phrase_at(struct KeyReconstructionDetails* key_details, int at, int* error_code);
@@ -49,8 +50,9 @@
         struct KeyDetails* threshold_key_initialize(struct FFIThresholdKey* threshold_key, char* import_share, struct ShareStore* input, bool never_initialize_new_key, struct ServiceProvider* service_provider, bool include_local_metadata_transitions, char* curve_n, int* error_code);
         struct KeyReconstructionDetails* threshold_key_reconstruct(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
         void threshold_key_free(struct FFIThresholdKey* ptr);
+        void share_store_map_free(struct ShareStoreMap* ptr);
         char* generate_new_share_store_result_get_shares_index(struct GenerateShareStoreResult* result,int* error_code);
-        char* generate_new_share_store_result_get_share_store(struct GenerateShareStoreResult* result,int* error_code);
+        struct ShareStoreMap* generate_new_share_store_result_get_share_store_map(struct GenerateShareStoreResult* result,int* error_code);
         void generate_share_store_result_free(struct GenerateShareStoreResult* ptr);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
