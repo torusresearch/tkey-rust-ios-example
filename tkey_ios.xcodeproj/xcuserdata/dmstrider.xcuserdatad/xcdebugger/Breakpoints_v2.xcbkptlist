@@ -39,22 +39,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0128B39E-0493-4B96-AD69-DCEF66F3F747"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/StorageLayer.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
-            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "0C09E523-3B7F-47D8-9926-583466B7B1A1"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -64,54 +48,6 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "55"
             endingLineNumber = "55">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "971495A5-4512-4537-8584-664D4AA536C2"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/StorageLayer.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "89"
-            endingLineNumber = "89"
-            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "DC08C070-33FD-4C01-B8F5-110AA8EA424D"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/StorageLayer.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "85"
-            endingLineNumber = "85"
-            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "46C5BAA5-DA25-4EE1-AE78-C30A629B7C96"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/StorageLayer.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
-            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -175,6 +111,166 @@
             startingLineNumber = "56"
             endingLineNumber = "56"
             landmarkName = "initialize(import_share:input:never_initialize_new_key:service_provider:include_local_metadata_transitions:curve_n:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5EB9D973-9B73-407B-A4A5-2227D9520B31"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "615FD73C-A4CB-4B6F-87CE-9166CFC783B5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/ThresholdKey.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
+            landmarkName = "init(private_key:metadata:shares:storage_layer:service_provider:local_matadata_transitions:last_fetch_cloud_metadata:enable_logging:manual_sync:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "615FD73C-A4CB-4B6F-87CE-9166CFC783B5 - b5439591860fd02a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "tkey_ios.ThresholdKey.init(private_key: Swift.String, metadata: Swift.Optional&lt;Swift.OpaquePointer&gt;, shares: Swift.Optional&lt;Swift.OpaquePointer&gt;, storage_layer: tkey_ios.StorageLayer, service_provider: Swift.Optional&lt;tkey_ios.ServiceProvider&gt;, local_matadata_transitions: Swift.Optional&lt;Swift.OpaquePointer&gt;, last_fetch_cloud_metadata: Swift.Optional&lt;Swift.OpaquePointer&gt;, enable_logging: Swift.Bool, manual_sync: Swift.Bool) throws -&gt; tkey_ios.ThresholdKey"
+                  moduleName = "tkey_ios"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmstrider/Documents/GitHub/tkey-ios/tkey_ios/Shared/ThresholdKey.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "30"
+                  endingLineNumber = "30"
+                  offsetFromSymbolStart = "978">
+               </Location>
+               <Location
+                  uuid = "615FD73C-A4CB-4B6F-87CE-9166CFC783B5 - 7c99882f445f43b8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.UnsafeMutablePointer&lt;Swift.Int32&gt;) -&gt; Swift.Optional&lt;Swift.OpaquePointer&gt; in tkey_ios.ThresholdKey.init(private_key: Swift.String, metadata: Swift.Optional&lt;Swift.OpaquePointer&gt;, shares: Swift.Optional&lt;Swift.OpaquePointer&gt;, storage_layer: tkey_ios.StorageLayer, service_provider: Swift.Optional&lt;tkey_ios.ServiceProvider&gt;, local_matadata_transitions: Swift.Optional&lt;Swift.OpaquePointer&gt;, last_fetch_cloud_metadata: Swift.Optional&lt;Swift.OpaquePointer&gt;, enable_logging: Swift.Bool, manual_sync: Swift.Bool) throws -&gt; tkey_ios.ThresholdKey"
+                  moduleName = "tkey_ios"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmstrider/Documents/GitHub/tkey-ios/tkey_ios/Shared/ThresholdKey.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "31"
+                  endingLineNumber = "31"
+                  offsetFromSymbolStart = "219">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "15202A26-C96C-47CA-98AD-382ECE266491"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/ThresholdKey.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "initialize(import_share:input:never_initialize_new_key:service_provider:include_local_metadata_transitions:curve_n:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "15202A26-C96C-47CA-98AD-382ECE266491 - 6501a6e94c3d9937"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "tkey_ios.ThresholdKey.initialize(import_share: Swift.String, input: Swift.Optional&lt;Swift.OpaquePointer&gt;, never_initialize_new_key: Swift.Bool, service_provider: Swift.Optional&lt;tkey_ios.ServiceProvider&gt;, include_local_metadata_transitions: Swift.Bool, curve_n: Swift.String) throws -&gt; tkey_ios.KeyDetails"
+                  moduleName = "tkey_ios"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmstrider/Documents/GitHub/tkey-ios/tkey_ios/Shared/ThresholdKey.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "1051">
+               </Location>
+               <Location
+                  uuid = "15202A26-C96C-47CA-98AD-382ECE266491 - 741c7d39a6cceca9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.UnsafeMutablePointer&lt;Swift.Int32&gt;) -&gt; Swift.Optional&lt;Swift.OpaquePointer&gt; in tkey_ios.ThresholdKey.initialize(import_share: Swift.String, input: Swift.Optional&lt;Swift.OpaquePointer&gt;, never_initialize_new_key: Swift.Bool, service_provider: Swift.Optional&lt;tkey_ios.ServiceProvider&gt;, include_local_metadata_transitions: Swift.Bool, curve_n: Swift.String) throws -&gt; tkey_ios.KeyDetails"
+                  moduleName = "tkey_ios"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmstrider/Documents/GitHub/tkey-ios/tkey_ios/Shared/ThresholdKey.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "201">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8828468D-9D59-45D2-AA25-DBE8B2969843"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "16"
+            endingLineNumber = "16"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A566438B-8F97-4F7E-886C-9C74844FF6F2"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/StorageLayer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "39"
+            endingLineNumber = "39"
+            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6869E596-17C1-4986-94BD-CD3E12881166"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shared/StorageLayer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "89"
+            endingLineNumber = "89"
+            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

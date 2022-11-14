@@ -18,12 +18,14 @@
         struct LocalMetadataTransitions;
         struct KeyDetails;
         struct KeyPoint;
+        struct ShareTransferStore;
+        struct GenerateShareStoreResult;
 
         //Methods
         void string_destroy(char *ptr);
         char* generate_private_key( char* curve_n, int* error_code);
         char* point_get_x(struct KeyPoint* point, int* error_code);
-        char* point_get_y(struct KeyPointPoint* point, int* error_code);
+        char* point_get_y(struct KeyPoint* point, int* error_code);
         void point_free(struct KeyPointPoint* point);
         char* key_reconstruction_get_private_key(struct KeyReconstructionDetails* key_details, int* error_code);
         int key_reconstruction_get_seed_phrase_len(struct KeyReconstructionDetails* key_details, int* error_code);
@@ -47,6 +49,29 @@
         struct KeyDetails* threshold_key_initialize(struct FFIThresholdKey* threshold_key, char* import_share, struct ShareStore* input, bool never_initialize_new_key, struct ServiceProvider* service_provider, bool include_local_metadata_transitions, char* curve_n, int* error_code);
         struct KeyReconstructionDetails* threshold_key_reconstruct(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
         void threshold_key_free(struct FFIThresholdKey* ptr);
+        char* generate_new_share_store_result_get_shares_index(struct GenerateShareStoreResult* result,int* error_code);
+        char* generate_new_share_store_result_get_share_store(struct GenerateShareStoreResult* result,int* error_code);
+        void generate_share_store_result_free(struct GenerateShareStoreResult* ptr);
+        //Module: security-question
+        struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
+        bool security_question_input_share(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
+        bool security_question_change_question_and_answer(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
+        bool security_question_store_answer(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
+        char* security_question_get_answer(struct FFIThresholdKey* threshold_key, int* error_code);
+        char* security_question_get_questions(struct FFIThresholdKey* threshold_key, int* error_code);
+        //Module: share-transfer
+        void share_transfer_store_free(struct ShareTransferStore* ptr);
+        char* share_transfer_request_new_share(struct FFIThresholdKey* threshold_key, char* user_agent, char* available_share_indexes, char* curve_n, int* error_code);
+        void share_transfer_add_custom_info_to_request(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, char* custom_info, char* curve_n, int* error_code);
+        char* share_transfer_look_for_request(struct FFIThresholdKey* threshold_key, int* error_code);
+        void share_transfer_approve_request(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, struct ShareStore* share_store, char* curve_n, int* error_code);
+        void share_transfer_approve_request_with_share_indexes(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, char* share_indexes, char* curve_n, int* error_code);
+        struct ShareTransferStore* share_transfer_get_store(struct FFIThresholdKey* threshold_key, int* error_code);
+        bool share_transfer_set_store(struct FFIThresholdKey* threshold_key, struct ShareTransferStore* store, char* curve_n, int* error_code);
+        bool share_transfer_delete_store(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, char* curve_n, int* error_code);
+        char* share_transfer_get_current_encryption_key(struct FFIThresholdKey* threshold_key, int* error_code);
+        struct ShareStore* share_transfer_request_status_check(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, bool delete_request_on_completion, char* curve_n, int* error_code);
+        void share_transfer_cleanup_request(struct FFIThresholdKey* threshold_key, int* error_code);
 
     #ifdef __cplusplus
     } // extern "C"
