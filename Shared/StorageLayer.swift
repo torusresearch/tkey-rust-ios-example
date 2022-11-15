@@ -69,25 +69,25 @@ final class StorageLayer {
                 request.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.httpBody = dataString.data(using: String.Encoding.utf8)
             }
-            
             var resultPointer = UnsafeMutablePointer<CChar>(nil)
-            let task = session.dataTask(with: request) { data, response, error in
-                defer { sem.signal() }
+            var result = NSString();
+            session.dataTask(with: request) { data, response, error in
+                defer {
+                    sem.signal()
+                }
                 if error != nil {
                     let code: Int32 = 1
                     error_code?.pointee = code
                 }
                 if let data = data {
                     let resultString: String = String(decoding: data, as: UTF8.self)
-                    let result: NSString = NSString(string: resultString)
-                    resultPointer = UnsafeMutablePointer<CChar>(mutating: result.utf8String)
+                    result = NSString(string: resultString)
+                    
                 }
-            }
-            task.resume()
-            // This line will wait until the semaphore has been signaled
-              // which will be once the data task has completed
+            }.resume()
+            
             sem.wait()
-
+            resultPointer = UnsafeMutablePointer<CChar>(mutating: result.utf8String)
             return resultPointer
         }
         
