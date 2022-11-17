@@ -61,6 +61,9 @@
 		B3F0176829086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176929086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176A290865F6005F577B /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
+		F0AC7A132926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
+		F0AC7A142926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
+		F0AC7A152926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -112,6 +115,7 @@
 		B3F017612908606B005F577B /* KeyDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDetails.swift; sourceTree = "<group>"; };
 		B3F0176429086079005F577B /* KeyReconstructionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyReconstructionDetails.swift; sourceTree = "<group>"; };
 		B3F0176729086392005F577B /* RuntimeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeError.swift; sourceTree = "<group>"; };
+		F0AC7A122926129F004585AD /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,6 +190,7 @@
 				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
 				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
+				F0AC7A122926129F004585AD /* Version.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -405,6 +410,7 @@
 				B3878A042922666300902894 /* ShareStoreMap.swift in Sources */,
 				B3878A0C2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 				B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */,
+				F0AC7A132926129F004585AD /* Version.swift in Sources */,
 				B3878A14292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3F0175C2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A08292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
@@ -443,6 +449,7 @@
 				B3878A1129226E1600902894 /* ShareTransferModule.swift in Sources */,
 				B3F0176029086053005F577B /* ThresholdKey.swift in Sources */,
 				B3878A09292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
+				F0AC7A142926129F004585AD /* Version.swift in Sources */,
 				B3878A0D2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -465,6 +472,7 @@
 				B3878A1229226E1600902894 /* ShareTransferModule.swift in Sources */,
 				B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */,
 				B3878A0A292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
+				F0AC7A152926129F004585AD /* Version.swift in Sources */,
 				B3878A0E2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

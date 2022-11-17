@@ -74,6 +74,7 @@
         char* share_transfer_get_current_encryption_key(struct FFIThresholdKey* threshold_key, int* error_code);
         struct ShareStore* share_transfer_request_status_check(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, bool delete_request_on_completion, char* curve_n, int* error_code);
         void share_transfer_cleanup_request(struct FFIThresholdKey* threshold_key, int* error_code);
+        char* get_version(int* error_code);
 
     #ifdef __cplusplus
     } // extern "C"

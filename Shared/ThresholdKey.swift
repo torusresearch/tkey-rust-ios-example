@@ -68,8 +68,9 @@ final class ThresholdKey {
             }
         return try! KeyReconstructionDetails(pointer: result!)
     }
-    
+  
     deinit {
         threshold_key_free(pointer)
     }
 }
+
