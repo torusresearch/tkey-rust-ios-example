@@ -71,14 +71,8 @@ final class ThresholdKey {
     
     public func get_lib_version() throws -> String
     {
-        var errorCode: Int32 = -1
-        let result = withUnsafeMutablePointer(to: &errorCode, { error in
-            get_version(error)})
-        guard errorCode == 0 else {
-            throw RuntimeError("Error in getting ThresholdKey library version")
-        }
-        guard let version = result else {
-            return "o"
+        guard let version = get_version() else {
+            return "Invalid Version"
         }
         return String(cString: version)
     }
