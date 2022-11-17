@@ -69,7 +69,22 @@ final class ThresholdKey {
         return try! KeyReconstructionDetails(pointer: result!)
     }
     
+    public func get_lib_version() throws -> String
+    {
+        var errorCode: Int32 = -1
+        let result = withUnsafeMutablePointer(to: &errorCode, { error in
+            get_version(error)})
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in getting ThresholdKey library version")
+        }
+        guard let version = result else {
+            return "o"
+        }
+        return String(cString: version)
+    }
+    
     deinit {
         threshold_key_free(pointer)
     }
 }
+

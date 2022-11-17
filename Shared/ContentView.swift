@@ -29,10 +29,15 @@ struct ContentView: View {
         encoder.outputFormatting = .prettyPrinted
         data = try! encoder.encode(key_reconstruction_details)
         let reconstruct_output = String(data: data, encoding: .utf8)!
+        
+        let version = try! threshold_key.get_lib_version()
+        
         return VStack(alignment: .center, spacing: 10) {
                 Text(initialize_output)
                 Spacer()
                 Text(reconstruct_output)
+                Spacer()
+                Text(version)
                 Spacer()
                 Text("Success").font(.title)
         }
