@@ -72,9 +72,11 @@ final class ThresholdKey {
     public func get_lib_version() throws -> String
     {
         guard let version = get_version() else {
-            return "Invalid Version"
+            throw RuntimeError("Error in retrieving library version")
         }
-        return String(cString: version)
+        let version_str = String.init(cString: version)
+        string_destroy(version)
+        return version_str
     }
     
     deinit {
