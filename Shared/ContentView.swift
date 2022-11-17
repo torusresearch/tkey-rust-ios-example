@@ -30,7 +30,7 @@ struct ContentView: View {
         data = try! encoder.encode(key_reconstruction_details)
         let reconstruct_output = String(data: data, encoding: .utf8)!
         
-        let version = try! threshold_key.get_lib_version()
+        let version = try! library_version()
         
         return VStack(alignment: .center, spacing: 10) {
                 Text(initialize_output)

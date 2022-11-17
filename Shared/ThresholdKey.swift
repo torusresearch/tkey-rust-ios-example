@@ -68,17 +68,7 @@ final class ThresholdKey {
             }
         return try! KeyReconstructionDetails(pointer: result!)
     }
-    
-    public func get_lib_version() throws -> String
-    {
-        guard let version = get_version() else {
-            throw RuntimeError("Error in retrieving library version")
-        }
-        let version_str = String.init(cString: version)
-        string_destroy(version)
-        return version_str
-    }
-    
+  
     deinit {
         threshold_key_free(pointer)
     }
