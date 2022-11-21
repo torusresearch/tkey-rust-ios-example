@@ -55,11 +55,12 @@ final class SeedPhraseModule {
         return string
     }
     
-    static func get_seed_phrases_with_accounts(threshold_key: ThresholdKey) throws -> String
+    static func get_seed_phrases_with_accounts(threshold_key: ThresholdKey, derivation_format: String) throws -> String
     {
         var errorCode: Int32 = -1
+        let derivationPointer = UnsafeMutablePointer<Int8>(mutating: (derivation_format as NSString).utf8String)
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
-            seed_phrase_get_seed_phrases_with_accounts(threshold_key.pointer, error)
+            seed_phrase_get_seed_phrases_with_accounts(threshold_key.pointer, derivationPointer, error)
                 })
         guard errorCode == 0 else {
             throw RuntimeError("Error in SeedPhraseModule, get_seed_phrases_with_accounts")
@@ -69,11 +70,12 @@ final class SeedPhraseModule {
         return string
     }
     
-    static func get_accounts(threshold_key: ThresholdKey) throws -> String
+    static func get_accounts(threshold_key: ThresholdKey, derivation_format: String) throws -> String
     {
         var errorCode: Int32 = -1
+        let derivationPointer = UnsafeMutablePointer<Int8>(mutating: (derivation_format as NSString).utf8String)
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
-            seed_phrase_get_accounts(threshold_key.pointer, error)
+            seed_phrase_get_accounts(threshold_key.pointer, derivationPointer, error)
                 })
         guard errorCode == 0 else {
             throw RuntimeError("Error in SeedPhraseModule, get_accounts")
