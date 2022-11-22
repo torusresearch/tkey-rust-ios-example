@@ -7,6 +7,7 @@
 
 import Foundation
 
+/*
 extension NSMutableData {
     func appendString(_ string: String) {
         if let data = string.data(using: .utf8) {
@@ -14,6 +15,8 @@ extension NSMutableData {
         }
     }
 }
+*/
+
 
 final class StorageLayer {
     private(set) var pointer: OpaquePointer?
@@ -22,6 +25,7 @@ final class StorageLayer {
         self.pointer = pointer
     }
     
+    /* for multipart form data
     static func createMultipartBody(data: Data, boundary: String, file: String) -> Data {
           let body = NSMutableData()
           let lineBreak = "\r\n"
@@ -34,6 +38,17 @@ final class StorageLayer {
           body.appendString("--\(boundary)--\(lineBreak)")
           return body as Data
       }
+     */
+    
+    static func percentEscapeString( string: String) -> String {
+      var characterSet = CharacterSet.alphanumerics
+      characterSet.insert(charactersIn: "-.* ")
+
+      return string
+        .addingPercentEncoding(withAllowedCharacters: characterSet)!
+        .replacingOccurrences(of: " ", with: "+")
+        .replacingOccurrences(of: " ", with: "+", options: [], range: nil)
+    }
     
     init(enable_logging: Bool, host_url: String, server_time_offset: UInt) throws {
         var errorCode: Int32 = -1
@@ -55,16 +70,30 @@ final class StorageLayer {
             
             if urlString.split(separator: "/").last == "bulk_set_stream"
             {
-                let boundary = UUID().uuidString;
-                request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-                                
+                //let boundary = UUID().uuidString;
+                //request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField:"Content-Type");
+                
                 let json = try! JSONSerialization.jsonObject(with: dataString.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [[String:Any]]
-                var requestData = Data()
-                for item in json {
-                        let dataItem = try! JSONSerialization.data(withJSONObject: item, options: .prettyPrinted)
-                    requestData.append(StorageLayer.createMultipartBody(data: dataItem, boundary: boundary, file: "multipartData"))
+
+                //for item in json {
+                    //let dataItem = try! JSONSerialization.data(withJSONObject: item, options: .prettyPrinted)
+                    //requestData.append(StorageLayer.createMultipartBody(data: dataItem, boundary: boundary, file: "multipartData"))
+                //}
+                
+                var form_data: [String] = []
+                
+                //urlencoded item format: "(key)=(self.percentEscapeString(value))"
+                for (index, element) in json.enumerated()
+                {
+                    let json_elem = try! JSONSerialization.data(withJSONObject: element, options: .withoutEscapingSlashes)
+                    let json_escaped_string = StorageLayer.percentEscapeString(string: String(data: json_elem, encoding: .utf8)!)
+                    let final_string = String(index) + "=" + json_escaped_string
+                    form_data.append(final_string)
                 }
-                request.httpBody = requestData
+                let body_data = form_data.joined(separator: "&")
+
+                request.httpBody = body_data.data(using: String.Encoding.utf8)
             } else {
                 request.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.httpBody = dataString.data(using: String.Encoding.utf8)

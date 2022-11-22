@@ -111,7 +111,6 @@ final class ThresholdKey {
         withUnsafeMutablePointer(to: &errorCode, {error in
             threshold_key_input_share(pointer, cShare, cShareType,  curvePointer, error )
         })
-        debugPrint(errorCode)
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
         }
