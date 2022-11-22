@@ -79,8 +79,8 @@
         void seed_phrase_set_phrase(struct FFIThresholdKey* threshold_key,char* format,char* phrase, unsigned int number_of_wallets,char* curve_n, int* error_code);
         void seed_phrase_change_phrase(struct FFIThresholdKey* threshold_key,char* old_phrase,char* new_phrase,char* curve_n, int* error_code);
         char* seed_phrase_get_seed_phrases(struct FFIThresholdKey* threshold_key, int* error_code);
-        char* seed_phrase_get_seed_phrases_with_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
-        char* seed_phrase_get_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
+        //(removed) char* seed_phrase_get_seed_phrases_with_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
+        //(removed) char* seed_phrase_get_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
         //Module: private-keys
         bool private_keys_set_private_key(struct FFIThresholdKey* threshold_key, char* key, char* format, char* curve_n, int* error_code);
         char* private_keys_get_private_keys(struct FFIThresholdKey* threshold_key, int* error_code);

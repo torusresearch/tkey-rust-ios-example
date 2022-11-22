@@ -55,6 +55,7 @@ final class SeedPhraseModule {
         return string
     }
     
+    /*
     static func get_seed_phrases_with_accounts(threshold_key: ThresholdKey, derivation_format: String) throws -> String
     {
         var errorCode: Int32 = -1
@@ -69,7 +70,9 @@ final class SeedPhraseModule {
         string_destroy(result)
         return string
     }
+    */
     
+    /*
     static func get_accounts(threshold_key: ThresholdKey, derivation_format: String) throws -> String
     {
         var errorCode: Int32 = -1
@@ -84,4 +87,5 @@ final class SeedPhraseModule {
         string_destroy(result)
         return string
     }
+    */
 }
