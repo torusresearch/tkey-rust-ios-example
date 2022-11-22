@@ -76,6 +76,10 @@
         void share_transfer_cleanup_request(struct FFIThresholdKey* threshold_key, int* error_code);
         char* get_version(int* error_code);
 
+        struct GenerateShareStoreResult* threshold_key_generate_share(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
+        char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
+        void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
+
     #ifdef __cplusplus
     } // extern "C"
     #endif
