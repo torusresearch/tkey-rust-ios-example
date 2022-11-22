@@ -37,8 +37,7 @@ struct ContentView: View {
         
         let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
         
-        try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
-        
+        //try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
         
         let threshold_key2 = try! ThresholdKey(
             storage_layer: storage_layer,
