@@ -23,6 +23,7 @@
         struct GenerateShareStoreResult;
 
         //Methods
+        char* get_version(int* error_code);
         void string_destroy(char *ptr);
         char* generate_private_key( char* curve_n, int* error_code);
         char* point_get_x(struct KeyPoint* point, int* error_code);
@@ -54,6 +55,9 @@
         char* generate_new_share_store_result_get_shares_index(struct GenerateShareStoreResult* result,int* error_code);
         struct ShareStoreMap* generate_new_share_store_result_get_share_store_map(struct GenerateShareStoreResult* result,int* error_code);
         void generate_share_store_result_free(struct GenerateShareStoreResult* ptr);
+        struct GenerateShareStoreResult* threshold_key_generate_share(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
+        char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
+        void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
         bool security_question_input_share(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
@@ -74,12 +78,10 @@
         char* share_transfer_get_current_encryption_key(struct FFIThresholdKey* threshold_key, int* error_code);
         struct ShareStore* share_transfer_request_status_check(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, bool delete_request_on_completion, char* curve_n, int* error_code);
         void share_transfer_cleanup_request(struct FFIThresholdKey* threshold_key, int* error_code);
-        char* get_version(int* error_code);
-
-        struct GenerateShareStoreResult* threshold_key_generate_share(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
-        char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
-        void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
-
+        //Module: private-keys
+        bool private_keys_set_private_key(struct FFIThresholdKey* threshold_key, char* key, char* format, char* curve_n, int* error_code);
+        char* private_keys_get_private_keys(struct FFIThresholdKey* threshold_key, int* error_code);
+        char* private_keys_get_accounts(struct FFIThresholdKey* threshold_key, int* error_code);
     #ifdef __cplusplus
     } // extern "C"
     #endif
