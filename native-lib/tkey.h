@@ -75,7 +75,10 @@
         struct ShareStore* share_transfer_request_status_check(struct FFIThresholdKey* threshold_key, char* enc_pub_key_x, bool delete_request_on_completion, char* curve_n, int* error_code);
         void share_transfer_cleanup_request(struct FFIThresholdKey* threshold_key, int* error_code);
         char* get_version(int* error_code);
-
+        //Module: private-keys
+        bool private_keys_set_private_key(struct FFIThresholdKey* threshold_key, char* key, char* format, char* curve_n, int* error_code);
+        char* private_keys_get_private_keys(struct FFIThresholdKey* threshold_key, int* error_code);
+        char* private_keys_get_accounts(struct FFIThresholdKey* threshold_key, int* error_code);
     #ifdef __cplusplus
     } // extern "C"
     #endif
