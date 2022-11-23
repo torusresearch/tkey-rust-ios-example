@@ -69,6 +69,52 @@ final class ThresholdKey {
         return try! KeyReconstructionDetails(pointer: result!)
     }
   
+    public func generate_new_share(curve_n: String) throws -> GenerateShareStoreResult {
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_generate_share(pointer, curvePointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey generate_new_share")
+        }
+        return try! GenerateShareStoreResult( pointer: result!)
+    }
+    
+    public func output_share( shareIndex : String, shareType: String?, curve_n: String ) throws -> String {
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let cShareIndex = UnsafeMutablePointer<Int8>(mutating: (shareIndex as NSString).utf8String)
+        
+        var cShareType:UnsafeMutablePointer<Int8>? = nil
+        if let shareType = shareType {
+            cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
+        }
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_output_share(pointer, cShareIndex, cShareType,  curvePointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey generate_new_share")
+        }
+        return String.init(cString: result!)
+    }
+    
+    public func input_share( share: String, shareType: String?, curve_n: String ) throws  {
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let cShare = UnsafeMutablePointer<Int8>(mutating: (share as NSString).utf8String)
+        
+        var cShareType:UnsafeMutablePointer<Int8>? = nil
+        if let shareType = shareType {
+            cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
+        }
+        withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_input_share(pointer, cShare, cShareType,  curvePointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey generate_new_share")
+        }
+    }
     deinit {
         threshold_key_free(pointer)
     }

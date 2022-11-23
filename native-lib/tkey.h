@@ -55,6 +55,9 @@
         char* generate_new_share_store_result_get_shares_index(struct GenerateShareStoreResult* result,int* error_code);
         struct ShareStoreMap* generate_new_share_store_result_get_share_store_map(struct GenerateShareStoreResult* result,int* error_code);
         void generate_share_store_result_free(struct GenerateShareStoreResult* ptr);
+        struct GenerateShareStoreResult* threshold_key_generate_share(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
+        char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
+        void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
         bool security_question_input_share(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
