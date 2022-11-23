@@ -39,6 +39,9 @@
 		B3878A18292837DB00902894 /* PrivateKeysModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A17292837DB00902894 /* PrivateKeysModule.swift */; };
 		B3878A19292837DB00902894 /* PrivateKeysModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A17292837DB00902894 /* PrivateKeysModule.swift */; };
 		B3878A1A292837DB00902894 /* PrivateKeysModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A17292837DB00902894 /* PrivateKeysModule.swift */; };
+		B3878A20292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
+		B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
+		B3878A22292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
 		B3A2ABC9290B8D320009C688 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175529085FF3005F577B /* ShareStore.swift */; };
 		B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017582908600F005F577B /* ServiceProvider.swift */; };
 		B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175B2908602F005F577B /* StorageLayer.swift */; };
@@ -107,6 +110,7 @@
 		B3878A0F29226E1600902894 /* ShareTransferModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareTransferModule.swift; sourceTree = "<group>"; };
 		B3878A13292277B200902894 /* ShareTransferStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareTransferStore.swift; sourceTree = "<group>"; };
 		B3878A17292837DB00902894 /* PrivateKeysModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKeysModule.swift; sourceTree = "<group>"; };
+		B3878A1F292955F800902894 /* SeedPhraseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPhraseModule.swift; sourceTree = "<group>"; };
 		B3EC55AB28BE5F3B003596E5 /* tkey_ios (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tkey_ios (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AC28BE5F3B003596E5 /* tkey_ios (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tkey_ios (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests iOS-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -196,6 +200,7 @@
 				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
 				F0AC7A122926129F004585AD /* Version.swift */,
+				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -407,6 +412,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3878A20292955F800902894 /* SeedPhraseModule.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				B3F017592908600F005F577B /* ServiceProvider.swift in Sources */,
 				B3878A1029226E1600902894 /* ShareTransferModule.swift in Sources */,
@@ -448,6 +454,7 @@
 				B3F0176929086392005F577B /* RuntimeError.swift in Sources */,
 				B3F0176629086079005F577B /* KeyReconstructionDetails.swift in Sources */,
 				B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */,
+				B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */,
 				B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */,
 				B3878A052922666300902894 /* ShareStoreMap.swift in Sources */,
 				B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */,
@@ -472,6 +479,7 @@
 				B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */,
 				B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */,
 				B3A2ABCE290B8D320009C688 /* KeyReconstructionDetails.swift in Sources */,
+				B3878A22292955F800902894 /* SeedPhraseModule.swift in Sources */,
 				B306A81D2911174400B3C8E6 /* KeyPoint.swift in Sources */,
 				B3878A062922666300902894 /* ShareStoreMap.swift in Sources */,
 				B3A2ABCF290B8D320009C688 /* RuntimeError.swift in Sources */,

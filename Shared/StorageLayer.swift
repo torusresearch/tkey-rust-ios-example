@@ -35,7 +35,7 @@ final class StorageLayer {
           return body as Data
       }
     
-    init(enable_logging: Bool, host_url: String, server_time_offset: UInt) throws {
+    init(enable_logging: Bool, host_url: String, server_time_offset: UInt64) throws {
         var errorCode: Int32 = -1
         let urlPointer = UnsafeMutablePointer<Int8>(mutating: (host_url as NSString).utf8String)
         
