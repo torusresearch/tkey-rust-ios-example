@@ -42,6 +42,9 @@
 		B3878A20292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
 		B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
 		B3878A22292955F800902894 /* SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A1F292955F800902894 /* SeedPhraseModule.swift */; };
+		B3878A24292F456300902894 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A23292F456300902894 /* Version.swift */; };
+		B3878A25292F456300902894 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A23292F456300902894 /* Version.swift */; };
+		B3878A26292F456300902894 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A23292F456300902894 /* Version.swift */; };
 		B3A2ABC9290B8D320009C688 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175529085FF3005F577B /* ShareStore.swift */; };
 		B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017582908600F005F577B /* ServiceProvider.swift */; };
 		B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175B2908602F005F577B /* StorageLayer.swift */; };
@@ -67,9 +70,9 @@
 		B3F0176829086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176929086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176A290865F6005F577B /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
-		F0AC7A132926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
-		F0AC7A142926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
-		F0AC7A152926129F004585AD /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AC7A122926129F004585AD /* Version.swift */; };
+		F0AC7A132926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F0AC7A142926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F0AC7A152926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +114,7 @@
 		B3878A13292277B200902894 /* ShareTransferStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareTransferStore.swift; sourceTree = "<group>"; };
 		B3878A17292837DB00902894 /* PrivateKeysModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKeysModule.swift; sourceTree = "<group>"; };
 		B3878A1F292955F800902894 /* SeedPhraseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPhraseModule.swift; sourceTree = "<group>"; };
+		B3878A23292F456300902894 /* Version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		B3EC55AB28BE5F3B003596E5 /* tkey_ios (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tkey_ios (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AC28BE5F3B003596E5 /* tkey_ios (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tkey_ios (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests iOS-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -178,6 +182,7 @@
 		B30B6B0F28BCC8A900812C1E /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				B3878A23292F456300902894 /* Version.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B3878A17292837DB00902894 /* PrivateKeysModule.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
@@ -200,7 +205,6 @@
 				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
 				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
-				F0AC7A122926129F004585AD /* Version.swift */,
 				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
 			);
 			path = Shared;
@@ -419,11 +423,12 @@
 				B3878A1029226E1600902894 /* ShareTransferModule.swift in Sources */,
 				B3F017622908606B005F577B /* KeyDetails.swift in Sources */,
 				B3F0176829086392005F577B /* RuntimeError.swift in Sources */,
+				B3878A24292F456300902894 /* Version.swift in Sources */,
 				B3878A18292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3878A042922666300902894 /* ShareStoreMap.swift in Sources */,
 				B3878A0C2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 				B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */,
-				F0AC7A132926129F004585AD /* Version.swift in Sources */,
+				F0AC7A132926129F004585AD /* (null) in Sources */,
 				B3878A14292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3F0175C2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A08292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
@@ -461,10 +466,11 @@
 				B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */,
 				B3F0175729085FF3005F577B /* ShareStore.swift in Sources */,
 				B3878A1129226E1600902894 /* ShareTransferModule.swift in Sources */,
+				B3878A25292F456300902894 /* Version.swift in Sources */,
 				B3878A19292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3F0176029086053005F577B /* ThresholdKey.swift in Sources */,
 				B3878A09292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
-				F0AC7A142926129F004585AD /* Version.swift in Sources */,
+				F0AC7A142926129F004585AD /* (null) in Sources */,
 				B3878A0D2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -486,10 +492,11 @@
 				B3A2ABCF290B8D320009C688 /* RuntimeError.swift in Sources */,
 				B30B6B3728BCC8AC00812C1E /* Tests_macOSLaunchTests.swift in Sources */,
 				B3878A1229226E1600902894 /* ShareTransferModule.swift in Sources */,
+				B3878A26292F456300902894 /* Version.swift in Sources */,
 				B3878A1A292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */,
 				B3878A0A292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
-				F0AC7A152926129F004585AD /* Version.swift in Sources */,
+				F0AC7A152926129F004585AD /* (null) in Sources */,
 				B3878A0E2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
