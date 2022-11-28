@@ -24,8 +24,8 @@ class Tests_iOS: XCTestCase {
 
     func testExample() throws {
         // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+//        let app = XCUIApplication()
+//        app.launch()
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
@@ -39,4 +39,20 @@ class Tests_iOS: XCTestCase {
         }
     }
         
+}
+
+
+
+class ThresholdKey_Test : XCTestCase {
+    
+
+    func test_thresholdKey () throws {
+        let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+        let version = try! library_version()
+//        let a = nil
+        let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+        let key1 = try! PrivateKey.generate(curve_n: curve_n)
+        
+        debugPrint(version)
+    }
 }
