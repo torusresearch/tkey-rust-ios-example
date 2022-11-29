@@ -39,7 +39,7 @@ final class ShareTransferModule {
             }
     }
     
-    static func look_for_request(threshold_key: ThresholdKey) throws -> String
+    static func look_for_request(threshold_key: ThresholdKey) throws -> [String]
     {
         var errorCode: Int32 = -1
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
@@ -49,8 +49,9 @@ final class ShareTransferModule {
             throw RuntimeError("Error in SecurityQuestionModule, change_question_and_answer")
             }
         let string = String.init(cString: result!)
+        let indicator_array = try! JSONSerialization.jsonObject(with: string.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [String]
         string_destroy(result)
-        return string
+        return indicator_array
     }
     
     static func approve_request(threshold_key: ThresholdKey, enc_pub_key_x: String, share_store: ShareStore, curve_n: String) throws
@@ -66,12 +67,12 @@ final class ShareTransferModule {
             }
     }
     
-    static func approve_request_with_share_indexes(threshold_key: ThresholdKey, enc_pub_key_x: String, share_indexes: String, curve_n: String) throws
+    static func approve_request_with_share_index(threshold_key: ThresholdKey, enc_pub_key_x: String, share_index: String, curve_n: String) throws
     {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let encPointer = UnsafeMutablePointer<Int8>(mutating: (enc_pub_key_x as NSString).utf8String)
-        let indexesPointer = UnsafeMutablePointer<Int8>(mutating: (enc_pub_key_x as NSString).utf8String)
+        let indexesPointer = UnsafeMutablePointer<Int8>(mutating: (share_index as NSString).utf8String)
         withUnsafeMutablePointer(to: &errorCode, { error in
             share_transfer_approve_request_with_share_indexes(threshold_key.pointer, encPointer, indexesPointer, curvePointer, error)
                 })
