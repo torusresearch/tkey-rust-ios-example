@@ -24,8 +24,8 @@ class Tests_iOS: XCTestCase {
 
     func testExample() throws {
         // UI tests must launch the application that they test.
-       let app = XCUIApplication()
-       app.launch()
+        let app = XCUIApplication()
+        app.launch()
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
@@ -44,11 +44,10 @@ class Tests_iOS: XCTestCase {
 
 
 class ThresholdKey_Test : XCTestCase {
-    
-    func threshold_share_transfer () throws {
+
+    func testThresholdInputOutputShare() throws {
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
         let version = try! library_version()
-        let a:Int32? = nil
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
         let service_provider = try! ServiceProvider(enable_logging: true, postbox_key: key1.hex, curve_n: curve_n)
@@ -60,14 +59,6 @@ class ThresholdKey_Test : XCTestCase {
 
         let key_details = try! threshold_key.initialize(never_initialize_new_key: false, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
         let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        var data = try! encoder.encode(key_details)
-        let initialize_output = String(data: data, encoding: .utf8)!
-        encoder.outputFormatting = .prettyPrinted
-        data = try! encoder.encode(key_reconstruction_details)
-        let reconstruct_output = String(data: data, encoding: .utf8)!
-        
 
         let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
         
