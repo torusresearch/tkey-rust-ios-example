@@ -81,7 +81,7 @@ final class ThresholdKey {
         return try! GenerateShareStoreResult( pointer: result!)
     }
     
-    public func delete_share(share_index: String, curve_n: String) throws -> Bool {
+    public func delete_share(share_index: String, curve_n: String) throws {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let shareIndexPointer = UnsafeMutablePointer<Int8>(mutating: (share_index as NSString).utf8String)

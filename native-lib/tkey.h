@@ -35,7 +35,7 @@
         int key_reconstruction_get_all_keys_len(struct KeyReconstructionDetails* key_details, int* error_code);
         char* key_reconstruction_get_all_keys_at(struct KeyReconstructionDetails* key_details, int at, int* error_code);
         void key_reconstruction_details_free(struct KeyReconstructionDetails* key_details);
-        struct KeyPointPoint* key_details_get_pub_key_point(struct KeyDetails* key_details, int* error_code);
+        struct KeyPoint* key_details_get_pub_key_point(struct KeyDetails* key_details, int* error_code);
         int key_details_get_required_shares(struct KeyDetails* key_details, int* error_code);
         unsigned int key_details_get_threshold(struct KeyDetails* key_details, int* error_code);
         unsigned int key_details_get_total_shares(struct KeyDetails* key_details, int* error_code);
@@ -57,7 +57,7 @@
         struct ShareStoreMap* generate_new_share_store_result_get_share_store_map(struct GenerateShareStoreResult* result,int* error_code);
         void generate_share_store_result_free(struct GenerateShareStoreResult* ptr);
         struct GenerateShareStoreResult* threshold_key_generate_share(struct FFIThresholdKey* threshold_key, char* curve_n, int* error_code);
-        bool threshold_key_delete_share(struct FFIThresholdKey* threshold_key, char* share_index, char* curve_n, int* error_code);
+        void threshold_key_delete_share(struct FFIThresholdKey* threshold_key, char* share_index, char* curve_n, int* error_code);
         char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
         void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
         //Module: security-question
@@ -83,6 +83,7 @@
         //Module:seed-phrase
         void seed_phrase_set_phrase(struct FFIThresholdKey* threshold_key,char* format,char* phrase, unsigned int number_of_wallets,char* curve_n, int* error_code);
         void seed_phrase_change_phrase(struct FFIThresholdKey* threshold_key,char* old_phrase,char* new_phrase,char* curve_n, int* error_code);
+        void seed_phrase_delete_seed_phrase(struct FFIThresholdKey* threshold_key, char* seed_phrase, int* error_code);
         char* seed_phrase_get_seed_phrases(struct FFIThresholdKey* threshold_key, int* error_code);
         //(removed) char* seed_phrase_get_seed_phrases_with_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
         //(removed) char* seed_phrase_get_accounts(struct FFIThresholdKey* threshold_key, char* derivation_path, int* error_code);
