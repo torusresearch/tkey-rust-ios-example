@@ -30,18 +30,21 @@ class Tests_iOS: XCTestCase {
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
-
-//    func testLaunchPerformance() throws {
-//        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-//            // This measures how long it takes to launch your application.
-//            measure(metrics: [XCTApplicationLaunchMetric()]) {
-//                XCUIApplication().launch()
-//            }
-//        }
-    }
     
-    func test() {
+    //    func testLaunchPerformance() throws {
+    //        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
+    //            // This measures how long it takes to launch your application.
+    //            measure(metrics: [XCTApplicationLaunchMetric()]) {
+    //                XCUIApplication().launch()
+    //            }
+    //        }
+    
+    func testThresholdShareTransfer () {
+        let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+        
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
     }
-        
+    
+    
 }
+ 
