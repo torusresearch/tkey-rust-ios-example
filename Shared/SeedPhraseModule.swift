@@ -57,7 +57,6 @@ final class SeedPhraseModule {
 
     static func delete_seedphrase(threshold_key: ThresholdKey, phrase: String, curve_n: String) throws
     {
-        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let Phrase = UnsafeMutablePointer<Int8>(mutating: (phrase as NSString).utf8String)
 
         var errorCode: Int32 = -1

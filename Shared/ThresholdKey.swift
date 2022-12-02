@@ -36,21 +36,17 @@ final class ThresholdKey {
         pointer = result
     }
     
-    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, service_provider: ServiceProvider? = nil, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
+    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
     {
         var errorCode: Int32 = -1
         var sharePointer:UnsafeMutablePointer<Int8>? = nil
         if !import_share.isEmpty {
             sharePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: import_share).utf8String)
         }
-        
-        var providerPointer: OpaquePointer? = nil
-        if case .some(let provider) = service_provider {
-            providerPointer = provider.pointer
-        }
+    
         
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: curve_n).utf8String)
-        let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_initialize(pointer, sharePointer, input, never_initialize_new_key, providerPointer, include_local_metadata_transitions, curvePointer, error)})
+        let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_initialize(pointer, sharePointer, input, never_initialize_new_key, include_local_metadata_transitions, curvePointer, error)})
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
             }
@@ -85,13 +81,12 @@ final class ThresholdKey {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let shareIndexPointer = UnsafeMutablePointer<Int8>(mutating: (share_index as NSString).utf8String)
-        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+        withUnsafeMutablePointer(to: &errorCode, {error in
             threshold_key_delete_share(pointer, shareIndexPointer, curvePointer, error);
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in Threshold while Deleting share")
             }
-        return result;
     }
     
     public func get_key_details() throws -> KeyDetails {
