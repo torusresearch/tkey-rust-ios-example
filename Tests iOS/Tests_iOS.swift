@@ -22,7 +22,7 @@ class ThresholdKey_Test : XCTestCase {
             enable_logging: true,
             manual_sync: true)
 
-        let key_details = try! threshold_key.initialize(never_initialize_new_key: false, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
+        let _ = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
         let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
 
         let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
@@ -35,7 +35,7 @@ class ThresholdKey_Test : XCTestCase {
             enable_logging: true,
             manual_sync: true)
         
-        let key_details2 = try! threshold_key2.initialize(never_initialize_new_key: true, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
+        let _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
         
         try! threshold_key2.input_share(share: shareOut, shareType: nil,  curve_n: curve_n)
         
@@ -58,7 +58,7 @@ class ThresholdKey_Test : XCTestCase {
             enable_logging: true,
             manual_sync: true)
 
-        let key_details = try! threshold_key.initialize(never_initialize_new_key: false, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
+        let _ = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
         let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
 
         
@@ -68,7 +68,7 @@ class ThresholdKey_Test : XCTestCase {
             enable_logging: true,
             manual_sync: true)
         
-        let key_details2 = try! threshold_key2.initialize(never_initialize_new_key: true, service_provider: service_provider, include_local_metadata_transitions: false, curve_n: curve_n)
+        let _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
 
         let request_enc = try! ShareTransferModule.request_new_share(threshold_key: threshold_key2, user_agent: "agent", available_share_indexes: "[]", curve_n: curve_n)
         
@@ -81,7 +81,7 @@ class ThresholdKey_Test : XCTestCase {
         try! ShareTransferModule.approve_request_with_share_index(threshold_key: threshold_key, enc_pub_key_x: encPubKey, share_index: newShare.hex, curve_n: curve_n)
         
         
-        let status = try! ShareTransferModule.request_status_check(threshold_key: threshold_key2, enc_pub_key_x: request_enc, delete_request_on_completion: true, curve_n: curve_n)
+        let _ = try! ShareTransferModule.request_status_check(threshold_key: threshold_key2, enc_pub_key_x: request_enc, delete_request_on_completion: true, curve_n: curve_n)
         
         let key_reconstruction_details_2 = try! threshold_key2.reconstruct(curve_n: curve_n)
         

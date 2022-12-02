@@ -37,6 +37,11 @@
                BlueprintName = "Tests iOS"
                ReferencedContainer = "container:tkey_ios.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "Tests_iOSLaunchTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
