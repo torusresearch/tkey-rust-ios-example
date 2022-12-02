@@ -81,6 +81,30 @@ final class ThresholdKey {
         return try! GenerateShareStoreResult( pointer: result!)
     }
     
+    public func delete_share(share_index: String, curve_n: String) throws {
+        var errorCode: Int32 = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let shareIndexPointer = UnsafeMutablePointer<Int8>(mutating: (share_index as NSString).utf8String)
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_delete_share(pointer, shareIndexPointer, curvePointer, error);
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in Threshold while Deleting share")
+            }
+        return result;
+    }
+    
+    public func get_key_details() throws -> KeyDetails {
+        var errorCode: Int32 = -1
+        let result = withUnsafeMutablePointer(to:&errorCode, {error in
+            threshold_key_get_key_details(pointer, error);
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in Threshold while Getting Key Details")
+            }
+        return try! KeyDetails(pointer: result!);
+    }
+    
     public func output_share( shareIndex : String, shareType: String?, curve_n: String ) throws -> String {
         var errorCode: Int32  = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
