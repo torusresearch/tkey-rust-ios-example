@@ -7,6 +7,10 @@
 
 import Foundation
 
+struct seedPhraseStruct :Codable {
+    var seedPhrase :String
+    var type :String
+}
 final class SeedPhraseModule {
     static func set_seed_phrase(threshold_key: ThresholdKey, format: String, phrase: String?, number_of_wallets: UInt32, curve_n: String) throws
     {
@@ -41,7 +45,7 @@ final class SeedPhraseModule {
             }
     }
     
-    static func get_seed_phrases(threshold_key: ThresholdKey) throws -> String
+    static func get_seed_phrases(threshold_key: ThresholdKey) throws -> [seedPhraseStruct]
     {
         var errorCode: Int32 = -1
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
@@ -52,7 +56,9 @@ final class SeedPhraseModule {
             }
         let string = String.init(cString: result!)
         string_destroy(result)
-        return string
+        let decoder = JSONDecoder()
+        let seed_array = try! decoder.decode( [seedPhraseStruct].self , from: string.data(using: String.Encoding.utf8)! )
+        return seed_array
     }
 
     static func delete_seedphrase(threshold_key: ThresholdKey, phrase: String, curve_n: String) throws
@@ -102,3 +108,5 @@ final class SeedPhraseModule {
     }
     */
 }
+
+
