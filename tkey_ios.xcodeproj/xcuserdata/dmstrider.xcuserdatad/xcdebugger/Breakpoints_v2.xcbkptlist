@@ -30,9 +30,9 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
-            landmarkName = "initialize(import_share:input:never_initialize_new_key:service_provider:include_local_metadata_transitions:curve_n:)"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
+            landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -94,9 +94,9 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "52"
-            endingLineNumber = "52"
-            landmarkName = "initialize(import_share:input:never_initialize_new_key:service_provider:include_local_metadata_transitions:curve_n:)"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -126,9 +126,9 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
-            landmarkName = "init(private_key:metadata:shares:storage_layer:service_provider:local_matadata_transitions:last_fetch_cloud_metadata:enable_logging:manual_sync:)"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "init(metadata:shares:storage_layer:service_provider:local_matadata_transitions:last_fetch_cloud_metadata:enable_logging:manual_sync:)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -174,9 +174,9 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "49"
-            endingLineNumber = "49"
-            landmarkName = "initialize(import_share:input:never_initialize_new_key:service_provider:include_local_metadata_transitions:curve_n:)"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
             <Locations>
                <Location
