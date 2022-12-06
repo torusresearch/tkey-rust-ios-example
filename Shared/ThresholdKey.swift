@@ -45,8 +45,11 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
             }
-        return try! KeyDetails(pointer: result!);
+        let keyDetails = try! KeyDetails(pointer: result!);
+        return keyDetails
     }
+    
+    
     
     public func reconstruct(curve_n: String) throws -> KeyReconstructionDetails
     {
@@ -110,7 +113,9 @@ final class ThresholdKey {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
         }
-        return String.init(cString: result!)
+        let string = String.init(cString: result!)
+        string_destroy(result)
+        return string
     }
     
     public func input_share( share: String, shareType: String?, curve_n: String ) throws  {
@@ -126,9 +131,27 @@ final class ThresholdKey {
             threshold_key_input_share(pointer, cShare, cShareType,  curvePointer, error )
         })
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey generate_new_share")
+            throw RuntimeError("Error in ThresholdKey input_share \(errorCode)")
         }
     }
+    
+    public func get_shares_index(curve_n : String ) throws -> [String]{
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_get_shares_index(pointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey generate_new_share")
+        }
+        
+        let string = String.init(cString: result!)
+        let indexes = try! JSONSerialization.jsonObject(with: string.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [String]
+        string_destroy(result)
+        return indexes
+    }
+    
     deinit {
         threshold_key_free(pointer)
     }

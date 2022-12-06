@@ -28,6 +28,7 @@
         char* generate_private_key( char* curve_n, int* error_code);
         char* point_get_x(struct KeyPoint* point, int* error_code);
         char* point_get_y(struct KeyPoint* point, int* error_code);
+        char* point_encode(struct KeyPoint* point, char* enc, int* error_code);
         void point_free(struct KeyPoint* point);
         char* key_reconstruction_get_private_key(struct KeyReconstructionDetails* key_details, int* error_code);
         int key_reconstruction_get_seed_phrase_len(struct KeyReconstructionDetails* key_details, int* error_code);
@@ -60,6 +61,7 @@
         void threshold_key_delete_share(struct FFIThresholdKey* threshold_key, char* share_index, char* curve_n, int* error_code);
         char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
         void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
+        char* threshold_key_get_shares_index(struct FFIThresholdKey* threshold_key, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
         bool security_question_input_share(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
