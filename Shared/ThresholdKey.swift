@@ -14,7 +14,7 @@ final class ThresholdKey {
         self.pointer = pointer
     }
     
-    init(metadata: OpaquePointer? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions:  OpaquePointer? = nil, last_fetch_cloud_metadata:  OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
+    init(metadata: Metadata? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions:  OpaquePointer? = nil, last_fetch_cloud_metadata:  OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
         var errorCode: Int32 = -1
         
         var providerPointer: OpaquePointer? = nil
@@ -23,8 +23,13 @@ final class ThresholdKey {
         }
  
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
-            threshold_key(metadata, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
-                })
+            if metadata == nil
+            {
+                return threshold_key(nil, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
+            } else {
+                return threshold_key(metadata!.pointer, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
+            }
+            })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey")
             }
