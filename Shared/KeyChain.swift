@@ -28,14 +28,16 @@ class KeychainInterface {
     static func syncShare( threshold_key: ThresholdKey, key_detail :KeyDetails, curve_n: String ) throws {
         if ( key_detail.required_shares > 0 ) {
 //            get share from keychain
+            debugPrint("input Share")
             let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
+            debugPrint(share)
             try! threshold_key.input_share(share: String(data: share, encoding: .utf8)!, shareType: "hex", curve_n: curve_n)
         } else {
 //          save/update keychain
             let indexes = try! threshold_key.get_shares_index(curve_n: curve_n)
             debugPrint(indexes)
 //            TODO: get right index for device share
-            let share = try! threshold_key.output_share(shareIndex: indexes[0], shareType: nil, curve_n: curve_n)
+            let share = try! threshold_key.output_share(shareIndex: indexes[0], shareType: "hex", curve_n: curve_n)
             debugPrint(share)
             debugPrint(key_detail.pub_key.compressed)
             do {
