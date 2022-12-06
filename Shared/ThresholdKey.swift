@@ -31,6 +31,16 @@ final class ThresholdKey {
         pointer = result
     }
     
+    public func get_metadata() throws -> Metadata
+    {
+        var errorCode: Int32 = -1
+        let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_get_metadata(pointer,error)})
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey get_metadata")
+        }
+        return Metadata.init(pointer: result!)
+    }
+    
     public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
     {
         var errorCode: Int32 = -1
