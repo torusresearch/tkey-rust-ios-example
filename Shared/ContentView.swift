@@ -51,11 +51,15 @@ struct ContentView: View {
         
         let _ = try! threshold_key2.reconstruct(curve_n: curve_n)
         
+        let metadata = try! threshold_key.get_metadata()
+        let metadata_json = try! metadata.export()
         
         return VStack(alignment: .center, spacing: 10) {
                 Text(initialize_output)
                 Spacer()
                 Text(reconstruct_output)
+                Spacer()
+                Text(metadata_json)
                 Spacer()
                 Text(version)
                 Spacer()
