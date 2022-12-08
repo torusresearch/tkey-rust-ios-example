@@ -21,7 +21,7 @@ struct ContentView: View {
             manual_sync: true)
 
         let key_details = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
-        try! KeychainInterface.syncShare(threshold_key: threshold_key, key_detail: key_details, curve_n: curve_n)
+//        try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil, curve_n: curve_n)
         let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -33,9 +33,9 @@ struct ContentView: View {
         
         let version = try! library_version()
 
-        let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
+//        let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
         
-        let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
+//        let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
         
         //try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
         
@@ -47,12 +47,29 @@ struct ContentView: View {
         
         let key_detail2 = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
         
+        
+        let enc_x = try! ShareTransferModule.request_new_share(threshold_key: threshold_key2, user_agent: "Ios", available_share_indexes: "[]", curve_n: curve_n)
+
+        let lookup = try! ShareTransferModule.look_for_request(threshold_key: threshold_key);
+        
+        let new_share_index = try! threshold_key.generate_new_share(curve_n: curve_n);
+        
+        try! ShareTransferModule.approve_request_with_share_index(threshold_key: threshold_key, enc_pub_key_x: lookup[0], share_index: new_share_index.hex, curve_n: curve_n)
+        
+        let new_index = try! ShareTransferModule.request_status_check(threshold_key: threshold_key2, enc_pub_key_x: enc_x, delete_request_on_completion: true, curve_n: curve_n)
+        
+        let kd = try! threshold_key2.get_key_details();
+        debugPrint(kd.required_shares)
+        let key_reconstruct2 = try! threshold_key2.reconstruct(curve_n: curve_n)
+        debugPrint(key_reconstruct2)
+        
+        try! KeychainInterface.syncShare(threshold_key: threshold_key2, share_index: new_index, curve_n: curve_n)
         debugPrint(key_detail2)
-        try! KeychainInterface.syncShare(threshold_key: threshold_key2, key_detail: key_detail2, curve_n: curve_n)
+//        try! KeychainInterface.syncShare(threshold_key: threshold_key2, share_index: nil, curve_n: curve_n)
 //        try! threshold_key2.input_share(share: shareOut, shareType: nil,  curve_n: curve_n)
         
         
-        let key_reconstruct2 = try! threshold_key2.reconstruct(curve_n: curve_n)
+        let key_reconstruct3 = try! threshold_key2.reconstruct(curve_n: curve_n)
         debugPrint(key_reconstruct2)
         
         return VStack(alignment: .center, spacing: 10) {

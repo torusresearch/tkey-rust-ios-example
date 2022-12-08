@@ -25,19 +25,28 @@ class KeychainInterface {
         case unexpectedStatus(OSStatus)
     }
     
-    static func syncShare( threshold_key: ThresholdKey, key_detail :KeyDetails, curve_n: String ) throws {
+    static func syncShare( threshold_key: ThresholdKey, share_index: String?, curve_n: String ) throws {
+        let key_detail = try! threshold_key.get_key_details();
+        
+        
         if ( key_detail.required_shares > 0 ) {
 //            get share from keychain
             debugPrint("input Share")
             let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
-            debugPrint(share)
+            debugPrint(String(data: share, encoding: .utf8)!)
             try! threshold_key.input_share(share: String(data: share, encoding: .utf8)!, shareType: "hex", curve_n: curve_n)
         } else {
 //          save/update keychain
-            let indexes = try! threshold_key.get_shares_index(curve_n: curve_n)
-            debugPrint(indexes)
+            var index = share_index
+            if (index == nil) {
+                let indexes = try! threshold_key.get_shares_index()
+                debugPrint(indexes)
+                if (indexes[0] == "1" ) { index = indexes[1] }
+                else { index = indexes[0] }
+                debugPrint("index =", indexes[0])
+            }
 //            TODO: get right index for device share
-            let share = try! threshold_key.output_share(shareIndex: indexes[0], shareType: "hex", curve_n: curve_n)
+            let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
             debugPrint(share)
             debugPrint(key_detail.pub_key.compressed)
             do {
@@ -49,7 +58,7 @@ class KeychainInterface {
     }
 
     
-    static func getAllAccount () {
+    static func getAllAccount () throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "tkey_ios" as AnyObject,
@@ -60,12 +69,14 @@ class KeychainInterface {
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
 
+        debugPrint(status)
         if status == errSecSuccess {
             let accounts = result as? [[String: Any]]
             debugPrint(accounts)
             // Do something with the accounts
         } else {
             // Handle the error
+            throw KeychainError.unexpectedStatus(status)
         }
     }
     

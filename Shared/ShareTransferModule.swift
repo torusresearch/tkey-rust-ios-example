@@ -8,6 +8,7 @@
 import Foundation
 
 final class ShareTransferModule {
+    
    static func request_new_share(threshold_key: ThresholdKey, user_agent: String, available_share_indexes: String, curve_n: String) throws -> String
     {
         var errorCode: Int32 = -1
@@ -135,7 +136,7 @@ final class ShareTransferModule {
     }
 
     
-    static func request_status_check(threshold_key: ThresholdKey, enc_pub_key_x: String, delete_request_on_completion: Bool, curve_n: String) throws -> ShareStore
+    static func request_status_check(threshold_key: ThresholdKey, enc_pub_key_x: String, delete_request_on_completion: Bool, curve_n: String) throws -> String
     {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
@@ -146,7 +147,9 @@ final class ShareTransferModule {
         guard errorCode == 0 else {
             throw RuntimeError("Error in ShareTransferModule, request status check. Error Code: \(errorCode)")
             }
-        return ShareStore.init(pointer: result!)
+        let string = String(cString: result!)
+        string_destroy(result)
+        return string
     }
     
     static func cleanup_request(threshold_key: ThresholdKey) throws {

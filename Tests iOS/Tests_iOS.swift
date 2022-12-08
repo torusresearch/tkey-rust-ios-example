@@ -7,6 +7,7 @@
 
 import XCTest
 import tkey_ios
+import Security
 
 class ThresholdKey_Test : XCTestCase {
 
@@ -88,37 +89,77 @@ class ThresholdKey_Test : XCTestCase {
         assert(key_reconstruction_details.key == key_reconstruction_details_2.key, "Share transfer fail")
     }
     
+
+
+    func testAddPassword() {
+        try! KeychainInterface.getAllAccount();
+        let password = "mypassword"
+        let account = "myaccount"
+        let success = addPassword(password: password, account: account)
+        XCTAssertTrue(success)
+    }
+
+    func addPassword(password: String, account: String) -> Bool {
+        // Create a dictionary with the password and account name
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: account,
+            kSecValueData as String: password.data(using: .utf8)!
+        ]
+
+        // Add the password to the keychain
+        let status = SecItemAdd(query as CFDictionary, nil)
+
+        if status == errSecSuccess {
+            return true
+        } else {
+            return false
+        }
+    }
 //    keychain not able to test
 //    tested on contentView()
-//    func testDeviceShare () {
-//        let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-//
-//        let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
-//        let key1 = try! PrivateKey.generate(curve_n: curve_n)
-//        let service_provider = try! ServiceProvider(enable_logging: true, postbox_key: key1.hex, curve_n: curve_n)
-//        let threshold_key = try! ThresholdKey(
-//            storage_layer: storage_layer,
-//            service_provider: service_provider,
-//            enable_logging: true,
-//            manual_sync: true)
-//
-//        let key_details = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
-//        try! KeychainInterface.syncShare(threshold_key: threshold_key, key_detail: key_details, curve_n: curve_n)
-//        let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
-//
-//
-//        let threshold_key2 = try! ThresholdKey(
-//            storage_layer: storage_layer,
-//            service_provider: service_provider,
-//            enable_logging: true,
-//            manual_sync: true)
-//
-//        let key_details2 = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
-//        try! KeychainInterface.syncShare(threshold_key: threshold_key2, key_detail: key_details2, curve_n: curve_n)
-//
-//        KeychainInterface.getAllAccount()
-//
-//
-//    }
+    func testDeviceShare () {
+        
+        
+        
+        
+        
+        
+        let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+
+        let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+        let key1 = try! PrivateKey.generate(curve_n: curve_n)
+        let service_provider = try! ServiceProvider(enable_logging: true, postbox_key: key1.hex, curve_n: curve_n)
+        let threshold_key = try! ThresholdKey(
+            storage_layer: storage_layer,
+            service_provider: service_provider,
+            enable_logging: true,
+            manual_sync: true)
+
+        let key_details = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
+        // Create an expectation for the keychain operation
+
+        try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil, curve_n: curve_n)
+
+
+        
+        let key_reconstruction_details = try! threshold_key.reconstruct(curve_n: curve_n)
+
+
+        let threshold_key2 = try! ThresholdKey(
+            storage_layer: storage_layer,
+            service_provider: service_provider,
+            enable_logging: true,
+            manual_sync: true)
+
+        let key_details2 = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
+        try! KeychainInterface.syncShare(threshold_key: threshold_key2, share_index: nil, curve_n: curve_n)
+
+        try! KeychainInterface.getAllAccount()
+
+        let key_reconstruction_details2 = try! threshold_key2.reconstruct(curve_n: curve_n)
+        assert( key_reconstruction_details.key == key_reconstruction_details2.key)
+        
+    }
     
 }

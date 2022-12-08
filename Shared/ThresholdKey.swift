@@ -58,7 +58,7 @@ final class ThresholdKey {
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
             threshold_key_reconstruct(pointer, curvePointer, error)})
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey Reconstruct")
+            throw RuntimeError("Error in ThresholdKey Reconstruct \(errorCode)")
             }
         return try! KeyReconstructionDetails(pointer: result!)
     }
@@ -135,10 +135,9 @@ final class ThresholdKey {
         }
     }
     
-    public func get_shares_index(curve_n : String ) throws -> [String]{
+    public func get_shares_index() throws -> [String]{
         var errorCode: Int32  = -1
-        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
-        
+         
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
             threshold_key_get_shares_index(pointer, error )
         })
