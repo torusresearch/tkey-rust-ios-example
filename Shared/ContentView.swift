@@ -43,17 +43,23 @@ struct ContentView: View {
             service_provider: service_provider,
             enable_logging: true,
             manual_sync: true)
-
-        _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
-
-        try! threshold_key2.input_share(share: shareOut, shareType: nil,   curve_n: curve_n)
-
-        _ = try! threshold_key2.reconstruct(curve_n: curve_n)
-
+        
+        let _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
+        
+        try! threshold_key2.input_share(share: shareOut, shareType: nil,  curve_n: curve_n)
+        
+        
+        let _ = try! threshold_key2.reconstruct(curve_n: curve_n)
+        
+        let metadata = try! threshold_key.get_metadata()
+        let metadata_json = try! metadata.export()
+        
         return VStack(alignment: .center, spacing: 10) {
                 Text(initialize_output)
                 Spacer()
                 Text(reconstruct_output)
+                Spacer()
+                Text(metadata_json)
                 Spacer()
                 Text(version)
                 Spacer()

@@ -13,30 +13,41 @@ final class ThresholdKey {
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-
-    init(private_key: String = "", metadata: OpaquePointer? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions: OpaquePointer? = nil, last_fetch_cloud_metadata: OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
+    
+    init(metadata: Metadata? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions:  OpaquePointer? = nil, last_fetch_cloud_metadata:  OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
         var errorCode: Int32 = -1
-
-        var keyPointer: UnsafeMutablePointer<Int8>?
-        if !private_key.isEmpty {
-            keyPointer = UnsafeMutablePointer<Int8>(mutating: (private_key as NSString).utf8String)
-        }
-
-        var providerPointer: OpaquePointer?
+        
+        var providerPointer: OpaquePointer? = nil
         if case .some(let provider) = service_provider {
             providerPointer = provider.pointer
         }
-
+ 
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
-            threshold_key(keyPointer, metadata, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
-                })
+            if metadata == nil
+            {
+                return threshold_key(nil, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
+            } else {
+                return threshold_key(metadata!.pointer, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
+            }
+            })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey")
             }
         pointer = result
     }
-
-    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails {
+    
+    public func get_metadata() throws -> Metadata
+    {
+        var errorCode: Int32 = -1
+        let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_get_metadata(pointer,error)})
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey get_metadata")
+        }
+        return Metadata.init(pointer: result!)
+    }
+    
+    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
+    {
         var errorCode: Int32 = -1
         var sharePointer: UnsafeMutablePointer<Int8>?
         if !import_share.isEmpty {
