@@ -37,7 +37,7 @@ class ThresholdKey_Test: XCTestCase {
 
         _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
 
-        try! threshold_key2.input_share(share: shareOut, shareType: nil,   curve_n: curve_n)
+        try! threshold_key2.input_share(share: shareOut, shareType: nil,     curve_n: curve_n)
 
         let key2_reconstruction_details = try! threshold_key2.reconstruct(curve_n: curve_n)
         assert( key_reconstruction_details.key ==
@@ -82,8 +82,8 @@ class ThresholdKey_Test: XCTestCase {
 
         assert(key_reconstruction_details.key == key_reconstruction_details_2.key, "Share transfer fail")
     }
-    
-    func test_get_metadata() {
+
+    func testPrivateKeyModule() {
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
@@ -173,7 +173,7 @@ class ThresholdKey_Test: XCTestCase {
 
 //        Try reconstruct 2nd Tkey instance to check if seed phrase is persistance
     }
-    
+
     func test_get_metadata() {
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
@@ -185,8 +185,8 @@ class ThresholdKey_Test: XCTestCase {
             service_provider: service_provider,
             enable_logging: true,
             manual_sync: true)
-        let _ = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
-        let _ = try! threshold_key.reconstruct(curve_n: curve_n)
+        _ = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false, curve_n: curve_n)
+        _ = try! threshold_key.reconstruct(curve_n: curve_n)
         let metadata = try! threshold_key.get_metadata()
         let json = try! metadata.export()
         assert(json.lengthOfBytes(using: .utf8) > 0)
