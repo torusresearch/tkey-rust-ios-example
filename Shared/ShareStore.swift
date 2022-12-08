@@ -9,11 +9,11 @@ import Foundation
 
 final class ShareStore {
     private(set) var pointer: OpaquePointer?
-    
+
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-    
+
     init(json: String) throws {
         var errorCode: Int32 = -1
         let jsonPointer = UnsafeMutablePointer<Int8>(mutating: (json as NSString).utf8String)
@@ -25,7 +25,7 @@ final class ShareStore {
             }
         pointer = result
     }
-    
+
     deinit {
         share_store_free(pointer)
     }

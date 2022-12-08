@@ -9,20 +9,20 @@ import Foundation
 
 final class ThresholdKey {
     private(set) var pointer: OpaquePointer?
-    
+
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-    
-    init(private_key: String = "", metadata: OpaquePointer? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions:  OpaquePointer? = nil, last_fetch_cloud_metadata:  OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
+
+    init(private_key: String = "", metadata: OpaquePointer? = nil, shares: OpaquePointer? = nil, storage_layer: StorageLayer, service_provider: ServiceProvider? = nil, local_matadata_transitions: OpaquePointer? = nil, last_fetch_cloud_metadata: OpaquePointer? = nil, enable_logging: Bool, manual_sync: Bool) throws {
         var errorCode: Int32 = -1
-        
-        var keyPointer: UnsafeMutablePointer<Int8>? = nil
+
+        var keyPointer: UnsafeMutablePointer<Int8>?
         if !private_key.isEmpty {
             keyPointer = UnsafeMutablePointer<Int8>(mutating: (private_key as NSString).utf8String)
         }
-        
-        var providerPointer: OpaquePointer? = nil
+
+        var providerPointer: OpaquePointer?
         if case .some(let provider) = service_provider {
             providerPointer = provider.pointer
         }
@@ -35,26 +35,23 @@ final class ThresholdKey {
             }
         pointer = result
     }
-    
-    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails
-    {
+
+    public func initialize(import_share: String = "", input: OpaquePointer? = nil, never_initialize_new_key: Bool, include_local_metadata_transitions: Bool, curve_n: String) throws -> KeyDetails {
         var errorCode: Int32 = -1
-        var sharePointer:UnsafeMutablePointer<Int8>? = nil
+        var sharePointer: UnsafeMutablePointer<Int8>?
         if !import_share.isEmpty {
             sharePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: import_share).utf8String)
         }
-    
-        
+
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: curve_n).utf8String)
         let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_initialize(pointer, sharePointer, input, never_initialize_new_key, include_local_metadata_transitions, curvePointer, error)})
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
             }
-        return try! KeyDetails(pointer: result!);
+        return try! KeyDetails(pointer: result!)
     }
-    
-    public func reconstruct(curve_n: String) throws -> KeyReconstructionDetails
-    {
+
+    public func reconstruct(curve_n: String) throws -> KeyReconstructionDetails {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
@@ -64,7 +61,7 @@ final class ThresholdKey {
             }
         return try! KeyReconstructionDetails(pointer: result!)
     }
-  
+
     public func generate_new_share(curve_n: String) throws -> GenerateShareStoreResult {
         var errorCode: Int32  = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
@@ -76,59 +73,59 @@ final class ThresholdKey {
         }
         return try! GenerateShareStoreResult( pointer: result!)
     }
-    
+
     public func delete_share(share_index: String, curve_n: String) throws {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let shareIndexPointer = UnsafeMutablePointer<Int8>(mutating: (share_index as NSString).utf8String)
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_delete_share(pointer, shareIndexPointer, curvePointer, error);
+            threshold_key_delete_share(pointer, shareIndexPointer, curvePointer, error)
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in Threshold while Deleting share")
             }
     }
-    
+
     public func get_key_details() throws -> KeyDetails {
         var errorCode: Int32 = -1
-        let result = withUnsafeMutablePointer(to:&errorCode, {error in
-            threshold_key_get_key_details(pointer, error);
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_get_key_details(pointer, error)
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in Threshold while Getting Key Details")
             }
-        return try! KeyDetails(pointer: result!);
+        return try! KeyDetails(pointer: result!)
     }
-    
-    public func output_share( shareIndex : String, shareType: String?, curve_n: String ) throws -> String {
+
+    public func output_share( shareIndex: String, shareType: String?, curve_n: String ) throws -> String {
         var errorCode: Int32  = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let cShareIndex = UnsafeMutablePointer<Int8>(mutating: (shareIndex as NSString).utf8String)
-        
-        var cShareType:UnsafeMutablePointer<Int8>? = nil
+
+        var cShareType: UnsafeMutablePointer<Int8>?
         if let shareType = shareType {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_output_share(pointer, cShareIndex, cShareType,  curvePointer, error )
+            threshold_key_output_share(pointer, cShareIndex, cShareType,   curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
         }
         return String.init(cString: result!)
     }
-    
-    public func input_share( share: String, shareType: String?, curve_n: String ) throws  {
+
+    public func input_share( share: String, shareType: String?, curve_n: String ) throws {
         var errorCode: Int32  = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         let cShare = UnsafeMutablePointer<Int8>(mutating: (share as NSString).utf8String)
-        
-        var cShareType:UnsafeMutablePointer<Int8>? = nil
+
+        var cShareType: UnsafeMutablePointer<Int8>?
         if let shareType = shareType {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_input_share(pointer, cShare, cShareType,  curvePointer, error )
+            threshold_key_input_share(pointer, cShare, cShareType,   curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
@@ -138,4 +135,3 @@ final class ThresholdKey {
         threshold_key_free(pointer)
     }
 }
-
