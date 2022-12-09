@@ -62,6 +62,11 @@
         char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
         void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
         char* threshold_key_get_shares_index(struct FFIThresholdKey* threshold_key, int* error_code);
+        // share description
+        char* threshold_key_get_share_descriptions(struct FFIThresholdKey* threshold_key, int* error_code);
+        void threshold_key_add_share_description(struct FFIThresholdKey* threshold_key, char* key, char* description, bool update_metadata, char* curve_n, int* error_code);
+        void threshold_key_delete_share_description(struct FFIThresholdKey* threshold_key, char* key, char* description, bool update_metadata, char* curve_n, int* error_code);
+        void threshold_key_update_share_description(struct FFIThresholdKey* threshold_key, char* key, char* old_description, char* new_description, bool update_metadata, char* curve_n, int* error_code);
         struct Metadata* threshold_key_get_metadata(struct FFIThresholdKey* threshold_key, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
