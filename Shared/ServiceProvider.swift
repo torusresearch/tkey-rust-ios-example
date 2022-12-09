@@ -9,11 +9,11 @@ import Foundation
 
 final class ServiceProvider {
     private(set) var pointer: OpaquePointer?
-    
+
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-    
+
     init(enable_logging: Bool, postbox_key: String, curve_n: String) throws {
         var errorCode: Int32 = -1
         let postboxPointer = UnsafeMutablePointer<Int8>(mutating: NSString(string: postbox_key).utf8String)
@@ -26,7 +26,7 @@ final class ServiceProvider {
             }
         pointer = result!
     }
-    
+
     deinit {
         service_provider_free(pointer)
     }

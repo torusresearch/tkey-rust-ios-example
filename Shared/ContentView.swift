@@ -29,31 +29,30 @@ struct ContentView: View {
         encoder.outputFormatting = .prettyPrinted
         data = try! encoder.encode(key_reconstruction_details)
         let reconstruct_output = String(data: data, encoding: .utf8)!
-        
+
         let version = try! library_version()
 
         let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
-        
+
         let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
-        
-        //try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
-        
+
+        // try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
+
         let threshold_key2 = try! ThresholdKey(
             storage_layer: storage_layer,
             service_provider: service_provider,
             enable_logging: true,
             manual_sync: true)
-        
-        let _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
-        
-        try! threshold_key2.input_share(share: shareOut, shareType: nil,  curve_n: curve_n)
-        
-        
-        let _ = try! threshold_key2.reconstruct(curve_n: curve_n)
-        
+
+        _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
+
+        try! threshold_key2.input_share(share: shareOut, shareType: nil,   curve_n: curve_n)
+
+        _ = try! threshold_key2.reconstruct(curve_n: curve_n)
+
         let metadata = try! threshold_key.get_metadata()
         let metadata_json = try! metadata.export()
-        
+
         return VStack(alignment: .center, spacing: 10) {
                 Text(initialize_output)
                 Spacer()

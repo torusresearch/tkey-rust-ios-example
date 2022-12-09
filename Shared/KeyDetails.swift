@@ -13,7 +13,7 @@ final class KeyDetails: Codable {
     let threshold: UInt32
     let total_shares: UInt32
     let share_descriptions: String
-    
+
     init(pointer: OpaquePointer) throws {
         var errorCode: Int32 = -1
         let point = withUnsafeMutablePointer(to: &errorCode, { error in
@@ -23,7 +23,7 @@ final class KeyDetails: Codable {
             throw RuntimeError("Error in KeyDetails, field Point")
             }
         pub_key = try! KeyPoint.init(pointer: point!)
-        
+
         let theshold = withUnsafeMutablePointer(to: &errorCode, { error in
            key_details_get_threshold(pointer, error)
                })
@@ -31,7 +31,7 @@ final class KeyDetails: Codable {
             throw RuntimeError("Error in KeyDetails, field Threshold")
             }
         self.threshold = theshold
-     
+
         let required_shares = withUnsafeMutablePointer(to: &errorCode, { error in
            key_details_get_required_shares(pointer, error)
                })
@@ -39,7 +39,7 @@ final class KeyDetails: Codable {
             throw RuntimeError("Error in KeyDetails, field Required Shares")
             }
         self.required_shares = required_shares
-        
+
         let total_shares = withUnsafeMutablePointer(to: &errorCode, { error in
            key_details_get_total_shares(pointer, error)
                })
@@ -47,7 +47,7 @@ final class KeyDetails: Codable {
             throw RuntimeError("Error in KeyDetails, field Total Shares")
             }
         self.total_shares = total_shares
-        
+
         let share_descriptions = withUnsafeMutablePointer(to: &errorCode, { error in
            key_details_get_share_descriptions(pointer, error)
                })
