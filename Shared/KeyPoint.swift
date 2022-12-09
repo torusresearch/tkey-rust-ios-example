@@ -9,7 +9,7 @@ import Foundation
 
 final class KeyPoint: Codable {
     var x, y: String
-    
+
     init(pointer: OpaquePointer) throws {
         var errorCode: Int32 = -1
         var result = withUnsafeMutablePointer(to: &errorCode, { error in

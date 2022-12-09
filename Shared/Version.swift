@@ -11,7 +11,7 @@ func library_version() throws -> String {
     var errorCode: Int32 = -1
     let result = withUnsafeMutablePointer(to: &errorCode, { error in
                     get_version(error) })
-    
+
     guard errorCode == 0 else {
         throw RuntimeError("Error in retrieving library version")
     }

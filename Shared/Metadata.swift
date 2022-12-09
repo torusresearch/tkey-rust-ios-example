@@ -9,11 +9,11 @@ import Foundation
 
 final class Metadata {
     private(set) var pointer: OpaquePointer?
-    
+
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-    
+
     init(json: String) throws {
         var errorCode: Int32 = -1
         let jsonPointer = UnsafeMutablePointer<Int8>(mutating: (json as NSString).utf8String)
@@ -25,7 +25,7 @@ final class Metadata {
             }
         pointer = result
     }
-    
+
     public func export() throws -> String {
         var errorCode: Int32 = -1
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
@@ -38,9 +38,8 @@ final class Metadata {
         string_destroy(result)
         return value
     }
-    
+
     deinit {
         metadata_free(pointer)
     }
 }
-
