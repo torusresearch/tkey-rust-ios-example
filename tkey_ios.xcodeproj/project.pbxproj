@@ -21,6 +21,9 @@
 		B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 		B30B6B3C28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
 		B30B6B3D28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
+		B327F595293F411800BDB20A /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B327F594293F411800BDB20A /* Metadata.swift */; };
+		B327F596293F411800BDB20A /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B327F594293F411800BDB20A /* Metadata.swift */; };
+		B327F597293F411800BDB20A /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B327F594293F411800BDB20A /* Metadata.swift */; };
 		B3878A042922666300902894 /* ShareStoreMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A032922666300902894 /* ShareStoreMap.swift */; };
 		B3878A052922666300902894 /* ShareStoreMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A032922666300902894 /* ShareStoreMap.swift */; };
 		B3878A062922666300902894 /* ShareStoreMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3878A032922666300902894 /* ShareStoreMap.swift */; };
@@ -111,6 +114,7 @@
 		B30B6B3028BCC8AC00812C1E /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		B30B6B3628BCC8AC00812C1E /* Tests_macOSLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOSLaunchTests.swift; sourceTree = "<group>"; };
+		B327F594293F411800BDB20A /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		B3878A032922666300902894 /* ShareStoreMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStoreMap.swift; sourceTree = "<group>"; };
 		B3878A07292266D100902894 /* GenerateShareStoreResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateShareStoreResult.swift; sourceTree = "<group>"; };
 		B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityQuestionModule.swift; sourceTree = "<group>"; };
@@ -212,6 +216,7 @@
 				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
 				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
+				B327F594293F411800BDB20A /* Metadata.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -433,6 +438,7 @@
 				B3F017622908606B005F577B /* KeyDetails.swift in Sources */,
 				B3F0176829086392005F577B /* RuntimeError.swift in Sources */,
 				B3878A24292F456300902894 /* Version.swift in Sources */,
+				B327F595293F411800BDB20A /* Metadata.swift in Sources */,
 				B3878A18292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3878A042922666300902894 /* ShareStoreMap.swift in Sources */,
 				B3878A0C2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
@@ -470,6 +476,7 @@
 				B3878A15292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3F0176929086392005F577B /* RuntimeError.swift in Sources */,
 				B3F0176629086079005F577B /* KeyReconstructionDetails.swift in Sources */,
+				B327F596293F411800BDB20A /* Metadata.swift in Sources */,
 				B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */,
 				B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */,
@@ -492,6 +499,7 @@
 			files = (
 				B3A2ABC9290B8D320009C688 /* ShareStore.swift in Sources */,
 				B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */,
+				B327F597293F411800BDB20A /* Metadata.swift in Sources */,
 				B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */,
 				B3878A16292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */,

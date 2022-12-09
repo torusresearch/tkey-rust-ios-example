@@ -62,6 +62,7 @@
         char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
         void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
         char* threshold_key_get_shares_index(struct FFIThresholdKey* threshold_key, int* error_code);
+        struct Metadata* threshold_key_get_metadata(struct FFIThresholdKey* threshold_key, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);
         bool security_question_input_share(struct FFIThresholdKey* threshold_key, char* answer, char* curve_n, int* error_code);
@@ -93,6 +94,10 @@
         bool private_keys_set_private_key(struct FFIThresholdKey* threshold_key, char* key, char* format, char* curve_n, int* error_code);
         char* private_keys_get_private_keys(struct FFIThresholdKey* threshold_key, int* error_code);
         char* private_keys_get_accounts(struct FFIThresholdKey* threshold_key, int* error_code);
+        // metadata
+        void metadata_free(struct Metadata* metadata);
+        struct Metadata* metadata_from_json(char* json, int* error_code);
+        char* metadata_to_json(struct Metadata* metadata, int* error_code);
     #ifdef __cplusplus
     } // extern "C"
     #endif

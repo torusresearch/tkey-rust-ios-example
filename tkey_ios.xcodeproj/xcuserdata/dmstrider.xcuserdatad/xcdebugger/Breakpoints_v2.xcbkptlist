@@ -30,8 +30,8 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "43"
-            endingLineNumber = "43"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
             landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "47"
-            endingLineNumber = "47"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
             landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -174,8 +174,8 @@
             filePath = "Shared/ThresholdKey.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "44"
-            endingLineNumber = "44"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
             landmarkType = "7">
             <Locations>
