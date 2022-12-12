@@ -115,7 +115,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_output_share(pointer, cShareIndex, cShareType,     curvePointer, error )
+            threshold_key_output_share(pointer, cShareIndex, cShareType,       curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
@@ -133,7 +133,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_input_share(pointer, cShare, cShareType,     curvePointer, error )
+            threshold_key_input_share(pointer, cShare, cShareType,       curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")

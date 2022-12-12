@@ -37,7 +37,7 @@ class ThresholdKey_Test: XCTestCase {
 
         _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
 
-        try! threshold_key2.input_share(share: shareOut, shareType: nil,     curve_n: curve_n)
+        try! threshold_key2.input_share(share: shareOut, shareType: nil,       curve_n: curve_n)
 
         let key2_reconstruction_details = try! threshold_key2.reconstruct(curve_n: curve_n)
         assert( key_reconstruction_details.key ==
@@ -166,8 +166,14 @@ class ThresholdKey_Test: XCTestCase {
         assert(seedResult_3[0].seedPhrase == seedPhraseToSet )
         assert(seedResult_3[1].seedPhrase == seedPhraseToSet2 )
 
+//        Try set seedphrase with existing seed phrase
+        do {
+            try SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet2, number_of_wallets: 0, curve_n: curve_n)
+            assert(false, "unexpected set same seedphrase")
+        } catch {
+        }
 //        Try set seedphrase with nil
-        try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet2, number_of_wallets: 0, curve_n: curve_n)
+        try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: nil, number_of_wallets: 0, curve_n: curve_n)
         let seedResult_4 = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
         assert(seedResult_4.count == 3 )
 
