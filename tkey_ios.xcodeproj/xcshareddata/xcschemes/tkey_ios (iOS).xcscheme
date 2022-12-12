@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "export PATH=&quot;$PATH:/opt/homebrew/bin&quot;&#10;echo ${WORKSPACE_PATH}&#10;cd ${WORKSPACE_PATH}&#10;cd ..&#10;cd ..&#10;pwd&#10;echo &quot;hello&quot;&#10;if which swiftlint &gt; /dev/null; then&#10;  swiftlint --fix&#10;fi&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;export PATH=&quot;$PATH:/opt/homebrew/bin&quot;&#10;echo ${WORKSPACE_PATH}&#10;cd ${WORKSPACE_PATH}&#10;cd ..&#10;cd ..&#10;pwd&#10;echo &quot;hello&quot;&#10;if which swiftlint &gt; /dev/null; then&#10;  swiftlint --fix&#10;fi&#10;">
             </ActionContent>
          </ExecutionAction>
       </PostActions>
