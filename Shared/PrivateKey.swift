@@ -9,12 +9,12 @@ import Foundation
 
 final class PrivateKey {
     var hex: String
-    
+
     init(pointer: UnsafeMutablePointer<Int8>) {
         hex = String.init(cString: pointer)
         string_destroy(pointer)
     }
-    
+
     static func generate(curve_n: String) throws -> PrivateKey {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)

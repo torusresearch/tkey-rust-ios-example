@@ -17,14 +17,13 @@ extension NSMutableData {
 }
 */
 
-
 final class StorageLayer {
     private(set) var pointer: OpaquePointer?
-    
+
     init(pointer: OpaquePointer) {
         self.pointer = pointer
     }
-    
+
     /* for multipart form data
     static func createMultipartBody(data: Data, boundary: String, file: String) -> Data {
           let body = NSMutableData()
@@ -39,7 +38,7 @@ final class StorageLayer {
           return body as Data
       }
      */
-    
+
     static func percentEscapeString( string: String) -> String {
       var characterSet = CharacterSet.alphanumerics
       characterSet.insert(charactersIn: "-.* ")
@@ -49,17 +48,17 @@ final class StorageLayer {
         .replacingOccurrences(of: " ", with: "+")
         .replacingOccurrences(of: " ", with: "+", options: [], range: nil)
     }
-    
+
     init(enable_logging: Bool, host_url: String, server_time_offset: Int64) throws {
         var errorCode: Int32 = -1
         let urlPointer = UnsafeMutablePointer<Int8>(mutating: (host_url as NSString).utf8String)
-        
+
         let network_interface: (@convention(c) (UnsafeMutablePointer<CChar>?, UnsafeMutablePointer<CChar>?, UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<CChar>?)? = {url, data, error_code in
             let sem = DispatchSemaphore.init(value: 0)
             let urlString = String.init(cString: url!)
             let dataString = String.init(cString: data!)
-            string_destroy(url);
-            string_destroy(data);
+            string_destroy(url)
+            string_destroy(data)
             let url = URL(string: urlString)!
             let session = URLSession.shared
             var request = URLRequest(url: url)
@@ -67,25 +66,23 @@ final class StorageLayer {
             request.addValue("*", forHTTPHeaderField: "Access-Control-Allow-Origin")
             request.addValue("GET, POST", forHTTPHeaderField: "Access-Control-Allow-Methods")
             request.addValue("Content-Type", forHTTPHeaderField: "Access-Control-Allow-Headers")
-            
-            if urlString.split(separator: "/").last == "bulk_set_stream"
-            {
-                //let boundary = UUID().uuidString;
-                //request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-                request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField:"Content-Type");
-                
-                let json = try! JSONSerialization.jsonObject(with: dataString.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [[String:Any]]
 
-                //for item in json {
-                    //let dataItem = try! JSONSerialization.data(withJSONObject: item, options: .prettyPrinted)
-                    //requestData.append(StorageLayer.createMultipartBody(data: dataItem, boundary: boundary, file: "multipartData"))
-                //}
-                
+            if urlString.split(separator: "/").last == "bulk_set_stream" {
+                // let boundary = UUID().uuidString;
+                // request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+                request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+                let json = try! JSONSerialization.jsonObject(with: dataString.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [[String: Any]]
+
+                // for item in json {
+                    // let dataItem = try! JSONSerialization.data(withJSONObject: item, options: .prettyPrinted)
+                    // requestData.append(StorageLayer.createMultipartBody(data: dataItem, boundary: boundary, file: "multipartData"))
+                // }
+
                 var form_data: [String] = []
-                
-                //urlencoded item format: "(key)=(self.percentEscapeString(value))"
-                for (index, element) in json.enumerated()
-                {
+
+                // urlencoded item format: "(key)=(self.percentEscapeString(value))"
+                for (index, element) in json.enumerated() {
                     let json_elem = try! JSONSerialization.data(withJSONObject: element, options: .withoutEscapingSlashes)
                     let json_escaped_string = StorageLayer.percentEscapeString(string: String(data: json_elem, encoding: .utf8)!)
                     let final_string = String(index) + "=" + json_escaped_string
@@ -99,8 +96,8 @@ final class StorageLayer {
                 request.httpBody = dataString.data(using: String.Encoding.utf8)
             }
             var resultPointer = UnsafeMutablePointer<CChar>(nil)
-            var result = NSString();
-            session.dataTask(with: request) { data, response, error in
+            var result = NSString()
+            session.dataTask(with: request) { data, _, error in
                 defer {
                     sem.signal()
                 }
@@ -111,15 +108,15 @@ final class StorageLayer {
                 if let data = data {
                     let resultString: String = String(decoding: data, as: UTF8.self)
                     result = NSString(string: resultString)
-                    
+
                 }
             }.resume()
-            
+
             sem.wait()
             resultPointer = UnsafeMutablePointer<CChar>(mutating: result.utf8String)
             return resultPointer
         }
-        
+
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
             storage_layer(enable_logging, urlPointer, server_time_offset, network_interface, error)
                 })
@@ -128,7 +125,7 @@ final class StorageLayer {
             }
         pointer = result
     }
-    
+
     deinit {
         storage_layer_free(pointer)
     }

@@ -8,8 +8,7 @@
 import Foundation
 
 final class PrivateKeysModule {
-    static func set_private_key(threshold_key: ThresholdKey, key: String?, format: String, curve_n: String) throws -> Bool
-    {
+    static func set_private_key(threshold_key: ThresholdKey, key: String?, format: String, curve_n: String) throws -> Bool {
         var errorCode: Int32 = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
         var keyPointer: UnsafeMutablePointer<Int8>?
@@ -25,9 +24,8 @@ final class PrivateKeysModule {
             }
         return result
     }
-    
-    static func get_private_keys(threshold_key: ThresholdKey) throws -> String
-    {
+
+    static func get_private_keys(threshold_key: ThresholdKey) throws -> String {
         var errorCode: Int32 = -1
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
             private_keys_get_private_keys(threshold_key.pointer, error)
@@ -39,9 +37,8 @@ final class PrivateKeysModule {
         string_destroy(result)
         return json
     }
-    
-    static func get_private_key_accounts(threshold_key: ThresholdKey) throws -> String
-    {
+
+    static func get_private_key_accounts(threshold_key: ThresholdKey) throws -> [String] {
         var errorCode: Int32 = -1
         let result = withUnsafeMutablePointer(to: &errorCode, { error in
             private_keys_get_accounts(threshold_key.pointer, error)
@@ -51,7 +48,8 @@ final class PrivateKeysModule {
             }
         let json = String.init(cString: result!)
         string_destroy(result)
-        return json
+        let account_array = try! JSONSerialization.jsonObject(with: json.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [String]
+        return account_array
     }
 
 }
