@@ -28,6 +28,7 @@
         char* generate_private_key( char* curve_n, int* error_code);
         char* point_get_x(struct KeyPoint* point, int* error_code);
         char* point_get_y(struct KeyPoint* point, int* error_code);
+        char* point_encode(struct KeyPoint* point, char* enc, int* error_code);
         void point_free(struct KeyPoint* point);
         char* key_reconstruction_get_private_key(struct KeyReconstructionDetails* key_details, int* error_code);
         int key_reconstruction_get_seed_phrase_len(struct KeyReconstructionDetails* key_details, int* error_code);
@@ -42,6 +43,7 @@
         char* key_details_get_share_descriptions(struct KeyDetails* key_details, int* error_code);
         void key_details_free(struct KeyDetails* key_details);
         struct ShareStore* json_to_share_store(char* json, int* error_code);
+        char* share_store_to_json(struct ShareStore* share_store, int* error_code);
         void share_store_free(struct ShareStore* ptr);
         struct FFIStorageLayer* storage_layer(bool enable_logging, char* host_url, long long int server_time_offset, char* (*network_callback)(char*, char*, int*), int* error_code);
         void storage_layer_free(struct FFIStorageLayer* ptr);
@@ -60,6 +62,14 @@
         void threshold_key_delete_share(struct FFIThresholdKey* threshold_key, char* share_index, char* curve_n, int* error_code);
         char* threshold_key_output_share(struct FFIThresholdKey* threshold_key, char* share_index, char* share_type, char* curve_n, int* error_code);
         void threshold_key_input_share(struct FFIThresholdKey* threshold_key, char* share, char* share_type, char* curve_n, int* error_code);
+        struct ShareStore* threshold_key_output_share_store(struct FFIThresholdKey* threshold_key, char* share_index, char* poly_id, char* curve_n, int* error_code);
+        void threshold_key_input_share_store(struct FFIThresholdKey* threshold_key, struct ShareStore* share_store, int* error_code);
+        char* threshold_key_get_shares_index(struct FFIThresholdKey* threshold_key, int* error_code);
+        // share description
+        char* threshold_key_get_share_descriptions(struct FFIThresholdKey* threshold_key, int* error_code);
+        void threshold_key_add_share_description(struct FFIThresholdKey* threshold_key, char* key, char* description, bool update_metadata, char* curve_n, int* error_code);
+        void threshold_key_delete_share_description(struct FFIThresholdKey* threshold_key, char* key, char* description, bool update_metadata, char* curve_n, int* error_code);
+        void threshold_key_update_share_description(struct FFIThresholdKey* threshold_key, char* key, char* old_description, char* new_description, bool update_metadata, char* curve_n, int* error_code);
         struct Metadata* threshold_key_get_metadata(struct FFIThresholdKey* threshold_key, int* error_code);
         //Module: security-question
         struct GenerateShareStoreResult* security_question_generate_new_share(struct FFIThresholdKey* threshold_key, char* questions, char* answer, char* curve_n, int* error_code);

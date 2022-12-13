@@ -73,6 +73,9 @@
 		B3F0176829086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176929086392005F577B /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
 		B3F0176A290865F6005F577B /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
+		F012ACBD29481E0B0037463E /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012ACBC29481E0B0037463E /* KeyChain.swift */; };
+		F012ACBE29481E0B0037463E /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012ACBC29481E0B0037463E /* KeyChain.swift */; };
+		F012ACBF29481E0B0037463E /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012ACBC29481E0B0037463E /* KeyChain.swift */; };
 		F02C197D2934AFA800717AB4 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
 		F0AC7A132926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
 		F0AC7A142926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
@@ -133,6 +136,7 @@
 		B3F0176429086079005F577B /* KeyReconstructionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyReconstructionDetails.swift; sourceTree = "<group>"; };
 		B3F0176729086392005F577B /* RuntimeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeError.swift; sourceTree = "<group>"; };
 		DD5FE15E292DE94C00DC016F /* native-lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "native-lib"; sourceTree = "<group>"; };
+		F012ACBC29481E0B0037463E /* KeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +206,7 @@
 				B3F0175B2908602F005F577B /* StorageLayer.swift */,
 				B3F0175E29086053005F577B /* ThresholdKey.swift */,
 				B3F017612908606B005F577B /* KeyDetails.swift */,
+				F012ACBC29481E0B0037463E /* KeyChain.swift */,
 				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
 				B3F0176729086392005F577B /* RuntimeError.swift */,
 				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
@@ -434,6 +439,7 @@
 				B3878A18292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3878A042922666300902894 /* ShareStoreMap.swift in Sources */,
 				B3878A0C2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
+				F012ACBD29481E0B0037463E /* KeyChain.swift in Sources */,
 				B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */,
 				F0AC7A132926129F004585AD /* (null) in Sources */,
 				B3878A14292277B200902894 /* ShareTransferStore.swift in Sources */,
@@ -471,6 +477,7 @@
 				B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */,
 				B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */,
+				F012ACBE29481E0B0037463E /* KeyChain.swift in Sources */,
 				B3878A052922666300902894 /* ShareStoreMap.swift in Sources */,
 				B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */,
 				B3F0175729085FF3005F577B /* ShareStore.swift in Sources */,
@@ -492,6 +499,7 @@
 				B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */,
 				B327F597293F411800BDB20A /* Metadata.swift in Sources */,
 				B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */,
+				F012ACBF29481E0B0037463E /* KeyChain.swift in Sources */,
 				B3878A16292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */,
 				B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */,
