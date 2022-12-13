@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B30147F5294827AA002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
+		B30147F6294827B9002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
+		B30147F7294827C0002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
+		B30147F8294827C7002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
 		B306A81929110FD100B3C8E6 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
 		B306A81B2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
 		B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
@@ -55,9 +59,6 @@
 		B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017612908606B005F577B /* KeyDetails.swift */; };
 		B3A2ABCE290B8D320009C688 /* KeyReconstructionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176429086079005F577B /* KeyReconstructionDetails.swift */; };
 		B3A2ABCF290B8D320009C688 /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0176729086392005F577B /* RuntimeError.swift */; };
-		B3EC55B828BE6427003596E5 /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
-		B3EC55B928BE6434003596E5 /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; settings = {ATTRIBUTES = (Required, ); }; };
-		B3EC55BA28BE6441003596E5 /* libtkey.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EC55B628BE6410003596E5 /* libtkey.lib */; };
 		B3F0175629085FF3005F577B /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175529085FF3005F577B /* ShareStore.swift */; };
 		B3F0175729085FF3005F577B /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0175529085FF3005F577B /* ShareStore.swift */; };
 		B3F017592908600F005F577B /* ServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F017582908600F005F577B /* ServiceProvider.swift */; };
@@ -77,9 +78,6 @@
 		F012ACBE29481E0B0037463E /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012ACBC29481E0B0037463E /* KeyChain.swift */; };
 		F012ACBF29481E0B0037463E /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012ACBC29481E0B0037463E /* KeyChain.swift */; };
 		F02C197D2934AFA800717AB4 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
-		F0AC7A132926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
-		F0AC7A142926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
-		F0AC7A152926129F004585AD /* (null) in Sources */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +98,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B30147F4294827AA002E0FD1 /* libtkey.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libtkey.xcframework; path = "native-lib/libtkey.xcframework"; sourceTree = "<group>"; };
 		B306A81829110FD100B3C8E6 /* PrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKey.swift; sourceTree = "<group>"; };
 		B306A81A2911174400B3C8E6 /* KeyPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPoint.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
@@ -127,7 +126,6 @@
 		B3EC55AC28BE5F3B003596E5 /* tkey_ios (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "tkey_ios (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests iOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		B3EC55AE28BE5F3B003596E5 /* Tests macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests macOS-Bridging-Header.h"; sourceTree = "<group>"; };
-		B3EC55B628BE6410003596E5 /* libtkey.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtkey.lib; path = "native-lib/libtkey.lib"; sourceTree = "<group>"; };
 		B3F0175529085FF3005F577B /* ShareStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStore.swift; sourceTree = "<group>"; };
 		B3F017582908600F005F577B /* ServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProvider.swift; sourceTree = "<group>"; };
 		B3F0175B2908602F005F577B /* StorageLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLayer.swift; sourceTree = "<group>"; };
@@ -144,7 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3F0176A290865F6005F577B /* libtkey.lib in Frameworks */,
+				B30147F5294827AA002E0FD1 /* libtkey.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,7 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3EC55B828BE6427003596E5 /* libtkey.lib in Frameworks */,
+				B30147F6294827B9002E0FD1 /* libtkey.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,7 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3EC55B928BE6434003596E5 /* libtkey.lib in Frameworks */,
+				B30147F7294827C0002E0FD1 /* libtkey.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,7 +166,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3EC55BA28BE6441003596E5 /* libtkey.lib in Frameworks */,
+				B30147F8294827C7002E0FD1 /* libtkey.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,7 +259,7 @@
 		B3EC55B528BE6410003596E5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B3EC55B628BE6410003596E5 /* libtkey.lib */,
+				B30147F4294827AA002E0FD1 /* libtkey.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -441,7 +439,6 @@
 				B3878A0C2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 				F012ACBD29481E0B0037463E /* KeyChain.swift in Sources */,
 				B3F0176529086079005F577B /* KeyReconstructionDetails.swift in Sources */,
-				F0AC7A132926129F004585AD /* (null) in Sources */,
 				B3878A14292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3F0175C2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A08292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
@@ -486,7 +483,6 @@
 				B3878A19292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3F0176029086053005F577B /* ThresholdKey.swift in Sources */,
 				B3878A09292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
-				F0AC7A142926129F004585AD /* (null) in Sources */,
 				B3878A0D2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -514,7 +510,6 @@
 				B3878A1A292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */,
 				B3878A0A292266D100902894 /* GenerateShareStoreResult.swift in Sources */,
-				F0AC7A152926129F004585AD /* (null) in Sources */,
 				B3878A0E2922696D00902894 /* SecurityQuestionModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -659,7 +654,6 @@
 				DEVELOPMENT_TEAM = 2Q63NCPY55;
 				ENABLE_PREVIEWS = YES;
 				EXCLUDED_ARCHS = "";
-				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -812,7 +806,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H5XG68FB7M;
-				EXCLUDED_ARCHS = arm64;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				LD_RUNPATH_SEARCH_PATHS = (
