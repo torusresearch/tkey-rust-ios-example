@@ -96,7 +96,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "62"
             endingLineNumber = "62"
-            landmarkName = "initialize(import_share:input:never_initialize_new_key:include_local_metadata_transitions:curve_n:)"
+            landmarkName = "reconstruct(curve_n:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -240,8 +240,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "39"
             endingLineNumber = "39"
-            landmarkName = "init(enable_logging:host_url:server_time_offset:)"
-            landmarkType = "7">
+            landmarkName = "StorageLayer"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
