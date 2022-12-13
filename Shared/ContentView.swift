@@ -46,7 +46,7 @@ struct ContentView: View {
 
         _ = try! threshold_key2.initialize(never_initialize_new_key: true, include_local_metadata_transitions: false, curve_n: curve_n)
 
-        try! threshold_key2.input_share(share: shareOut, shareType: nil,   curve_n: curve_n)
+        try! threshold_key2.input_share(share: shareOut, shareType: nil,       curve_n: curve_n)
 
         _ = try! threshold_key2.reconstruct(curve_n: curve_n)
 
