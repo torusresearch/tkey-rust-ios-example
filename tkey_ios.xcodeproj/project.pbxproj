@@ -11,6 +11,9 @@
 		B30147F6294827B9002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
 		B30147F7294827C0002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
 		B30147F8294827C7002E0FD1 /* libtkey.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B30147F4294827AA002E0FD1 /* libtkey.xcframework */; };
+		B30147FA29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */; };
+		B30147FB29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */; };
+		B30147FC29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */; };
 		B306A81929110FD100B3C8E6 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
 		B306A81B2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
 		B306A81C2911174400B3C8E6 /* KeyPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81A2911174400B3C8E6 /* KeyPoint.swift */; };
@@ -95,6 +98,7 @@
 
 /* Begin PBXFileReference section */
 		B30147F4294827AA002E0FD1 /* libtkey.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libtkey.xcframework; path = "native-lib/libtkey.xcframework"; sourceTree = "<group>"; };
+		B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStorePolyIdIndexMap.swift; sourceTree = "<group>"; };
 		B306A81829110FD100B3C8E6 /* PrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKey.swift; sourceTree = "<group>"; };
 		B306A81A2911174400B3C8E6 /* KeyPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPoint.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
@@ -209,6 +213,7 @@
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
 				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
 				B327F594293F411800BDB20A /* Metadata.swift */,
+				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -427,6 +432,7 @@
 				B3F017622908606B005F577B /* KeyDetails.swift in Sources */,
 				B3F0176829086392005F577B /* RuntimeError.swift in Sources */,
 				B3878A24292F456300902894 /* Version.swift in Sources */,
+				B30147FA29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */,
 				B327F595293F411800BDB20A /* Metadata.swift in Sources */,
 				B3878A18292837DB00902894 /* PrivateKeysModule.swift in Sources */,
 				B3878A042922666300902894 /* ShareStoreMap.swift in Sources */,
@@ -463,6 +469,7 @@
 				B3878A15292277B200902894 /* ShareTransferStore.swift in Sources */,
 				B3F0176929086392005F577B /* RuntimeError.swift in Sources */,
 				B3F0176629086079005F577B /* KeyReconstructionDetails.swift in Sources */,
+				B30147FB29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */,
 				B327F596293F411800BDB20A /* Metadata.swift in Sources */,
 				B3F0175D2908602F005F577B /* StorageLayer.swift in Sources */,
 				B3878A21292955F800902894 /* SeedPhraseModule.swift in Sources */,
@@ -483,6 +490,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B30147FC29487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift in Sources */,
 				B3A2ABC9290B8D320009C688 /* ShareStore.swift in Sources */,
 				B3A2ABCA290B8D320009C688 /* ServiceProvider.swift in Sources */,
 				B327F597293F411800BDB20A /* Metadata.swift in Sources */,
