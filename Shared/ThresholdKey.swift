@@ -185,9 +185,8 @@ final class ThresholdKey {
         }
     }
 
-    public func get_shares_index() throws -> [String] {
+    public func get_shares_indexes() throws -> [String] {
          var errorCode: Int32  = -1
-
          let result = withUnsafeMutablePointer(to: &errorCode, {error in
              threshold_key_get_shares_indexes(pointer, error )
          })

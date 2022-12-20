@@ -42,7 +42,7 @@ import Security
  //          save/update keychain
              var index = share_index
              if index == nil {
-                 let indexes = try! threshold_key.get_shares_index()
+                 let indexes = try! threshold_key.get_shares_indexes()
                  debugPrint(indexes)
                  if indexes[0] == "1" { index = indexes[1] } else { index = indexes[0] }
                  debugPrint("index =", indexes[0])
