@@ -29,7 +29,7 @@ final class GenerateShareStoreResult {
         guard errorCode == 0 else {
             throw RuntimeError("Error in GenerateShareStoreResult, field share_store")
             }
-        share_store = ShareStoreMap.init(pointer: storePtr!)
+        share_store = try! ShareStoreMap.init(pointer: storePtr!)
     }
 
     deinit {

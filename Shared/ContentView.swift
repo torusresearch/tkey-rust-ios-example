@@ -50,7 +50,7 @@ struct ContentView: View {
 
         try! KeychainInterface.syncShare(threshold_key: threshold_key2, share_index: nil, curve_n: curve_n)
 
-        // try! threshold_key2.input_share(share: shareOut, shareType: nil,       curve_n: curve_n)
+        // try! threshold_key2.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
 
         _ = try! threshold_key2.reconstruct(curve_n: curve_n)
 

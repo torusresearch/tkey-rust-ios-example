@@ -123,6 +123,20 @@ final class ThresholdKey {
         return String.init(cString: result!)
     }
 
+    public func share_to_share_store(share: String, curve_n: String ) throws -> ShareStore {
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let sharePointer = UnsafeMutablePointer<Int8>(mutating: (share as NSString).utf8String)
+
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_share_to_share_store(pointer, sharePointer, curvePointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey share_to_share_store")
+        }
+        return ShareStore.init(pointer: result!)
+    }
+
     public func input_share( share: String, shareType: String?, curve_n: String ) throws {
         var errorCode: Int32  = -1
         let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
