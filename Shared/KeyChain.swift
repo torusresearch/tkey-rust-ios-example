@@ -50,7 +50,7 @@ import Security
  //            TODO: get right index for device share
 //             let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
              let share = try threshold_key.output_share_store(shareIndex: index!, polyId: nil, curve_n: curve_n)
-             let share_str = try! share.toJson()
+             let share_str = try! share.toJsonString()
 
              debugPrint(share)
              debugPrint(key_detail.pub_key.compressed)

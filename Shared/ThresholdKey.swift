@@ -115,7 +115,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_output_share(pointer, cShareIndex, cShareType,        curvePointer, error )
+            threshold_key_output_share(pointer, cShareIndex, cShareType,           curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
@@ -147,7 +147,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_input_share(pointer, cShare, cShareType,           curvePointer, error )
+            threshold_key_input_share(pointer, cShare, cShareType,              curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
@@ -167,7 +167,7 @@ final class ThresholdKey {
             threshold_key_output_share_store(pointer, cShareIndex, cPolyId, curvePointer, error )
         })
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey generate_new_share")
+            throw RuntimeError("Error in ThresholdKey output share store")
         }
         return ShareStore(pointer: result!)
     }
@@ -181,7 +181,7 @@ final class ThresholdKey {
             threshold_key_input_share_store(pointer, shareStore.pointer, error)
         })
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey generate_new_share")
+            throw RuntimeError("Error in ThresholdKey input share store")
         }
     }
 
@@ -189,7 +189,7 @@ final class ThresholdKey {
          var errorCode: Int32  = -1
 
          let result = withUnsafeMutablePointer(to: &errorCode, {error in
-             threshold_key_get_shares_index(pointer, error )
+             threshold_key_get_shares_indexes(pointer, error )
          })
          guard errorCode == 0 else {
              throw RuntimeError("Error in ThresholdKey generate_new_share")
