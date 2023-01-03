@@ -190,30 +190,13 @@
 			children = (
 				B3878A23292F456300902894 /* Version.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
-				B3878A17292837DB00902894 /* PrivateKeysModule.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
 				B3EC55AB28BE5F3B003596E5 /* tkey_ios (iOS)-Bridging-Header.h */,
 				B3EC55AC28BE5F3B003596E5 /* tkey_ios (macOS)-Bridging-Header.h */,
 				B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */,
 				B3EC55AE28BE5F3B003596E5 /* Tests macOS-Bridging-Header.h */,
-				B3F0175529085FF3005F577B /* ShareStore.swift */,
-				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
-				B3F017582908600F005F577B /* ServiceProvider.swift */,
-				B3F0175B2908602F005F577B /* StorageLayer.swift */,
-				B3F0175E29086053005F577B /* ThresholdKey.swift */,
-				B3F017612908606B005F577B /* KeyDetails.swift */,
-				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
-				B3F0176729086392005F577B /* RuntimeError.swift */,
-				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
-				B3878A032922666300902894 /* ShareStoreMap.swift */,
-				B3878A07292266D100902894 /* GenerateShareStoreResult.swift */,
-				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
-				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
-				B3878A13292277B200902894 /* ShareTransferStore.swift */,
-				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
-				B327F594293F411800BDB20A /* Metadata.swift */,
-				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
+				DD9A164F29641D3A002FA795 /* ThresholdKey */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -261,6 +244,47 @@
 				B30147F4294827AA002E0FD1 /* libtkey.xcframework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DD9A164F29641D3A002FA795 /* ThresholdKey */ = {
+			isa = PBXGroup;
+			children = (
+				DD9A165129641D86002FA795 /* Common */,
+				DD9A165029641D6E002FA795 /* Modules */,
+				B3F017582908600F005F577B /* ServiceProvider.swift */,
+				B3F0175B2908602F005F577B /* StorageLayer.swift */,
+				B3F0175E29086053005F577B /* ThresholdKey.swift */,
+				B3F017612908606B005F577B /* KeyDetails.swift */,
+				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
+				B3F0176729086392005F577B /* RuntimeError.swift */,
+				B3878A032922666300902894 /* ShareStoreMap.swift */,
+				B3878A07292266D100902894 /* GenerateShareStoreResult.swift */,
+				B327F594293F411800BDB20A /* Metadata.swift */,
+				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
+			);
+			path = ThresholdKey;
+			sourceTree = "<group>";
+		};
+		DD9A165029641D6E002FA795 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				B3878A17292837DB00902894 /* PrivateKeysModule.swift */,
+				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
+				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
+				B3878A13292277B200902894 /* ShareTransferStore.swift */,
+				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
+		DD9A165129641D86002FA795 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				B3F0175529085FF3005F577B /* ShareStore.swift */,
+				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
+				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

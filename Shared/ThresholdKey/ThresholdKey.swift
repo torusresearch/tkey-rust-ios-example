@@ -22,16 +22,16 @@ final class ThresholdKey {
             providerPointer = provider.pointer
         }
 
-        let result = withUnsafeMutablePointer(to: &errorCode, { error in
+        let result = withUnsafeMutablePointer(to: &errorCode, { error -> OpaquePointer in
             if metadata == nil {
                 return threshold_key(nil, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
             } else {
                 return threshold_key(metadata!.pointer, shares, storage_layer.pointer, providerPointer, local_matadata_transitions, last_fetch_cloud_metadata, enable_logging, manual_sync, error)
             }
-            })
+        })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey")
-            }
+        }
         pointer = result
     }
 
@@ -55,7 +55,7 @@ final class ThresholdKey {
         let result = withUnsafeMutablePointer(to: &errorCode, { error in threshold_key_initialize(pointer, sharePointer, input, never_initialize_new_key, include_local_metadata_transitions, curvePointer, error)})
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Initialize")
-            }
+        }
         return try! KeyDetails(pointer: result!)
     }
 
@@ -66,7 +66,7 @@ final class ThresholdKey {
             threshold_key_reconstruct(pointer, curvePointer, error)})
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey Reconstruct")
-            }
+        }
         return try! KeyReconstructionDetails(pointer: result!)
     }
 
@@ -91,7 +91,7 @@ final class ThresholdKey {
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in Threshold while Deleting share")
-            }
+        }
     }
 
     public func get_key_details() throws -> KeyDetails {
@@ -101,7 +101,7 @@ final class ThresholdKey {
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in Threshold while Getting Key Details")
-            }
+        }
         return try! KeyDetails(pointer: result!)
     }
 
@@ -115,7 +115,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_output_share(pointer, cShareIndex, cShareType,                        curvePointer, error )
+            threshold_key_output_share(pointer, cShareIndex, cShareType,                             curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
@@ -147,7 +147,7 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_input_share(pointer, cShare, cShareType,                        curvePointer, error )
+            threshold_key_input_share(pointer, cShare, cShareType,                             curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
