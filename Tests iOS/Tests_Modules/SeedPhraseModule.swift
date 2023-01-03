@@ -24,7 +24,6 @@ final class Tests_SeedPhraseModule: XCTestCase {
         }
     }
     
-    
     func testSeedPhraseModule() throws {
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
@@ -44,38 +43,31 @@ final class Tests_SeedPhraseModule: XCTestCase {
 
         // Check the seedphrase module is empty
         let seedResult = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
-        assert(seedResult.count == 0 )
+        XCTAssertEqual(seedResult.count, 0 )
 
         // set and get seedphrases
         try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0, curve_n: curve_n)
         let seedResult_2 = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
-        assert(seedResult_2[0].seedPhrase == seedPhraseToSet )
+        XCTAssertEqual(seedResult_2[0].seedPhrase, seedPhraseToSet )
 
         // Try delete unknown seedphrase - expect fail
-        do {
-            try SeedPhraseModule.delete_seedphrase(threshold_key: threshold_key, phrase: seedPhraseToSet2, curve_n: curve_n)
-            assert(false)
-        } catch {
-            debugPrint("expected delete failed")
-        }
+        XCTAssertThrowsError(try SeedPhraseModule.delete_seedphrase(threshold_key: threshold_key, phrase: seedPhraseToSet2, curve_n: curve_n))
 
         // Try to set and get 2nd seedphrases
         try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet2, number_of_wallets: 0, curve_n: curve_n)
         let seedResult_3 = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
-        assert(seedResult_3[0].seedPhrase == seedPhraseToSet )
-        assert(seedResult_3[1].seedPhrase == seedPhraseToSet2 )
+        XCTAssertEqual(seedResult_3[0].seedPhrase, seedPhraseToSet )
+        XCTAssertEqual(seedResult_3[1].seedPhrase, seedPhraseToSet2 )
 
         // Try set seedphrase with existing seed phrase
-        do {
-            try SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet2, number_of_wallets: 0, curve_n: curve_n)
-            assert(false, "unexpected set same seedphrase")
-        } catch {
-        }
+        XCTAssertThrowsError(try SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet2, number_of_wallets: 0, curve_n: curve_n))
+
         // Try set seedphrase with nil
         try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: nil, number_of_wallets: 0, curve_n: curve_n)
         let seedResult_4 = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
-        assert(seedResult_4.count == 3 )
+        XCTAssertEqual(seedResult_4.count, 3 )
 
-        //Try reconstruct 2nd Tkey instance to check if seed phrase is persistance
+        // Try reconstruct 2nd Tkey instance to check if seed phrase is persistance
     }
+
 }

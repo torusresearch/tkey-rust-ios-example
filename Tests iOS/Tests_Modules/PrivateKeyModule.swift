@@ -41,29 +41,27 @@ final class Tests_PrivateKeyModule: XCTestCase {
         _ = try! threshold_key.reconstruct(curve_n: curve_n)
 
         let result = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
-        assert(result.count == 0)
+        XCTAssertEqual(result.count, 0)
 
         let key_module = try! PrivateKey.generate(curve_n: curve_n)
         let key_module2 = try! PrivateKey.generate(curve_n: curve_n)
         // Done setup
-
         // Try set and get privatekey from privatekey module
         _ = try! PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n", curve_n: curve_n)
         let result_1 = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
-        assert(result_1 == [key_module.hex] )
+        XCTAssertEqual(result_1, [key_module.hex] )
 
         // Try set 2nd privatekey
         _ = try! PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module2.hex, format: "secp256k1n", curve_n: curve_n)
         let result_2 = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
-        assert( result_2 == [key_module.hex, key_module2.hex] )
+        XCTAssertEqual(result_2, [key_module.hex, key_module2.hex])
 
         // Try set privateKey module with nil key
         _ = try! PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: nil, format: "secp256k1n", curve_n: curve_n)
         let result_3 = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
-        assert(result_3.count == 3 )
+        XCTAssertEqual(result_3.count, 3)
 
-        //        try PrivateKeysModule.remove_private_key()
-
+        // try PrivateKeysModule.remove_private_key()
         // Reconstruct on second instance and check value ?
 
     }

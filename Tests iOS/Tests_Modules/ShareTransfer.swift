@@ -24,7 +24,7 @@ final class Tests_ShareTransfer: XCTestCase {
         }
     }
 
-    func testThresholdShareTransfer() throws {
+    func testThresholdShareTransfer () throws {
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
 
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
@@ -59,9 +59,6 @@ final class Tests_ShareTransfer: XCTestCase {
 
         let key_reconstruction_details_2 = try! threshold_key2.reconstruct(curve_n: curve_n)
 
-        assert(key_reconstruction_details.key == key_reconstruction_details_2.key, "Share transfer fail")
+        XCTAssertEqual(key_reconstruction_details.key, key_reconstruction_details_2.key)
     }
-
-
-
 }

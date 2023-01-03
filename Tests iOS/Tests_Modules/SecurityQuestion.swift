@@ -52,21 +52,14 @@ final class Tests_SecurityQuestion: XCTestCase {
         let security_input_share: Bool = try! SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer, curve_n: curve_n)
         XCTAssertEqual(security_input_share, true)
 
-        do {
-            _ = try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: "ant man", curve_n: curve_n)
-        } catch let error as RuntimeError {
-            XCTAssertEqual(error.message, "Error in SecurityQuestionModule, input_share")
-        }
+        XCTAssertThrowsError(try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: "ant man", curve_n: curve_n)
+            )
 
         // change answer for already existing question
         let change_answer_result = try! SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer_2, curve_n: curve_n)
         XCTAssertEqual(change_answer_result, true)
 
-        do {
-            _ = try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer, curve_n: curve_n)
-        } catch let error as RuntimeError {
-            XCTAssertEqual(error.message, "Error in SecurityQuestionModule, input_share")
-        }
+        XCTAssertThrowsError(try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer, curve_n: curve_n))
 
         let security_input_share_2 = try! SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer_2, curve_n: curve_n)
         XCTAssertEqual(security_input_share_2, true)
@@ -75,15 +68,11 @@ final class Tests_SecurityQuestion: XCTestCase {
         XCTAssertEqual(get_answer, answer_2)
 
         let key_reconstruction_details_2 = try! threshold_key.reconstruct(curve_n: curve_n)
-        assert(key_reconstruction_details.key == key_reconstruction_details_2.key, "security question fail")
+        XCTAssertEqual(key_reconstruction_details.key, key_reconstruction_details_2.key)
 
         // delete newly security share
         try! threshold_key.delete_share(share_index: share_index, curve_n: curve_n)
 
-        do {
-            _ = try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer, curve_n: curve_n)
-        } catch let error as RuntimeError {
-            XCTAssertEqual(error.message, "Error in SecurityQuestionModule, input_share")
-        }
+        XCTAssertThrowsError(try SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer, curve_n: curve_n))
     }
 }

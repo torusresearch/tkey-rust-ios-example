@@ -24,7 +24,8 @@ final class Tests_Metadata: XCTestCase {
         }
     }
 
-    func test_get_metadata() throws {
+    
+    func test_get_metadata() {
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
@@ -39,7 +40,7 @@ final class Tests_Metadata: XCTestCase {
         _ = try! threshold_key.reconstruct(curve_n: curve_n)
         let metadata = try! threshold_key.get_metadata()
         let json = try! metadata.export()
-        assert(json.lengthOfBytes(using: .utf8) > 0)
+        XCTAssertGreaterThan(json.lengthOfBytes(using: .utf8), 0)
         _ = try! Metadata.init(json: json)
     }
 
