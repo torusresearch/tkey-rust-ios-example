@@ -86,6 +86,7 @@
 		F0C81744296419F800F970EC /* Tests_PrivateKeyModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C81743296419F800F970EC /* Tests_PrivateKeyModule.swift */; };
 		F0C8174629641A0700F970EC /* Tests_SeedPhraseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C8174529641A0700F970EC /* Tests_SeedPhraseModule.swift */; };
 		F0C8175029641C1200F970EC /* Tests_Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C8174F29641C1200F970EC /* Tests_Metadata.swift */; };
+		F0C81753296420DF00F970EC /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B306A81829110FD100B3C8E6 /* PrivateKey.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -191,6 +192,7 @@
 		B30B6B0A28BCC8A900812C1E = {
 			isa = PBXGroup;
 			children = (
+				F0C817542964216D00F970EC /* App */,
 				DD5FE15E292DE94C00DC016F /* native-lib */,
 				B30B6B0F28BCC8A900812C1E /* Shared */,
 				B30B6B1E28BCC8AC00812C1E /* macOS */,
@@ -204,33 +206,20 @@
 		B30B6B0F28BCC8A900812C1E /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				B3878A23292F456300902894 /* Version.swift */,
-				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
-				B3878A17292837DB00902894 /* PrivateKeysModule.swift */,
-				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
+				F0C81752296420D500F970EC /* Common */,
+				F0C817512964205000F970EC /* Modules */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
 				B3EC55AB28BE5F3B003596E5 /* tkey_ios (iOS)-Bridging-Header.h */,
 				B3EC55AC28BE5F3B003596E5 /* tkey_ios (macOS)-Bridging-Header.h */,
 				B3EC55AD28BE5F3B003596E5 /* Tests iOS-Bridging-Header.h */,
 				B3EC55AE28BE5F3B003596E5 /* Tests macOS-Bridging-Header.h */,
-				B3F0175529085FF3005F577B /* ShareStore.swift */,
-				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
+				F012ACBC29481E0B0037463E /* KeyChain.swift */,
+				B327F594293F411800BDB20A /* Metadata.swift */,
 				B3F017582908600F005F577B /* ServiceProvider.swift */,
 				B3F0175B2908602F005F577B /* StorageLayer.swift */,
 				B3F0175E29086053005F577B /* ThresholdKey.swift */,
-				B3F017612908606B005F577B /* KeyDetails.swift */,
-				F012ACBC29481E0B0037463E /* KeyChain.swift */,
-				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
 				B3F0176729086392005F577B /* RuntimeError.swift */,
-				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
-				B3878A032922666300902894 /* ShareStoreMap.swift */,
-				B3878A07292266D100902894 /* GenerateShareStoreResult.swift */,
-				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
-				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
-				B3878A13292277B200902894 /* ShareTransferStore.swift */,
-				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
-				B327F594293F411800BDB20A /* Metadata.swift */,
-				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
+				B3878A23292F456300902894 /* Version.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -292,6 +281,42 @@
 				F0C8174529641A0700F970EC /* Tests_SeedPhraseModule.swift */,
 			);
 			path = Tests_Modules;
+			sourceTree = "<group>";
+		};
+		F0C817512964205000F970EC /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				B3878A17292837DB00902894 /* PrivateKeysModule.swift */,
+				B3878A0B2922696D00902894 /* SecurityQuestionModule.swift */,
+				B3878A1F292955F800902894 /* SeedPhraseModule.swift */,
+				B3878A0F29226E1600902894 /* ShareTransferModule.swift */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
+		F0C81752296420D500F970EC /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				B3878A07292266D100902894 /* GenerateShareStoreResult.swift */,
+				B3F017612908606B005F577B /* KeyDetails.swift */,
+				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
+				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
+				B3F0175529085FF3005F577B /* ShareStore.swift */,
+				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
+				B3878A13292277B200902894 /* ShareTransferStore.swift */,
+				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
+				B3878A032922666300902894 /* ShareStoreMap.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		F0C817542964216D00F970EC /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
+				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
+			);
+			path = App;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -536,6 +561,7 @@
 				B3A2ABCB290B8D320009C688 /* StorageLayer.swift in Sources */,
 				F012ACBF29481E0B0037463E /* KeyChain.swift in Sources */,
 				B3878A16292277B200902894 /* ShareTransferStore.swift in Sources */,
+				F0C81753296420DF00F970EC /* PrivateKey.swift in Sources */,
 				B3A2ABCC290B8D320009C688 /* ThresholdKey.swift in Sources */,
 				B3A2ABCD290B8D320009C688 /* KeyDetails.swift in Sources */,
 				B3A2ABCE290B8D320009C688 /* KeyReconstructionDetails.swift in Sources */,
