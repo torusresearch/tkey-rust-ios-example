@@ -118,7 +118,7 @@ final class ThresholdKey {
             threshold_key_output_share(pointer, cShareIndex, cShareType, curvePointer, error )
         })
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey generate_new_share")
+            throw RuntimeError("Error in ThresholdKey output_share")
         }
         return String.init(cString: result!)
     }

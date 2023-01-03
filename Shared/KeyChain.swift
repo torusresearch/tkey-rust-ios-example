@@ -27,62 +27,53 @@ class KeychainInterface {
     }
 
     static func syncShare( threshold_key: ThresholdKey, share_index: String?, curve_n: String ) throws {
-        let key_detail = try! threshold_key.get_key_details()
+         let key_detail = try! threshold_key.get_key_details()
 
-        if  key_detail.required_shares > 0 {
-        // get share from keychain
-            debugPrint("input Share")
-            let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
-            debugPrint(String(data: share, encoding: .utf8)!)
-            let shareStore = try! ShareStore(json: String(data: share, encoding: .utf8)!)
-            try! threshold_key.input_share_store(shareStore: shareStore, curve_n: curve_n)
+         if  key_detail.required_shares > 0 {
+         // get share from keychain
+             let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
+             let shareStore = try! ShareStore(json: String(data: share, encoding: .utf8)!)
+             try! threshold_key.input_share_store(shareStore: shareStore, curve_n: curve_n)
 
-        } else {
-        // save/update keychain
-        var index = share_index
-        if index == nil {
-            let indexes = try! threshold_key.get_shares_indexes()
-            debugPrint(indexes)
-            if indexes[0] == "1" { index = indexes[1] } else { index = indexes[0] }
-            debugPrint("index =", indexes[0])
+         } else {
+         // save/update keychain
+         var index = share_index
+         if index == nil {
+             let indexes = try! threshold_key.get_shares_indexes()
+             if indexes[0] == "1" { index = indexes[1] } else { index = indexes[0] }
+         }
+
+         // TODO: get right index for device share
+         // let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
+         let share = try threshold_key.output_share_store(shareIndex: index!, polyId: nil, curve_n: curve_n)
+         let share_str = try! share.toJsonString()
+
+         do {
+             try save( password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
+         } catch KeychainError.duplicateItem {
+             try! update(password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
+         }
+         }
+     }
+
+    static func getAllAccounts() throws -> [[String: Any]] {
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: "tkey_ios" as AnyObject,
+                kSecMatchLimit as String: kSecMatchLimitAll,
+                kSecReturnAttributes as String: true
+            ]
+
+            var result: AnyObject?
+            let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+            if status == errSecSuccess {
+                return result as! [[String: Any]]
+            } else {
+                // Handle the error
+                throw KeychainError.unexpectedStatus(status)
+            }
         }
-
-        // TODO: get right index for device share
-        // let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
-        let share = try threshold_key.output_share_store(shareIndex: index!, polyId: nil, curve_n: curve_n)
-        let share_str = try! share.toJsonString()
-
-        debugPrint(share)
-        debugPrint(key_detail.pub_key.compressed)
-        do {
-            try save( password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
-        } catch KeychainError.duplicateItem {
-            try! update(password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
-        }
-        }
-    }
-
-    static func getAllAccount () throws {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "tkey_ios" as AnyObject,
-            kSecMatchLimit as String: kSecMatchLimitAll,
-            kSecReturnAttributes as String: true
-        ]
-
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-
-        debugPrint(status)
-        if status == errSecSuccess {
-            let accounts = result as? [[String: Any]]
-            debugPrint(accounts)
-            // Do something with the accounts
-        } else {
-            // Handle the error
-            throw KeychainError.unexpectedStatus(status)
-        }
-    }
 
     static func save(password: Data, service: String, account: String) throws {
 

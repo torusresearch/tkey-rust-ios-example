@@ -24,7 +24,7 @@ final class ShareStorePolyIdIndexMap {
         let key_array = try JSONSerialization.jsonObject(with: data) as! [String]
         for item in key_array {
             let keyPointer = UnsafeMutablePointer<Int8>(mutating: (item as NSString).utf8String)
-            let value = withUnsafeMutablePointer(to: &errorCode, { error in
+            let value = withUnsafeMutablePointer(to: &errorCode, { error -> OpaquePointer? in
                 share_store_poly_id_index_map_get_value_by_key(pointer, keyPointer, error)
                     })
             guard errorCode == 0 else {
