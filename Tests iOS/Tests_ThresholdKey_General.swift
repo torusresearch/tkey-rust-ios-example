@@ -56,7 +56,7 @@ final class ThresholdKey_General: XCTestCase {
         )
 
     }
-    
+
     func testThresholdInputOutputShare() throws {
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"

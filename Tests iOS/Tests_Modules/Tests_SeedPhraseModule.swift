@@ -23,7 +23,7 @@ final class Tests_SeedPhraseModule: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
+
     func testSeedPhraseModule() throws {
         let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"

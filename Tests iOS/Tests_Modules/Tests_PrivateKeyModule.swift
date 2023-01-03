@@ -23,8 +23,7 @@ final class Tests_PrivateKeyModule: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
-    
+
     func testPrivateKeyModule() throws {
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
@@ -65,6 +64,5 @@ final class Tests_PrivateKeyModule: XCTestCase {
         // Reconstruct on second instance and check value ?
 
     }
-
 
 }

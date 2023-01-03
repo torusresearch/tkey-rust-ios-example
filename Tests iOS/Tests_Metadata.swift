@@ -24,7 +24,6 @@ final class Tests_Metadata: XCTestCase {
         }
     }
 
-    
     func test_get_metadata() {
         let curve_n = "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
         let key1 = try! PrivateKey.generate(curve_n: curve_n)
