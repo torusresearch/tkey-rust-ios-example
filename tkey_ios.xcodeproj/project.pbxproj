@@ -215,10 +215,10 @@
 				B3EC55AE28BE5F3B003596E5 /* Tests macOS-Bridging-Header.h */,
 				F012ACBC29481E0B0037463E /* KeyChain.swift */,
 				B327F594293F411800BDB20A /* Metadata.swift */,
+				B3F0176729086392005F577B /* RuntimeError.swift */,
 				B3F017582908600F005F577B /* ServiceProvider.swift */,
 				B3F0175B2908602F005F577B /* StorageLayer.swift */,
 				B3F0175E29086053005F577B /* ThresholdKey.swift */,
-				B3F0176729086392005F577B /* RuntimeError.swift */,
 				B3878A23292F456300902894 /* Version.swift */,
 			);
 			path = Shared;
@@ -300,12 +300,12 @@
 				B3878A07292266D100902894 /* GenerateShareStoreResult.swift */,
 				B3F017612908606B005F577B /* KeyDetails.swift */,
 				B306A81A2911174400B3C8E6 /* KeyPoint.swift */,
+				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
 				B306A81829110FD100B3C8E6 /* PrivateKey.swift */,
 				B3F0175529085FF3005F577B /* ShareStore.swift */,
+				B3878A032922666300902894 /* ShareStoreMap.swift */,
 				B30147F929487CF5002E0FD1 /* ShareStorePolyIdIndexMap.swift */,
 				B3878A13292277B200902894 /* ShareTransferStore.swift */,
-				B3F0176429086079005F577B /* KeyReconstructionDetails.swift */,
-				B3878A032922666300902894 /* ShareStoreMap.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
