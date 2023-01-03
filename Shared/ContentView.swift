@@ -34,9 +34,9 @@ struct ContentView: View {
 
         let version = try! library_version()
 
-//        let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
-//
-//        let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
+        // let shareStore = try! threshold_key.generate_new_share(curve_n: curve_n)
+
+        // let shareOut = try! threshold_key.output_share(shareIndex: shareStore.hex, shareType: nil, curve_n: curve_n)
 
         // try! threshold_key.input_share(share: shareOut, shareType: nil, curve_n: curve_n)
 

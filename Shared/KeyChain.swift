@@ -9,220 +9,220 @@ import Foundation
 
 import Security
 
- class KeychainInterface {
+class KeychainInterface {
 
-     enum KeychainError: Error {
-         // Attempted read for an item that does not exist.
-         case itemNotFound
+    enum KeychainError: Error {
+        // Attempted read for an item that does not exist.
+        case itemNotFound
 
-         // Attempted save to override an existing item.
-         // Use update instead of save to update existing items
-         case duplicateItem
+        // Attempted save to override an existing item.
+        // Use update instead of save to update existing items
+        case duplicateItem
 
-         // A read of an item in any format other than Data
-         case invalidItemFormat
+        // A read of an item in any format other than Data
+        case invalidItemFormat
 
-         // Any operation result status than errSecSuccess
-         case unexpectedStatus(OSStatus)
-     }
+        // Any operation result status than errSecSuccess
+        case unexpectedStatus(OSStatus)
+    }
 
-     static func syncShare( threshold_key: ThresholdKey, share_index: String?, curve_n: String ) throws {
-         let key_detail = try! threshold_key.get_key_details()
+    static func syncShare( threshold_key: ThresholdKey, share_index: String?, curve_n: String ) throws {
+        let key_detail = try! threshold_key.get_key_details()
 
-         if  key_detail.required_shares > 0 {
- //            get share from keychain
-             debugPrint("input Share")
-             let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
-             debugPrint(String(data: share, encoding: .utf8)!)
-             let shareStore = try! ShareStore(json: String(data: share, encoding: .utf8)!)
-//             try! threshold_key.input_share(share: String(data: share, encoding: .utf8)!, shareType: "hex", curve_n: curve_n)
-             try! threshold_key.input_share_store(shareStore: shareStore, curve_n: curve_n)
+        if  key_detail.required_shares > 0 {
+        // get share from keychain
+            debugPrint("input Share")
+            let share = try! readPassword(service: "tkey_ios", account: key_detail.pub_key.compressed)
+            debugPrint(String(data: share, encoding: .utf8)!)
+            let shareStore = try! ShareStore(json: String(data: share, encoding: .utf8)!)
+            try! threshold_key.input_share_store(shareStore: shareStore, curve_n: curve_n)
 
-         } else {
- //          save/update keychain
-             var index = share_index
-             if index == nil {
-                 let indexes = try! threshold_key.get_shares_indexes()
-                 debugPrint(indexes)
-                 if indexes[0] == "1" { index = indexes[1] } else { index = indexes[0] }
-                 debugPrint("index =", indexes[0])
-             }
- //            TODO: get right index for device share
-//             let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
-             let share = try threshold_key.output_share_store(shareIndex: index!, polyId: nil, curve_n: curve_n)
-             let share_str = try! share.toJsonString()
+        } else {
+        // save/update keychain
+        var index = share_index
+        if index == nil {
+            let indexes = try! threshold_key.get_shares_indexes()
+            debugPrint(indexes)
+            if indexes[0] == "1" { index = indexes[1] } else { index = indexes[0] }
+            debugPrint("index =", indexes[0])
+        }
 
-             debugPrint(share)
-             debugPrint(key_detail.pub_key.compressed)
-             do {
-                 try save( password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
-             } catch KeychainError.duplicateItem {
-                 try! update(password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
-             }
-         }
-     }
+        // TODO: get right index for device share
+        // let share = try! threshold_key.output_share(shareIndex: index!, shareType: "hex", curve_n: curve_n)
+        let share = try threshold_key.output_share_store(shareIndex: index!, polyId: nil, curve_n: curve_n)
+        let share_str = try! share.toJsonString()
 
-     static func getAllAccount () throws {
-         let query: [String: Any] = [
-             kSecClass as String: kSecClassGenericPassword,
-             kSecAttrService as String: "tkey_ios" as AnyObject,
-             kSecMatchLimit as String: kSecMatchLimitAll,
-             kSecReturnAttributes as String: true
-         ]
+        debugPrint(share)
+        debugPrint(key_detail.pub_key.compressed)
+        do {
+            try save( password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
+        } catch KeychainError.duplicateItem {
+            try! update(password: share_str.data(using: .utf8)!, service: "tkey_ios", account: key_detail.pub_key.compressed )
+        }
+        }
+    }
 
-         var result: AnyObject?
-         let status = SecItemCopyMatching(query as CFDictionary, &result)
+    static func getAllAccount () throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "tkey_ios" as AnyObject,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+            kSecReturnAttributes as String: true
+        ]
 
-         debugPrint(status)
-         if status == errSecSuccess {
-             let accounts = result as? [[String: Any]]
-             debugPrint(accounts)
-             // Do something with the accounts
-         } else {
-             // Handle the error
-             throw KeychainError.unexpectedStatus(status)
-         }
-     }
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
 
-     static func save(password: Data, service: String, account: String) throws {
+        debugPrint(status)
+        if status == errSecSuccess {
+            let accounts = result as? [[String: Any]]
+            debugPrint(accounts)
+            // Do something with the accounts
+        } else {
+            // Handle the error
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
 
-         let query: [String: AnyObject] = [
-             // kSecAttrService,  kSecAttrAccount, and kSecClass
-             // uniquely identify the item to save in Keychain
-             kSecAttrService as String: service as AnyObject,
-             kSecAttrAccount as String: account as AnyObject,
-             kSecClass as String: kSecClassGenericPassword,
+    static func save(password: Data, service: String, account: String) throws {
 
-             // kSecValueData is the item value to save
-             kSecValueData as String: password as AnyObject
-         ]
+        let query: [String: AnyObject] = [
+            // kSecAttrService,  kSecAttrAccount, and kSecClass
+            // uniquely identify the item to save in Keychain
+            kSecAttrService as String: service as AnyObject,
+            kSecAttrAccount as String: account as AnyObject,
+            kSecClass as String: kSecClassGenericPassword,
 
-         // SecItemAdd attempts to add the item identified by
-         // the query to keychain
-         let status = SecItemAdd(
-             query as CFDictionary,
-             nil
-         )
+            // kSecValueData is the item value to save
+            kSecValueData as String: password as AnyObject
+        ]
 
-         // errSecDuplicateItem is a special case where the
-         // item identified by the query already exists. Throw
-         // duplicateItem so the client can determine whether
-         // or not to handle this as an error
-         if status == errSecDuplicateItem {
-             throw KeychainError.duplicateItem
-         }
+        // SecItemAdd attempts to add the item identified by
+        // the query to keychain
+        let status = SecItemAdd(
+            query as CFDictionary,
+            nil
+        )
 
-         // Any status other than errSecSuccess indicates the
-         // save operation failed.
-         guard status == errSecSuccess else {
-             throw KeychainError.unexpectedStatus(status)
-         }
-     }
+        // errSecDuplicateItem is a special case where the
+        // item identified by the query already exists. Throw
+        // duplicateItem so the client can determine whether
+        // or not to handle this as an error
+        if status == errSecDuplicateItem {
+            throw KeychainError.duplicateItem
+        }
 
-     static func update(password: Data, service: String, account: String) throws {
-         let query: [String: AnyObject] = [
-             // kSecAttrService,  kSecAttrAccount, and kSecClass
-             // uniquely identify the item to update in Keychain
-             kSecAttrService as String: service as AnyObject,
-             kSecAttrAccount as String: account as AnyObject,
-             kSecClass as String: kSecClassGenericPassword
-         ]
+        // Any status other than errSecSuccess indicates the
+        // save operation failed.
+        guard status == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
 
-         // attributes is passed to SecItemUpdate with
-         // kSecValueData as the updated item value
-         let attributes: [String: AnyObject] = [
-             kSecValueData as String: password as AnyObject
-         ]
+    static func update(password: Data, service: String, account: String) throws {
+        let query: [String: AnyObject] = [
+            // kSecAttrService,  kSecAttrAccount, and kSecClass
+            // uniquely identify the item to update in Keychain
+            kSecAttrService as String: service as AnyObject,
+            kSecAttrAccount as String: account as AnyObject,
+            kSecClass as String: kSecClassGenericPassword
+        ]
 
-         // SecItemUpdate attempts to update the item identified
-         // by query, overriding the previous value
-         let status = SecItemUpdate(
-             query as CFDictionary,
-             attributes as CFDictionary
-         )
+        // attributes is passed to SecItemUpdate with
+        // kSecValueData as the updated item value
+        let attributes: [String: AnyObject] = [
+            kSecValueData as String: password as AnyObject
+        ]
 
-         // errSecItemNotFound is a special status indicating the
-         // item to update does not exist. Throw itemNotFound so
-         // the client can determine whether or not to handle
-         // this as an error
-         guard status != errSecItemNotFound else {
-             throw KeychainError.itemNotFound
-         }
+        // SecItemUpdate attempts to update the item identified
+        // by query, overriding the previous value
+        let status = SecItemUpdate(
+            query as CFDictionary,
+            attributes as CFDictionary
+        )
 
-         // Any status other than errSecSuccess indicates the
-         // update operation failed.
-         guard status == errSecSuccess else {
-             throw KeychainError.unexpectedStatus(status)
-         }
-     }
+        // errSecItemNotFound is a special status indicating the
+        // item to update does not exist. Throw itemNotFound so
+        // the client can determine whether or not to handle
+        // this as an error
+        guard status != errSecItemNotFound else {
+            throw KeychainError.itemNotFound
+        }
 
-     static func readPassword(service: String, account: String) throws -> Data {
-         let query: [String: AnyObject] = [
-             // kSecAttrService,  kSecAttrAccount, and kSecClass
-             // uniquely identify the item to read in Keychain
-             kSecAttrService as String: service as AnyObject,
-             kSecAttrAccount as String: account as AnyObject,
-             kSecClass as String: kSecClassGenericPassword,
+        // Any status other than errSecSuccess indicates the
+        // update operation failed.
+        guard status == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
 
-             // kSecMatchLimitOne indicates keychain should read
-             // only the most recent item matching this query
-             kSecMatchLimit as String: kSecMatchLimitOne,
+    static func readPassword(service: String, account: String) throws -> Data {
+        let query: [String: AnyObject] = [
+            // kSecAttrService,  kSecAttrAccount, and kSecClass
+            // uniquely identify the item to read in Keychain
+            kSecAttrService as String: service as AnyObject,
+            kSecAttrAccount as String: account as AnyObject,
+            kSecClass as String: kSecClassGenericPassword,
 
-             // kSecReturnData is set to kCFBooleanTrue in order
-             // to retrieve the data for the item
-             kSecReturnData as String: kCFBooleanTrue
-         ]
+            // kSecMatchLimitOne indicates keychain should read
+            // only the most recent item matching this query
+            kSecMatchLimit as String: kSecMatchLimitOne,
 
-         // SecItemCopyMatching will attempt to copy the item
-         // identified by query to the reference itemCopy
-         var itemCopy: AnyObject?
-         let status = SecItemCopyMatching(
-             query as CFDictionary,
-             &itemCopy
-         )
+            // kSecReturnData is set to kCFBooleanTrue in order
+            // to retrieve the data for the item
+            kSecReturnData as String: kCFBooleanTrue
+        ]
 
-         // errSecItemNotFound is a special status indicating the
-         // read item does not exist. Throw itemNotFound so the
-         // client can determine whether or not to handle
-         // this case
-         guard status != errSecItemNotFound else {
-             throw KeychainError.itemNotFound
-         }
+        // SecItemCopyMatching will attempt to copy the item
+        // identified by query to the reference itemCopy
+        var itemCopy: AnyObject?
+        let status = SecItemCopyMatching(
+            query as CFDictionary,
+            &itemCopy
+        )
 
-         // Any status other than errSecSuccess indicates the
-         // read operation failed.
-         guard status == errSecSuccess else {
-             throw KeychainError.unexpectedStatus(status)
-         }
+        // errSecItemNotFound is a special status indicating the
+        // read item does not exist. Throw itemNotFound so the
+        // client can determine whether or not to handle
+        // this case
+        guard status != errSecItemNotFound else {
+            throw KeychainError.itemNotFound
+        }
 
-         // This implementation of KeychainInterface requires all
-         // items to be saved and read as Data. Otherwise,
-         // invalidItemFormat is thrown
-         guard let password = itemCopy as? Data else {
-             throw KeychainError.invalidItemFormat
-         }
+        // Any status other than errSecSuccess indicates the
+        // read operation failed.
+        guard status == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(status)
+        }
 
-         return password
-     }
+        // This implementation of KeychainInterface requires all
+        // items to be saved and read as Data. Otherwise,
+        // invalidItemFormat is thrown
+        guard let password = itemCopy as? Data else {
+            throw KeychainError.invalidItemFormat
+        }
 
-     static func deletePassword(service: String, account: String) throws {
-         let query: [String: AnyObject] = [
-             // kSecAttrService,  kSecAttrAccount, and kSecClass
-             // uniquely identify the item to delete in Keychain
-             kSecAttrService as String: service as AnyObject,
-             kSecAttrAccount as String: account as AnyObject,
-             kSecClass as String: kSecClassGenericPassword
-         ]
+        return password
+    }
 
-         // SecItemDelete attempts to perform a delete operation
-         // for the item identified by query. The status indicates
-         // if the operation succeeded or failed.
-         let status = SecItemDelete(query as CFDictionary)
+    static func deletePassword(service: String, account: String) throws {
+        let query: [String: AnyObject] = [
+            // kSecAttrService,  kSecAttrAccount, and kSecClass
+            // uniquely identify the item to delete in Keychain
+            kSecAttrService as String: service as AnyObject,
+            kSecAttrAccount as String: account as AnyObject,
+            kSecClass as String: kSecClassGenericPassword
+        ]
 
-         // Any status other than errSecSuccess indicates the
-         // delete operation failed.
-         guard status == errSecSuccess else {
-             throw KeychainError.unexpectedStatus(status)
-         }
-     }
- }
+        // SecItemDelete attempts to perform a delete operation
+        // for the item identified by query. The status indicates
+        // if the operation succeeded or failed.
+        let status = SecItemDelete(query as CFDictionary)
+
+        // Any status other than errSecSuccess indicates the
+        // delete operation failed.
+        guard status == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
+}
