@@ -115,10 +115,10 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         let result = withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_output_share(pointer, cShareIndex, cShareType,                                           curvePointer, error )
+            threshold_key_output_share(pointer, cShareIndex, cShareType,                                              curvePointer, error )
         })
         guard errorCode == 0 else {
-            throw RuntimeError("Error in ThresholdKey generate_new_share")
+            throw RuntimeError("Error in ThresholdKey output_share")
         }
         return String.init(cString: result!)
     }
@@ -147,11 +147,57 @@ final class ThresholdKey {
             cShareType = UnsafeMutablePointer<Int8>(mutating: (shareType as NSString).utf8String)
         }
         withUnsafeMutablePointer(to: &errorCode, {error in
-            threshold_key_input_share(pointer, cShare, cShareType,                                           curvePointer, error )
+            threshold_key_input_share(pointer, cShare, cShareType,                                              curvePointer, error )
         })
         guard errorCode == 0 else {
             throw RuntimeError("Error in ThresholdKey generate_new_share")
         }
+    }
+
+    public func output_share_store( shareIndex: String, polyId: String?, curve_n: String ) throws -> ShareStore {
+        var errorCode: Int32  = -1
+        let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        let cShareIndex = UnsafeMutablePointer<Int8>(mutating: (shareIndex as NSString).utf8String)
+
+        var cPolyId: UnsafeMutablePointer<Int8>?
+        if let polyId = polyId {
+            cPolyId = UnsafeMutablePointer<Int8>(mutating: (polyId as NSString).utf8String)
+        }
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_output_share_store(pointer, cShareIndex, cPolyId, curvePointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey output share store")
+        }
+        return ShareStore(pointer: result!)
+    }
+
+    public func input_share_store( shareStore: ShareStore, curve_n: String ) throws {
+        var errorCode: Int32  = -1
+        // let curvePointer = UnsafeMutablePointer<Int8>(mutating: (curve_n as NSString).utf8String)
+        // let cShare = UnsafeMutablePointer<Int8>(mutating: (share as NSString).utf8String)
+
+        withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_input_share_store(pointer, shareStore.pointer, error)
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey input share store")
+        }
+    }
+
+    public func get_shares_indexes() throws -> [String] {
+        var errorCode: Int32  = -1
+        let result = withUnsafeMutablePointer(to: &errorCode, {error in
+            threshold_key_get_shares_indexes(pointer, error )
+        })
+        guard errorCode == 0 else {
+            throw RuntimeError("Error in ThresholdKey generate_new_share")
+        }
+
+        let string = String.init(cString: result!)
+        let indexes = try! JSONSerialization.jsonObject(with: string.data(using: String.Encoding.utf8)!, options: .allowFragments) as! [String]
+        string_destroy(result)
+        return indexes
     }
 
     deinit {
