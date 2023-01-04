@@ -203,7 +203,6 @@
 			isa = PBXGroup;
 			children = (
 				DD5FE15E292DE94C00DC016F /* native-lib */,
-				B3878A23292F456300902894 /* Version.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
@@ -264,6 +263,7 @@
 		DD9A164F29641D3A002FA795 /* ThresholdKey */ = {
 			isa = PBXGroup;
 			children = (
+				B3878A23292F456300902894 /* Version.swift */,
 				DD9A165129641D86002FA795 /* Common */,
 				DD9A165029641D6E002FA795 /* Modules */,
 				B3F017582908600F005F577B /* ServiceProvider.swift */,
