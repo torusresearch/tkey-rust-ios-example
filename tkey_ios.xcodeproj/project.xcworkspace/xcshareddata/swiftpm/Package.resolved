@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "libtkey-pkg",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/torusresearch/libtkey-pkg/",
+      "state" : {
+        "branch" : "master",
+        "revision" : "e3c25e32903379050ece0708594ac1be4ef2bcf3"
+      }
+    }
+  ],
+  "version" : 2
+}
