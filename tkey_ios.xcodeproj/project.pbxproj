@@ -19,6 +19,7 @@
 		B30B6B3D28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
 		B37E79AF296EA60700C5F3F4 /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B37E79AE296EA60700C5F3F4 /* ThresholdKey */; };
 		B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B3A1F29C29667EC80066658F /* ThresholdKey */; };
+		DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -367,6 +368,7 @@
 			files = (
 				B30B6B3728BCC8AC00812C1E /* Tests_macOSLaunchTests.swift in Sources */,
 				B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */,
+				DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
