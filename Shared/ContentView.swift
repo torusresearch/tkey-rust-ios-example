@@ -43,11 +43,13 @@ struct ContentView: View {
 }
 
 struct ThirdTabView: View {
+    @State private var isLoading = true
     @State private var showAlert = false
     @State private var alertContent = "Sample"
     @State private var totalShares = 0
     @State private var threshold = 0
     @State private var finalKey = ""
+    @State private var shareIndexCreated = ""
 
     func logger(data: String) {
         logs.append(data + "\n")
@@ -67,8 +69,8 @@ struct ThirdTabView: View {
                         .font(.subheadline)
                     Text("threshold: \(threshold)")
                         .font(.subheadline)
-
                 }
+                Spacer()
             }
             .padding()
             List {
@@ -77,6 +79,7 @@ struct ThirdTabView: View {
                         Text("Create new tkey")
                         Spacer()
                         Button(action: {
+                            isLoading = true
                             let key_details = try! threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
                             let key = try! threshold_key.reconstruct()
                             // print(key_details.pub_key, key_details.required_shares)
@@ -86,9 +89,10 @@ struct ThirdTabView: View {
 
                             alertContent = "\(totalShares) shares created"
                             logger(data: alertContent.description)
+                            isLoading = false
                             showAlert = true
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
@@ -103,7 +107,7 @@ struct ThirdTabView: View {
                             logger(data: alertContent.description)
                             showAlert = true
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
@@ -120,13 +124,71 @@ struct ThirdTabView: View {
                             logger(data: alertContent.description)
                             showAlert = true
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+
+                    HStack {
+                        Text("Get key details")
+                        Spacer()
+                        Button(action: {
+                            let key_details = try! threshold_key.get_key_details()
+
+                            totalShares = Int(key_details.total_shares)
+                            threshold = Int(key_details.threshold)
+                            alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key"
+                            logger(data: alertContent.description)
+                            showAlert = true
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Generate new share")
+                        Spacer()
+                        Button(action: {
+                            let shares = try! threshold_key.generate_new_share()
+                            let index = shares.hex
+
+                            let key_details = try! threshold_key.get_key_details()
+                            totalShares = Int(key_details.total_shares)
+                            threshold = Int(key_details.threshold)
+                            shareIndexCreated = index
+                            alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
+                            logger(data: alertContent.description)
+                            showAlert = true
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Delete share")
+                        Spacer()
+                        Button(action: {
+                            try! threshold_key.delete_share(share_index: shareIndexCreated )
+                            let key_details = try! threshold_key.get_key_details()
+                            totalShares = Int(key_details.total_shares)
+                            threshold = Int(key_details.threshold)
+                            alertContent = "You have \(totalShares) shares. Share index, \(shareIndexCreated) was deleted"
+                            logger(data: alertContent.description)
+                            showAlert = true
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
                 }
-                
+
                 // MARK: Security questions or password
                 Section(header: Text("Security Question")) {
                     HStack {
@@ -153,7 +215,7 @@ struct ThirdTabView: View {
                                 showAlert = true
                             }
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
@@ -174,7 +236,7 @@ struct ThirdTabView: View {
                             logger(data: alertContent.description)
                             showAlert = true
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
@@ -193,7 +255,7 @@ struct ThirdTabView: View {
                             logger(data: alertContent.description)
                             showAlert = true
                         }) {
-                            Text("Click")
+                            Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
@@ -217,18 +279,13 @@ struct SecondTabView: View {
     }
 }
 
-struct FirstTabView: View {
+struct LoaderView: View {
+    var tintColor: Color = .blue
+    var scaleSize: CGFloat = 1.0
+
     var body: some View {
-        List {
-            ForEach(1...10, id: \.self) { row in
-                HStack {
-                    Text("Row \(row)")
-                    Spacer()
-                    Button(action: {}) {
-                        Text("Button")
-                    }
-                }
-            }
-        }
+        ProgressView()
+            .scaleEffect(scaleSize, anchor: .center)
+            .progressViewStyle(CircularProgressViewStyle(tint: tintColor))
     }
 }
