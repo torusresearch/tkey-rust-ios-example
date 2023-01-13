@@ -131,24 +131,6 @@ struct ThirdTabView: View {
                     }
 
                     HStack {
-                        Text("Get key details")
-                        Spacer()
-                        Button(action: {
-                            let key_details = try! threshold_key.get_key_details()
-
-                            totalShares = Int(key_details.total_shares)
-                            threshold = Int(key_details.threshold)
-                            alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key"
-                            logger(data: alertContent.description)
-                            showAlert = true
-                        }) {
-                            Text("")
-                        } .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }
-
-                    HStack {
                         Text("Generate new share")
                         Spacer()
                         Button(action: {
