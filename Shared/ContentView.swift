@@ -50,6 +50,7 @@ struct ThirdTabView: View {
     @State private var threshold = 0
     @State private var finalKey = ""
     @State private var shareIndexCreated = ""
+    @State private var phrase = ""
 
     func logger(data: String) {
         logs.append(data + "\n")
@@ -242,7 +243,86 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+                }
+                Section(header: Text("seed phrase")) {
+                    HStack {
+                        Text("Set seed pharse")
+                        Spacer()
+                        Button(action: {
+                            let seedPhraseToSet = "seed sock milk update focus rotate barely fade car face mechanic mercy"
 
+                            try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0)
+                            
+                            phrase = seedPhraseToSet
+                            alertContent = "set seed phrase complete"
+                            
+                            let _ = print("hi")
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Change seed pharse")
+                        Spacer()
+                        Button(action: {
+                            let seedPhraseToChange = "object brass success calm lizard science syrup planet exercise parade honey impulse"
+                                
+                            try! SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
+                            phrase = seedPhraseToChange
+                            alertContent = "change seed phrase complete"
+
+
+                            
+                            let _ = print("hi")
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Get seed pharse")
+                        Spacer()
+                        Button(action: {
+                            
+                            let seedResult = try!
+                                SeedPhraseModule
+                                .get_seed_phrases(threshold_key: threshold_key)
+                            // TODO : get string result from seedResult
+                            alertContent = "seed phrase is `\(phrase)`"
+                            
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Delete Seed phrase")
+                        Spacer()
+                        Button(action: {
+                            try!
+                            SeedPhraseModule
+                                .delete_seedphrase(threshold_key: threshold_key, phrase: phrase)
+                            
+                            phrase = ""
+                            alertContent = "delete seed phrase complete"
+
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
                 }
             }
         }
