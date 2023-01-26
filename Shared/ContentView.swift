@@ -255,8 +255,6 @@ struct ThirdTabView: View {
                             
                             phrase = seedPhraseToSet
                             alertContent = "set seed phrase complete"
-                            
-                            let _ = print("hi")
                             showAlert = true
                         }) {
                             Text("")
@@ -274,10 +272,6 @@ struct ThirdTabView: View {
                             try! SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
                             phrase = seedPhraseToChange
                             alertContent = "change seed phrase complete"
-
-
-                            
-                            let _ = print("hi")
                             showAlert = true
                         }) {
                             Text("")
@@ -295,6 +289,7 @@ struct ThirdTabView: View {
                                 SeedPhraseModule
                                 .get_seed_phrases(threshold_key: threshold_key)
                             // TODO : get string result from seedResult
+                            print("result",seedResult)
                             alertContent = "seed phrase is `\(phrase)`"
                             
                             showAlert = true
