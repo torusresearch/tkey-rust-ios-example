@@ -1,16 +1,14 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "tkey_pkg",
-        "repositoryURL": "https://github.com/torusresearch/libtkey-pkg/",
-        "state": {
-          "branch": "master",
-          "revision": "04850a15c9b4dbce429bf3f746f4a8f47a5a2f21",
-          "version": null
-        }
+  "pins" : [
+    {
+      "identity" : "libtkey-pkg",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/torusresearch/libtkey-pkg/",
+      "state" : {
+        "branch" : "master",
+        "revision" : "5c0aa8d116c0967e3121dae012f45d03f0ce311c"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 2
 }

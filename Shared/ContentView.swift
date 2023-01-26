@@ -50,6 +50,7 @@ struct ThirdTabView: View {
     @State private var threshold = 0
     @State private var finalKey = ""
     @State private var shareIndexCreated = ""
+    @State private var phrase = ""
 
     func logger(data: String) {
         logs.append(data + "\n")
@@ -242,7 +243,158 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+                }
+                Section(header: Text("seed phrase")) {
+                    HStack {
+                        Text("Set seed pharse")
+                        Spacer()
+                        Button(action: {
+                            let seedPhraseToSet = "seed sock milk update focus rotate barely fade car face mechanic mercy"
 
+                            try! SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0)
+
+                            phrase = seedPhraseToSet
+                            alertContent = "set seed phrase complete"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Change seed pharse")
+                        Spacer()
+                        Button(action: {
+                            let seedPhraseToChange = "object brass success calm lizard science syrup planet exercise parade honey impulse"
+
+                            try! SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
+                            phrase = seedPhraseToChange
+                            alertContent = "change seed phrase complete"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Get seed pharse")
+                        Spacer()
+                        Button(action: {
+
+                            let seedResult = try!
+                                SeedPhraseModule
+                                .get_seed_phrases(threshold_key: threshold_key)
+                            // TODO : get string result from seedResult
+                            print("result", seedResult)
+                            alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
+
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Delete Seed phrase")
+                        Spacer()
+                        Button(action: {
+                            try!
+                            SeedPhraseModule
+                                .delete_seedphrase(threshold_key: threshold_key, phrase: phrase)
+
+                            phrase = ""
+                            alertContent = "delete seed phrase complete"
+
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                }
+                Section(header: Text("Share Serialization")) {
+                    HStack {
+                        Text("Export share")
+                        Spacer()
+                        Button(action: {
+                            let shareStore = try! threshold_key.generate_new_share()
+                            let index = shareStore.hex
+
+                            let key_details = try! threshold_key.get_key_details()
+                            totalShares = Int(key_details.total_shares)
+                            threshold = Int(key_details.threshold)
+                            shareIndexCreated = index
+
+                            let shareOut = try! threshold_key.output_share(shareIndex: index, shareType: nil)
+
+                            let result = try! ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                            alertContent = "serialize result is \(result)"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                }
+
+                Section(header: Text("Private Key")) {
+                    HStack {
+                        Text("Set Private Key")
+                        Spacer()
+                        Button(action: {
+                            let key_module = try! PrivateKey.generate()
+
+                            let result = try! PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
+                            if result {
+                                alertContent = "setting private key completed"
+                            } else {
+                                alertContent = "Setting private key failed"
+                            }
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Get Private Key")
+                        Spacer()
+                        Button(action: {
+                            let result = try! PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
+
+                            alertContent = "Get private key result is \(result)"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+
+                    HStack {
+                        Text("Get Accounts")
+                        Spacer()
+                        Button(action: {
+                            let result = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
+
+                            alertContent = "Get accounts result is \(result)"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
                 }
             }
         }
