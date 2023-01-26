@@ -320,7 +320,6 @@ struct ThirdTabView: View {
                     }
                 }
                 Section(header: Text("Share Serialization")) {
-                    
                     HStack {
                         Text("Share Serialization")
                         Spacer()
@@ -337,6 +336,58 @@ struct ThirdTabView: View {
                             
                             let result = try! ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
                             alertContent = "serialize result is \(result)"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                }
+                
+                Section(header: Text("Private Key")) {
+                    HStack {
+                        Text("Set Private Key")
+                        Spacer()
+                        Button(action: {
+                            let key_module = try! PrivateKey.generate()
+
+                            let result = try! PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
+                            if result {
+                                alertContent = "setting private key completed"
+                            } else {
+                                alertContent = "Setting private key failed"
+                            }
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Get Private Key")
+                        Spacer()
+                        Button(action: {
+                            let result = try! PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
+                            
+                            alertContent = "Get private key result is \(result)"
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Get Accounts")
+                        Spacer()
+                        Button(action: {
+                            let result = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
+                            
+                            alertContent = "Get accounts result is \(result)"
                             showAlert = true
                         }) {
                             Text("")
