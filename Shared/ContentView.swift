@@ -15,7 +15,7 @@ let threshold_key = try! ThresholdKey(
     storage_layer: storage_layer,
     service_provider: service_provider,
     enable_logging: true,
-    manual_sync: false)
+    manual_sync: true)
 
 var logs: [String] = []
 
