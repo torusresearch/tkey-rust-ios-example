@@ -15,7 +15,7 @@ let threshold_key = try! ThresholdKey(
     storage_layer: storage_layer,
     service_provider: service_provider,
     enable_logging: true,
-    manual_sync: true)
+    manual_sync: false)
 
 var logs: [String] = []
 
@@ -290,7 +290,7 @@ struct ThirdTabView: View {
                                 .get_seed_phrases(threshold_key: threshold_key)
                             // TODO : get string result from seedResult
                             print("result",seedResult)
-                            alertContent = "seed phrase is `\(phrase)`"
+                            alertContent = "seed phrase is `\(seedResult)`"
                             
                             showAlert = true
                         }) {
@@ -311,6 +311,32 @@ struct ThirdTabView: View {
                             phrase = ""
                             alertContent = "delete seed phrase complete"
 
+                            showAlert = true
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                }
+                Section(header: Text("Share Serialization")) {
+                    
+                    HStack {
+                        Text("Share Serialization")
+                        Spacer()
+                        Button(action: {
+                            let shareStore = try! threshold_key.generate_new_share()
+                            let index = shareStore.hex
+                            
+                            let key_details = try! threshold_key.get_key_details()
+                            totalShares = Int(key_details.total_shares)
+                            threshold = Int(key_details.threshold)
+                            shareIndexCreated = index
+                            
+                            let shareOut = try! threshold_key.output_share(shareIndex: index, shareType: nil)
+                            
+                            let result = try! ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                            alertContent = "serialize result is \(result)"
                             showAlert = true
                         }) {
                             Text("")
