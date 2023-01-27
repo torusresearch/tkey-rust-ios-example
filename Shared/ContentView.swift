@@ -102,8 +102,8 @@ struct ThirdTabView: View {
                         Text("Create new tkey async")
                         Spacer()
                         Button(action: {
-                            self.isLoading = true
                             DispatchQueue.global().async {
+                                self.isLoading = true
                                 threshold_key.initializeAsync(never_initialize_new_key: false, include_local_metadata_transitions: false) { result in
                                     switch result {
                                     case .success(let keyDetails):
@@ -181,6 +181,39 @@ struct ThirdTabView: View {
                             alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
                             logger(data: alertContent.description)
                             showAlert = true
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Generate new share async")
+                        Spacer()
+                        Button(action: {
+                            DispatchQueue.global().async {
+                                threshold_key.generateNewShareAsync(){ result in
+                                    switch result {
+                                        case .success(let share):
+                                            let index = share.hex
+                                            threshold_key.getKeyDetailsAsync(){ result in
+                                                switch result {
+                                                case .success(let key_details):
+                                                    totalShares = Int(key_details.total_shares)
+                                                    threshold = Int(key_details.threshold)
+                                                    shareIndexCreated = index
+                                                    alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
+                                                    logger(data: alertContent.description)
+                                                    self.showAlert = true
+                                                case .failure(let err):
+                                                    print(err)
+                                                }
+                                            }
+                                        case .failure(let err):
+                                    }
+                                }
+                            }
                         }) {
                             Text("")
                         } .alert(isPresented: $showAlert) {
