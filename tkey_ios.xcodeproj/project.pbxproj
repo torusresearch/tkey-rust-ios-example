@@ -839,7 +839,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
 			requirement = {
-				branch = master;
+				branch = feat/async;
 				kind = branch;
 			};
 		};

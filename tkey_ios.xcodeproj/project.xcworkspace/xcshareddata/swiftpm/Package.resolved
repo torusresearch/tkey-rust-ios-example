@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
-        "branch" : "master",
-        "revision" : "5c0aa8d116c0967e3121dae012f45d03f0ce311c"
+        "branch" : "feat/async",
+        "revision" : "ac7308c1f8b23d89c63e01cf8b02774de34b72f4"
       }
     }
   ],

@@ -15,7 +15,7 @@ let threshold_key = try! ThresholdKey(
     storage_layer: storage_layer,
     service_provider: service_provider,
     enable_logging: true,
-    manual_sync: true)
+    manual_sync: false)
 
 var logs: [String] = []
 
@@ -96,6 +96,42 @@ struct ThirdTabView: View {
                             Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    HStack {
+                        Text("Create new tkey async")
+                        Spacer()
+                        Button(action: {
+                            self.isLoading = true
+                            DispatchQueue.global().async {
+                                threshold_key.initializeAsync(never_initialize_new_key: false, include_local_metadata_transitions: false) { result in
+                                    switch result {
+                                    case .success(let keyDetails):
+                                        self.totalShares = Int(keyDetails.total_shares)
+                                        self.threshold = Int(keyDetails.threshold)
+                                        threshold_key.reconstructAsync { result in
+                                            switch result {
+                                            case .success(let keyReconstructionDetails):
+                                                self.finalKey = keyReconstructionDetails.key
+                                                self.alertContent = "\(self.totalShares) shares created"
+                                                self.logger(data: self.alertContent.description)
+                                                self.isLoading = false
+                                                DispatchQueue.main.async {
+                                                    self.showAlert = true
+                                                }
+                                            case .failure(let error):
+                                                print(error)
+                                            }
+                                        }
+                                    case .failure(let error):
+                                        print(error)
+                                    }
+                                }
+                            }
+                        }) {
+                            Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Dismiss")))
                         }
                     }
                     HStack {
@@ -196,6 +232,44 @@ struct ThirdTabView: View {
                                 alertContent = "Password share already exists"
                                 logger(data: alertContent.description)
                                 showAlert = true
+                            }
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Add password async")
+                        Spacer()
+                        Button(action: {
+                            let question = "what's your password?"
+                            let answer = "blublu"
+
+                            DispatchQueue.global().async {
+                                SecurityQuestionModule.generateNewShareAsync(threshold_key: threshold_key, questions: question, answer: answer) { result in
+                                    switch result {
+                                    case .success(let share):
+                                        print(share.share_store, share.hex)
+                                        threshold_key.getKeyDetailsAsync() { result in
+                                            switch result {
+                                            case .success(let KeyDetails):
+                                                self.totalShares = Int(KeyDetails.total_shares)
+                                                self.threshold = Int(KeyDetails.threshold)
+
+                                                alertContent = "New password share created with password: \(answer)"
+                                                DispatchQueue.main.async {
+                                                    self.showAlert = true
+                                                }
+                                            case .failure(let error):
+                                                print(error)
+                                            }
+                                        }
+                                    case .failure(let error):
+                                        print(error)
+                                    }
+                                }
                             }
                         }) {
                             Text("")
