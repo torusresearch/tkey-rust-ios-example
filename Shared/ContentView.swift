@@ -51,6 +51,8 @@ struct ThirdTabView: View {
     @State private var finalKey = ""
     @State private var shareIndexCreated = ""
     @State private var phrase = ""
+    let semaphore = DispatchSemaphore(value: 1)
+
 
     func logger(data: String) {
         logs.append(data + "\n")
@@ -192,26 +194,25 @@ struct ThirdTabView: View {
                         Text("Generate new share async")
                         Spacer()
                         Button(action: {
-                            DispatchQueue.global().async {
-                                threshold_key.generateNewShareAsync(){ result in
-                                    switch result {
-                                        case .success(let share):
-                                            let index = share.hex
-                                            threshold_key.getKeyDetailsAsync(){ result in
-                                                switch result {
+                            threshold_key.generateNewShareAsync(){ result in
+                                switch result {
+                                    case .success(let share):
+                                        let index = share.hex
+                                        threshold_key.getKeyDetailsAsync(){ result in
+                                            switch result {
                                                 case .success(let key_details):
                                                     totalShares = Int(key_details.total_shares)
                                                     threshold = Int(key_details.threshold)
                                                     shareIndexCreated = index
                                                     alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
                                                     logger(data: alertContent.description)
-                                                    self.showAlert = true
+                                                    showAlert = true
                                                 case .failure(let err):
                                                     print(err)
-                                                }
                                             }
-                                        case .failure(let err):
-                                    }
+                                        }
+                                    case .failure(let err):
+                                        print(err)
                                 }
                             }
                         }) {
@@ -219,6 +220,7 @@ struct ThirdTabView: View {
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
+
                     }
 
                     HStack {
@@ -280,7 +282,7 @@ struct ThirdTabView: View {
                             let question = "what's your password?"
                             let answer = "blublu"
 
-                            DispatchQueue.global().async {
+                            DispatchQueue.main.async {
                                 SecurityQuestionModule.generateNewShareAsync(threshold_key: threshold_key, questions: question, answer: answer) { result in
                                     switch result {
                                     case .success(let share):
@@ -296,10 +298,15 @@ struct ThirdTabView: View {
                                                     self.showAlert = true
                                                 }
                                             case .failure(let error):
+                                                alertContent = "get key details failed"
+                                                showAlert = true
                                                 print(error)
                                             }
                                         }
                                     case .failure(let error):
+                                        alertContent = "Password share already exists"
+                                        logger(data: alertContent.description)
+                                        showAlert = true
                                         print(error)
                                     }
                                 }
