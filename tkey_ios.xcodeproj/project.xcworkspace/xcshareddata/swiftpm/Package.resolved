@@ -1,12 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "libtkey-pkg",
+      "identity" : "tkey-rust-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/torusresearch/libtkey-pkg/",
+      "location" : "https://github.com/torusresearch/tkey-rust-ios",
       "state" : {
         "branch" : "feat/async",
-        "revision" : "8b62b73cbbd172b3d5059565b77c41d39880e435"
+        "revision" : "d099a25ec2a3fa5db516e77acfa17ac6ce535e92"
       }
     }
   ],

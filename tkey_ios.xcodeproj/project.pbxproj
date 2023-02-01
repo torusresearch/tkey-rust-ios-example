@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14CC981E29891C340047113D /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = 14CC981D29891C340047113D /* ThresholdKey */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
 		B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */; };
@@ -17,8 +18,6 @@
 		B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 		B30B6B3C28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
 		B30B6B3D28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
-		B37E79AF296EA60700C5F3F4 /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B37E79AE296EA60700C5F3F4 /* ThresholdKey */; };
-		B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B3A1F29C29667EC80066658F /* ThresholdKey */; };
 		DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -53,6 +52,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		14CC981A29891B660047113D /* tkey-rust-ios */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "tkey-rust-ios"; path = "../tkey-rust-ios"; sourceTree = "<group>"; };
+		14CC981B29891BBF0047113D /* tkey-rust-ios */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "tkey-rust-ios"; path = "../tkey-rust-ios"; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -72,7 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */,
+				14CC981E29891C340047113D /* ThresholdKey in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,7 +88,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B37E79AF296EA60700C5F3F4 /* ThresholdKey in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,9 +101,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		14CC981929891B660047113D /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				14CC981A29891B660047113D /* tkey-rust-ios */,
+				14CC981B29891BBF0047113D /* tkey-rust-ios */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
 		B30B6B0A28BCC8A900812C1E = {
 			isa = PBXGroup;
 			children = (
+				14CC981929891B660047113D /* Packages */,
 				B30B6B0F28BCC8A900812C1E /* Shared */,
 				B30B6B1E28BCC8AC00812C1E /* macOS */,
 				B30B6B2728BCC8AC00812C1E /* Tests iOS */,
@@ -185,7 +195,7 @@
 			);
 			name = "tkey_ios (iOS)";
 			packageProductDependencies = (
-				B3A1F29C29667EC80066658F /* ThresholdKey */,
+				14CC981D29891C340047113D /* ThresholdKey */,
 			);
 			productName = "tkey_ios (iOS)";
 			productReference = B30B6B1728BCC8AC00812C1E /* tkey_ios.app */;
@@ -223,7 +233,6 @@
 			);
 			name = "Tests iOS";
 			packageProductDependencies = (
-				B37E79AE296EA60700C5F3F4 /* ThresholdKey */,
 			);
 			productName = "Tests iOS";
 			productReference = B30B6B2428BCC8AC00812C1E /* Tests iOS.xctest */;
@@ -287,7 +296,7 @@
 			);
 			mainGroup = B30B6B0A28BCC8A900812C1E;
 			packageReferences = (
-				B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */,
+				14CC981C29891C340047113D /* XCRemoteSwiftPackageReference "tkey-rust-ios" */,
 			);
 			productRefGroup = B30B6B1828BCC8AC00812C1E /* Products */;
 			projectDirPath = "";
@@ -835,9 +844,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */ = {
+		14CC981C29891C340047113D /* XCRemoteSwiftPackageReference "tkey-rust-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
+			repositoryURL = "https://github.com/torusresearch/tkey-rust-ios";
 			requirement = {
 				branch = feat/async;
 				kind = branch;
@@ -846,14 +855,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B37E79AE296EA60700C5F3F4 /* ThresholdKey */ = {
+		14CC981D29891C340047113D /* ThresholdKey */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */;
-			productName = ThresholdKey;
-		};
-		B3A1F29C29667EC80066658F /* ThresholdKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */;
+			package = 14CC981C29891C340047113D /* XCRemoteSwiftPackageReference "tkey-rust-ios" */;
 			productName = ThresholdKey;
 		};
 /* End XCSwiftPackageProductDependency section */
