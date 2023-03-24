@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
+		14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
+		14446F3929CD644100B7EFE2 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* ViewModel.swift */; };
+		14446F3A29CD644100B7EFE2 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* ViewModel.swift */; };
 		146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 146B0D6829CC01F7000473A8 /* CustomAuth */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
@@ -54,6 +58,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		14446F3529CD642100B7EFE2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		14446F3829CD644100B7EFE2 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -121,6 +127,8 @@
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
+				14446F3529CD642100B7EFE2 /* LoginView.swift */,
+				14446F3829CD644100B7EFE2 /* ViewModel.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -343,7 +351,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				14446F3929CD644100B7EFE2 /* ViewModel.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -352,7 +362,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				14446F3A29CD644100B7EFE2 /* ViewModel.swift in Sources */,
 				B30B6B3928BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

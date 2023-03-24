@@ -15,31 +15,71 @@ var logs: [String] = []
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(vm: ViewModel())
     }
 }
 
 struct ContentView: View {
+    @StateObject var vm: ViewModel
 
 //    var threshold_key : String;
 //    var threshold_key: ThresholdKey;
     var body: some View {
         TabView {
-            ThirdTabView()
-                .tabItem {
-                    Image(systemName: "person")
-                    Text("Profile")
+            if vm.isLoading {
+                ProgressView()
+            } else {
+                if vm.loggedIn {
+                    ThirdTabView(threshold_key: vm.threshold_key)
+                        .tabItem {
+                            Image(systemName: "person")
+                            Text("Profile")
+                        }
+                    
+                    SecondTabView()
+                        .tabItem {
+                            Image(systemName: "list.bullet")
+                            Text("Logs")
+                        }
+                } else {
+                    LoginView(vm: vm)
                 }
-            
-            SecondTabView()
-                .tabItem {
-                    Image(systemName: "list.bullet")
-                    Text("Logs")
-                }
+            }
         }
-
+        .onAppear {
+            Task {
+                await vm.setup()
+            }
+        }
     }
 }
+
+//struct ContentView: View {
+//    @StateObject var vm: ViewModel
+//
+//    var body: some View {
+//        NavigationView {
+//            VStack {
+//                if vm.isLoading {
+//                    ProgressView()
+//                } else {
+//                    if vm.loggedIn,let user = vm.user, let web3rpc = Web3RPC(user: user) {
+//                        UserDetailView(user: vm.user, loggedIn: $vm.loggedIn, web3RPC: web3rpc)
+//                    } else {
+//                        LoginView(vm: vm)
+//                    }
+//                }
+//            }
+//            .navigationTitle(vm.navigationTitle)
+//            Spacer()
+//        }
+//        .onAppear {
+//            Task {
+//                await vm.setup()
+//            }
+//        }
+//    }
+//}
 
 struct ThirdTabView: View {
     @State private var isLoading = true
@@ -52,7 +92,8 @@ struct ThirdTabView: View {
     @State private var phrase = ""
     @State private var service_provider: ServiceProvider?
 
-    @State private var threshold_key: ThresholdKey!
+    @State var threshold_key: ThresholdKey!
+    
     func logger(data: String) {
         logs.append(data + "\n")
     }
