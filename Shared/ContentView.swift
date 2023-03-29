@@ -21,6 +21,7 @@ struct ContentView_Previews: PreviewProvider {
 
 struct ContentView: View {
     @StateObject var vm: ViewModel
+    @State var showAlert = false
 
 //    var threshold_key : String;
 //    var threshold_key: ThresholdKey;
@@ -30,10 +31,13 @@ struct ContentView: View {
                 ProgressView()
             } else {
                 if vm.loggedIn {
+                    
                     ThirdTabView(threshold_key: vm.threshold_key)
                         .tabItem {
                             Image(systemName: "person")
                             Text("Profile")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text("Setup Security question first. account might lost if security question not created"), dismissButton: .default(Text("OK")))
                         }
                     
                     SecondTabView()
@@ -41,45 +45,22 @@ struct ContentView: View {
                             Image(systemName: "list.bullet")
                             Text("Logs")
                         }
+
                 } else {
                     LoginView(vm: vm)
                 }
             }
         }
+
         .onAppear {
             Task {
                 await vm.setup()
+                showAlert = true
             }
         }
     }
 }
 
-//struct ContentView: View {
-//    @StateObject var vm: ViewModel
-//
-//    var body: some View {
-//        NavigationView {
-//            VStack {
-//                if vm.isLoading {
-//                    ProgressView()
-//                } else {
-//                    if vm.loggedIn,let user = vm.user, let web3rpc = Web3RPC(user: user) {
-//                        UserDetailView(user: vm.user, loggedIn: $vm.loggedIn, web3RPC: web3rpc)
-//                    } else {
-//                        LoginView(vm: vm)
-//                    }
-//                }
-//            }
-//            .navigationTitle(vm.navigationTitle)
-//            Spacer()
-//        }
-//        .onAppear {
-//            Task {
-//                await vm.setup()
-//            }
-//        }
-//    }
-//}
 
 struct ThirdTabView: View {
     @State private var isLoading = true
@@ -117,6 +98,7 @@ struct ThirdTabView: View {
             }
             .padding()
             List {
+
                 Section(header: Text("single Login")) {
                     
                     HStack {
@@ -168,6 +150,7 @@ struct ThirdTabView: View {
                             Task {
                                 isLoading = true
                                 let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
+                                try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
 
@@ -191,6 +174,24 @@ struct ThirdTabView: View {
                             let key = try! await threshold_key.reconstruct()
                             finalKey = key.key
                             alertContent = "\(key.key) is the final private key"
+                            logger(data: alertContent.description)
+                            showAlert = true
+
+                            }
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
+                    HStack {
+                        Text("sync share")
+                        Spacer()
+                        Button(action: {
+                            Task {
+                            try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+                            alertContent = "sync share complete"
                             logger(data: alertContent.description)
                             showAlert = true
 

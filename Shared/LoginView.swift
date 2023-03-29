@@ -9,7 +9,7 @@ struct LoginView: View {
                     vm.loginWithAuth0()
                 },
                 label: {
-                    Text("Sign In With Auth0")
+                    Text("Sign In With Google")
                 }
             )
 
