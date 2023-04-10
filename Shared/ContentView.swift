@@ -185,23 +185,6 @@ struct ThirdTabView: View {
                         }
                     }
                     
-                    HStack {
-                        Text("sync share")
-                        Spacer()
-                        Button(action: {
-                            Task {
-                            try! await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
-                            alertContent = "sync share complete"
-                            logger(data: alertContent.description)
-                            showAlert = true
-
-                            }
-                        }) {
-                            Text("")
-                        } .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }
 
                     HStack {
                         Text("Get key details")
