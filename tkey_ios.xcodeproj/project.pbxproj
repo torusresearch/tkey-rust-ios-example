@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
+		14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
+		14446F3929CD644100B7EFE2 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* ViewModel.swift */; };
+		14446F3A29CD644100B7EFE2 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* ViewModel.swift */; };
+		146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 146B0D6829CC01F7000473A8 /* CustomAuth */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
 		B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */; };
@@ -53,6 +58,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		14446F3529CD642100B7EFE2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		14446F3829CD644100B7EFE2 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -73,6 +80,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */,
+				146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +127,8 @@
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
+				14446F3529CD642100B7EFE2 /* LoginView.swift */,
+				14446F3829CD644100B7EFE2 /* ViewModel.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -186,6 +196,7 @@
 			name = "tkey_ios (iOS)";
 			packageProductDependencies = (
 				B3A1F29C29667EC80066658F /* ThresholdKey */,
+				146B0D6829CC01F7000473A8 /* CustomAuth */,
 			);
 			productName = "tkey_ios (iOS)";
 			productReference = B30B6B1728BCC8AC00812C1E /* tkey_ios.app */;
@@ -288,6 +299,7 @@
 			mainGroup = B30B6B0A28BCC8A900812C1E;
 			packageReferences = (
 				B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */,
+				146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */,
 			);
 			productRefGroup = B30B6B1828BCC8AC00812C1E /* Products */;
 			projectDirPath = "";
@@ -339,7 +351,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				14446F3929CD644100B7EFE2 /* ViewModel.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -348,7 +362,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				14446F3A29CD644100B7EFE2 /* ViewModel.swift in Sources */,
 				B30B6B3928BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -835,6 +851,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
@@ -846,6 +870,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		146B0D6829CC01F7000473A8 /* CustomAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */;
+			productName = CustomAuth;
+		};
 		B37E79AE296EA60700C5F3F4 /* ThresholdKey */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */;

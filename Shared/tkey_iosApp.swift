@@ -11,7 +11,7 @@ import SwiftUI
 struct tkey_iosApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(vm: ViewModel())
         }
     }
 }
