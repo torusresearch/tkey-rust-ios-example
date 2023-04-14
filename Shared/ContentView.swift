@@ -31,7 +31,7 @@ struct ContentView: View {
                 ProgressView()
             } else {
                 if vm.loggedIn {
-                    
+
                     ThirdTabView(threshold_key: vm.threshold_key)
                         .tabItem {
                             Image(systemName: "person")
@@ -39,7 +39,7 @@ struct ContentView: View {
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text("Setup Security question first. account might lost if security question not created"), dismissButton: .default(Text("OK")))
                         }
-                    
+
                     SecondTabView()
                         .tabItem {
                             Image(systemName: "list.bullet")
@@ -61,7 +61,6 @@ struct ContentView: View {
     }
 }
 
-
 struct ThirdTabView: View {
     @State private var isLoading = true
     @State private var showAlert = false
@@ -74,7 +73,7 @@ struct ThirdTabView: View {
     @State private var service_provider: ServiceProvider?
 
     @State var threshold_key: ThresholdKey!
-    
+
     func logger(data: String) {
         logs.append(data + "\n")
     }
@@ -99,49 +98,6 @@ struct ThirdTabView: View {
             .padding()
             List {
 
-                Section(header: Text("single Login")) {
-                    
-                    HStack {
-                        Button(action: {
-                            Task{
-                                let sub = SubVerifierDetails(loginType: .web,
-                                                             loginProvider: .google,
-                                                             clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-                                                             verifier: "google-lrc",
-                                                             redirectURL: "tdsdk://tdsdk/oauthCallback",
-                                                             browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
-
-                                let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET)
-                                let data = try! await tdsdk.triggerLogin()
-
-                                print(data)
-
-                                let postboxkey = data["privateKey"] as! String
-                                service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                threshold_key = try! ThresholdKey(
-                                    storage_layer: storage_layer,
-                                    service_provider: service_provider,
-                                    enable_logging: true,
-                                    manual_sync: true)
-   
-                                var username = ""
-                                
-                                
-                                if let userInfo = data["userInfo"] as? [String: Any], let name = userInfo["name"] as? String {
-                                    username = name
-                                }
-                                
-                                alertContent = "welcome. \(username) "
-                                showAlert = true
-
-                            }
-                        }, label: {
-                            Text("Google Login")
-                        }).alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }
-                }
                 Section(header: Text("Basic functionality")) {
                     HStack {
                         Text("Create new tkey")
@@ -150,7 +106,7 @@ struct ThirdTabView: View {
                             Task {
                                 isLoading = true
                                 let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
-                                try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+                                try! await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
 
@@ -174,24 +130,6 @@ struct ThirdTabView: View {
                             let key = try! await threshold_key.reconstruct()
                             finalKey = key.key
                             alertContent = "\(key.key) is the final private key"
-                            logger(data: alertContent.description)
-                            showAlert = true
-
-                            }
-                        }) {
-                            Text("")
-                        } .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }
-                    
-                    HStack {
-                        Text("sync share")
-                        Spacer()
-                        Button(action: {
-                            Task {
-                            try! KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
-                            alertContent = "sync share complete"
                             logger(data: alertContent.description)
                             showAlert = true
 
@@ -233,7 +171,7 @@ struct ThirdTabView: View {
                                 let shares = try! await threshold_key.generate_new_share()
                                 let index = shares.hex
 
-                                let key_details = try! await threshold_key.get_key_details()
+                                let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
                                 shareIndexCreated = index
@@ -254,7 +192,7 @@ struct ThirdTabView: View {
                         Button(action: {
                             Task {
                                 try! await threshold_key.delete_share(share_index: shareIndexCreated )
-                                let key_details = try! await threshold_key.get_key_details()
+                                let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
                                 alertContent = "You have \(totalShares) shares. Share index, \(shareIndexCreated) was deleted"
@@ -284,7 +222,7 @@ struct ThirdTabView: View {
                                     let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
                                     print(share.share_store, share.hex)
 
-                                    let key_details = try! await threshold_key.get_key_details()
+                                    let key_details = try! threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
 
@@ -311,8 +249,8 @@ struct ThirdTabView: View {
                             Task {
                                 let question = "what's your password?"
                                 let answer = "blublublu"
-                                try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
-                                let key_details = try! await threshold_key.get_key_details()
+                                _ = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
 
@@ -333,8 +271,8 @@ struct ThirdTabView: View {
                         Button(action: {
                             Task {
 
-                                let data = try! await SecurityQuestionModule.get_answer(threshold_key: threshold_key)
-                                let key_details = try! await threshold_key.get_key_details()
+                                let data = try! SecurityQuestionModule.get_answer(threshold_key: threshold_key)
+                                let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
 
@@ -396,7 +334,7 @@ struct ThirdTabView: View {
                         Button(action: {
                             Task {
 
-                                let seedResult = try! await
+                                let seedResult = try!
                                 SeedPhraseModule
                                     .get_seed_phrases(threshold_key: threshold_key)
                                 // TODO : get string result from seedResult
@@ -419,7 +357,7 @@ struct ThirdTabView: View {
                             Task {
                                 try! await
                                 SeedPhraseModule
-                                    .delete_seedphrase(threshold_key: threshold_key, phrase: phrase)
+                                    .delete_seed_phrase(threshold_key: threshold_key, phrase: phrase)
 
                                 phrase = ""
                                 alertContent = "delete seed phrase complete"
@@ -442,14 +380,14 @@ struct ThirdTabView: View {
                                 let shareStore = try! await threshold_key.generate_new_share()
                                 let index = shareStore.hex
 
-                                let key_details = try! await threshold_key.get_key_details()
+                                let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
                                 shareIndexCreated = index
 
-                                let shareOut = try! await threshold_key.output_share(shareIndex: index, shareType: nil)
+                                let shareOut = try! threshold_key.output_share(shareIndex: index, shareType: nil)
 
-                                let result = try! await ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                                let result = try! ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
                                 alertContent = "serialize result is \(result)"
                                 showAlert = true
                             }
@@ -489,7 +427,7 @@ struct ThirdTabView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let result = try! await PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
+                                let result = try! PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
 
                                 alertContent = "Get private key result is \(result)"
                                 showAlert = true
@@ -506,7 +444,7 @@ struct ThirdTabView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let result = try! await PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
+                                let result = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
 
                                 alertContent = "Get accounts result is \(result)"
                                 showAlert = true

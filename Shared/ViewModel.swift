@@ -6,10 +6,10 @@ class ViewModel: ObservableObject {
     @Published var loggedIn: Bool = false
     @Published var isLoading = false
     @Published var navigationTitle: String = ""
-    @Published var userData: [String:Any]?
+    @Published var userData: [String: Any]?
     @Published var service_provider: ServiceProvider?
     @Published var threshold_key: ThresholdKey!
-    
+
     func setup() async {
         await MainActor.run(body: {
             isLoading = true
@@ -24,11 +24,9 @@ class ViewModel: ObservableObject {
         })
     }
 
-    
-    
     func loginWithAuth0() {
         print("hi")
-        Task{
+        Task {
             do {
                 let sub = SubVerifierDetails(loginType: .web,
                                              loginProvider: .google,
@@ -44,16 +42,13 @@ class ViewModel: ObservableObject {
 
                 let postboxkey = data["privateKey"] as! String
 
-
-                
-                
                 try await MainActor.run(body: {
                     service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
                     threshold_key = try! ThresholdKey(
                         storage_layer: storage_layer,
                         service_provider: service_provider,
                         enable_logging: true,
-                        manual_sync: true)
+                        manual_sync: false )
                     self.userData = data
                     loggedIn = true
                 })
@@ -63,11 +58,10 @@ class ViewModel: ObservableObject {
             }
         }
     }
-    
-    
+
 }
 
-//extension ViewModel {
+// extension ViewModel {
 //    func showResult(result: Web3AuthState) {
 //        print("""
 //        Signed in successfully!
@@ -79,4 +73,4 @@ class ViewModel: ObservableObject {
 //                Type of login: \(result.userInfo?.typeOfLogin ?? "")
 //        """)
 //    }
-//}
+// }
