@@ -31,7 +31,7 @@ struct ContentView: View {
                 ProgressView()
             } else {
                 if vm.loggedIn {
-                    
+
                     ThirdTabView(threshold_key: vm.threshold_key)
                         .tabItem {
                             Image(systemName: "person")
@@ -39,7 +39,7 @@ struct ContentView: View {
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text("Setup Security question first. account might lost if security question not created"), dismissButton: .default(Text("OK")))
                         }
-                    
+
                     SecondTabView()
                         .tabItem {
                             Image(systemName: "list.bullet")
@@ -61,7 +61,6 @@ struct ContentView: View {
     }
 }
 
-
 struct ThirdTabView: View {
     @State private var isLoading = true
     @State private var showAlert = false
@@ -74,7 +73,7 @@ struct ThirdTabView: View {
     @State private var service_provider: ServiceProvider?
 
     @State var threshold_key: ThresholdKey!
-    
+
     func logger(data: String) {
         logs.append(data + "\n")
     }
@@ -99,49 +98,6 @@ struct ThirdTabView: View {
             .padding()
             List {
 
-                Section(header: Text("single Login")) {
-                    
-                    HStack {
-                        Button(action: {
-                            Task{
-                                let sub = SubVerifierDetails(loginType: .web,
-                                                             loginProvider: .google,
-                                                             clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-                                                             verifier: "google-lrc",
-                                                             redirectURL: "tdsdk://tdsdk/oauthCallback",
-                                                             browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
-
-                                let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET)
-                                let data = try! await tdsdk.triggerLogin()
-
-                                print(data)
-
-                                let postboxkey = data["privateKey"] as! String
-                                service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                threshold_key = try! ThresholdKey(
-                                    storage_layer: storage_layer,
-                                    service_provider: service_provider,
-                                    enable_logging: true,
-                                    manual_sync: true)
-   
-                                var username = ""
-                                
-                                
-                                if let userInfo = data["userInfo"] as? [String: Any], let name = userInfo["name"] as? String {
-                                    username = name
-                                }
-                                
-                                alertContent = "welcome. \(username) "
-                                showAlert = true
-
-                            }
-                        }, label: {
-                            Text("Google Login")
-                        }).alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }
-                }
                 Section(header: Text("Basic functionality")) {
                     HStack {
                         Text("Create new tkey")
@@ -184,7 +140,6 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                    
 
                     HStack {
                         Text("Get key details")
