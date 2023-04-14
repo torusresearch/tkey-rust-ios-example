@@ -71,6 +71,8 @@ struct ThirdTabView: View {
     @State private var shareIndexCreated = ""
     @State private var phrase = ""
     @State private var service_provider: ServiceProvider?
+    @State private var tkeyInitalized = false
+    @State private var tkeyReconstructed = false
 
     @State var threshold_key: ThresholdKey!
 
@@ -100,7 +102,7 @@ struct ThirdTabView: View {
 
                 Section(header: Text("Basic functionality")) {
                     HStack {
-                        Text("Create new tkey")
+                        Text("Initialize tkey")
                         Spacer()
                         Button(action: {
                             Task {
@@ -109,6 +111,9 @@ struct ThirdTabView: View {
                                 try! await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
+                                if totalShares >= threshold {
+                                    tkeyInitalized = true
+                                }
 
                                 alertContent = "\(totalShares) shares created"
                                 logger(data: alertContent.description)
@@ -122,6 +127,7 @@ struct ThirdTabView: View {
                         }
                     }
                     HStack {
+
                         Text("Reconstruct key")
                         Spacer()
                         Button(action: {
@@ -132,14 +138,15 @@ struct ThirdTabView: View {
                             alertContent = "\(key.key) is the final private key"
                             logger(data: alertContent.description)
                             showAlert = true
-
+                            tkeyReconstructed = true
                             }
                         }) {
                             Text("")
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled( !tkeyInitalized)
+                        .opacity( !tkeyInitalized ? 0.5 : 1 )
 
                     HStack {
                         Text("Get key details")
@@ -160,7 +167,8 @@ struct ThirdTabView: View {
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled(!tkeyInitalized)
+                        .opacity( !tkeyInitalized ? 0.5 : 1 )
 
                     HStack {
                         Text("Generate new share")
@@ -184,7 +192,8 @@ struct ThirdTabView: View {
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled(!tkeyReconstructed)
+                        .opacity( !tkeyReconstructed ? 0.5 : 1 )
 
                     HStack {
                         Text("Delete share")
@@ -204,10 +213,9 @@ struct ThirdTabView: View {
                         } .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
-
+                    }.disabled(!tkeyReconstructed)
+                        .opacity( !tkeyReconstructed ? 0.5 : 1 )
                 }
-
                 // MARK: Security questions or password
                 Section(header: Text("Security Question")) {
                     HStack {
@@ -286,7 +294,8 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                }
+                }.disabled(!tkeyReconstructed)
+                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
                 Section(header: Text("seed phrase")) {
                     HStack {
                         Text("Set seed pharse")
@@ -370,7 +379,8 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                }
+                }.disabled(!tkeyReconstructed)
+                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
                 Section(header: Text("Share Serialization")) {
                     HStack {
                         Text("Export share")
@@ -455,7 +465,8 @@ struct ThirdTabView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                }
+                }.disabled(!tkeyReconstructed)
+                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
             }
         }
     }
