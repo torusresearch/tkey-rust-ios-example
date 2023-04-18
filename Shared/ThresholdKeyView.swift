@@ -54,7 +54,7 @@ struct ThresholdKeyView: View {
                                 isLoading = true
                                 let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
 
-                                // try? await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+                                // try? await KeychainInterface.save(item: "", key: "")
 
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
@@ -63,7 +63,7 @@ struct ThresholdKeyView: View {
                                 if totalShares >= threshold {
                                     tkeyInitalized = true
                                 }
-                                
+
                                 // TODO: Add proper messages, 1/2 and 2/2 (old accounts, new accounts)
                                 alertContent = "\(totalShares) shares created"
                                 isLoading = false

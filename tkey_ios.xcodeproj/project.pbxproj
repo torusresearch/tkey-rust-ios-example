@@ -28,6 +28,8 @@
 		B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */; };
 		B3E5316929EC4ED000174AF1 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316829EC4ED000174AF1 /* LoaderView.swift */; };
 		B3E5316A29EC4ED000174AF1 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316829EC4ED000174AF1 /* LoaderView.swift */; };
+		B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
+		B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
 		DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +80,7 @@
 		B30B6B3628BCC8AC00812C1E /* Tests_macOSLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOSLaunchTests.swift; sourceTree = "<group>"; };
 		B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdKeyView.swift; sourceTree = "<group>"; };
 		B3E5316829EC4ED000174AF1 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
+		B3E5316E29EE75CA00174AF1 /* KeyChain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +133,7 @@
 		B30B6B0F28BCC8A900812C1E /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				B3E5316E29EE75CA00174AF1 /* KeyChain.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
@@ -363,6 +367,7 @@
 				B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */,
+				B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 				B3E5316929EC4ED000174AF1 /* LoaderView.swift in Sources */,
 			);
@@ -376,6 +381,7 @@
 				B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */,
+				B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				B30B6B3928BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 				B3E5316A29EC4ED000174AF1 /* LoaderView.swift in Sources */,
 			);
