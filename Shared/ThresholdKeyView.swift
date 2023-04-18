@@ -57,6 +57,7 @@ struct ThresholdKeyView: View {
                                 // try? await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
 
                                 totalShares = Int(key_details.total_shares)
+                                let required_share = Int(key_details.required_shares)
                                 threshold = Int(key_details.threshold)
 
                                 // FIX: check what this condition is ??
@@ -65,7 +66,10 @@ struct ThresholdKeyView: View {
                                 }
                                 
                                 // TODO: Add proper messages, 1/2 and 2/2 (old accounts, new accounts)
-                                alertContent = "\(totalShares) shares created"
+                                alertContent = "\(totalShares - required_share)/\(totalShares) shares created."
+                                if totalShares == 2 && required_share == 1 {
+                                    alertContent += "This tkey cannot be reconstructed because the existing device share has been lost. Please clear the tkey and start over."
+                                }
                                 isLoading = false
                                 showAlert = true
                             }
@@ -83,7 +87,7 @@ struct ThresholdKeyView: View {
                                 // Why does the application state Panic ??
                                 let key = try? await threshold_key.reconstruct()
                                 if key == nil {
-                                    alertContent = "Reconstruction failed"
+                                    alertContent = "Reconstruction failed. This is most likely caused by a non-zero value for required_share. "
                                     showAlert = true
                                     tkeyReconstructed = false
                                 } else {
@@ -106,12 +110,16 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                            let key_details = try! threshold_key.get_key_details()
-                            totalShares = Int(key_details.total_shares)
-                            threshold = Int(key_details.threshold)
-                            alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key"
-                            showAlert = true
-
+                                let key_details = try? threshold_key.get_key_details()
+                                if key_details == nil {
+                                    alertContent = "get key details failed"
+                                    showAlert = true
+                                } else{
+                                    totalShares = Int(key_details!.total_shares)
+                                    threshold = Int(key_details!.threshold)
+                                        alertContent = "You have \(totalShares) shares. \(key_details!.required_shares) are required to reconstruct the final key\n threshold : \(threshold)\n pub_key: (\(try! key_details!.pub_key.getX()) , \(try! key_details!.pub_key.getY())) \n share_descriptions: \(key_details!.share_descriptions)"
+                                    showAlert = true
+                                }
                             }
                         }) {
                             Text("")
@@ -127,15 +135,20 @@ struct ThresholdKeyView: View {
                         Button(action: {
                             Task {
 
-                                let shares = try! await threshold_key.generate_new_share()
-                                let index = shares.hex
+                                let shares = try? await threshold_key.generate_new_share()
+                                if shares == nil {
+                                    alertContent = "generate new share failed"
+                                    showAlert = true
+                                } else {
+                                    let index = shares!.hex
+                                    let key_details = try! threshold_key.get_key_details()
+                                    totalShares = Int(key_details.total_shares)
+                                    threshold = Int(key_details.threshold)
+                                    shareIndexCreated = index
+                                    alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
+                                    showAlert = true
+                                }
 
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
-                                shareIndexCreated = index
-                                alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
-                                showAlert = true
                             }
                         }) {
                             Text("")
@@ -150,19 +163,23 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                try! await threshold_key.delete_share(share_index: shareIndexCreated )
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
-                                alertContent = "You have \(totalShares) shares. Share index, \(shareIndexCreated) was deleted"
+                                do {
+                                    try await threshold_key.delete_share(share_index: shareIndexCreated)
+                                    let key_details = try! threshold_key.get_key_details()
+                                    totalShares = Int(key_details.total_shares)
+                                    threshold = Int(key_details.threshold)
+                                    alertContent = "You have \(totalShares) shares. Share index, \(shareIndexCreated) was deleted"
+                                } catch {
+                                    alertContent = "Delete share failed"
+                                }
                                 showAlert = true
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }.disabled(!tkeyReconstructed)
+                        }.disabled(!tkeyReconstructed)
                         .opacity( !tkeyReconstructed ? 0.5 : 1 )
 
                     HStack {
@@ -172,6 +189,8 @@ struct ThresholdKeyView: View {
                             Task {
                                 // Set metadata for service provider to be empty.
                                 // storageLayer.setMetatadata(service_provider_key, { message: KEY_NOT_FOUND })
+//                                try! await threshold_key.delete_tkey()
+                                
                             }
                         }) {
                             Text("")
@@ -200,7 +219,7 @@ struct ThresholdKeyView: View {
                                     alertContent = "New password share created with password: \(answer)"
                                     showAlert = true
                                 } catch {
-                                    alertContent = "Password share already exists"
+                                    alertContent = "Generate new share with password failed. It's because password share already exists, or execution went wrong"
                                     showAlert = true
                                 }
                             }
@@ -216,15 +235,21 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let question = "what's your password?"
-                                let answer = "blublublu"
-                                _ = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
+                                    let question = "what's your password?"
+                                    let answer = "blublublu"
+                                    let result = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                    if result == false {
+                                        alertContent = "Password changed failed"
+                                        showAlert = true
+                                    } else {
+                                        let key_details = try! threshold_key.get_key_details()
+                                        totalShares = Int(key_details.total_shares)
+                                        threshold = Int(key_details.threshold)
 
-                                alertContent = "Password changed to: \(answer)"
-                                showAlert = true
+                                        alertContent = "Password changed to: \(answer)"
+                                        showAlert = true
+                                    }
+
                             }
                         }) {
                             Text("")
@@ -239,13 +264,18 @@ struct ThresholdKeyView: View {
                         Button(action: {
                             Task {
 
-                                let data = try! SecurityQuestionModule.get_answer(threshold_key: threshold_key)
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
+                                let data = try? SecurityQuestionModule.get_answer(threshold_key: threshold_key)
+                                if data == nil {
+                                    alertContent = "show password failed"
+                                } else {
+                                    let key_details = try! threshold_key.get_key_details()
+                                    totalShares = Int(key_details.total_shares)
+                                    threshold = Int(key_details.threshold)
 
-                                alertContent = "Password is: \(data)"
-                                showAlert = true
+                                    alertContent = "Password is: \(data!)"
+                                    showAlert = true
+                                }
+
                             }
                         }) {
                             Text("")
@@ -261,13 +291,14 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
-                                let seedPhraseToSet = "seed sock milk update focus rotate barely fade car face mechanic mercy"
-
-                                try! await SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0)
-
-                                phrase = seedPhraseToSet
-                                alertContent = "set seed phrase complete"
+                                do {
+                                    let seedPhraseToSet = "seed sock milk update focus rotate barely fade car face mechanic mercy"
+                                    try await SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0)
+                                    phrase = seedPhraseToSet
+                                    alertContent = "set seed phrase complete"
+                                } catch {
+                                    alertContent = "set seed phrase failed"
+                                }
                                 showAlert = true
                             }
                         }) {
@@ -282,11 +313,14 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let seedPhraseToChange = "object brass success calm lizard science syrup planet exercise parade honey impulse"
-
-                                try! await SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
-                                phrase = seedPhraseToChange
-                                alertContent = "change seed phrase complete"
+                                do {
+                                    let seedPhraseToChange = "object brass success calm lizard science syrup planet exercise parade honey impulse"
+                                    try await SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
+                                    phrase = seedPhraseToChange
+                                    alertContent = "change seed phrase complete"
+                                } catch {
+                                    alertContent = "change seed phrase failed"
+                                }
                                 showAlert = true
                             }
                         }) {
@@ -301,13 +335,12 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
-                                let seedResult = try!
-                                SeedPhraseModule
-                                    .get_seed_phrases(threshold_key: threshold_key)
-                                print("result", seedResult)
-                                alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
-
+                                do {
+                                    let seedResult = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
+                                    alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
+                                } catch {
+                                    alertContent = "get seed phrase failed"
+                                }
                                 showAlert = true
                             }
                         }) {
@@ -322,12 +355,13 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                try! await
-                                SeedPhraseModule
-                                    .delete_seed_phrase(threshold_key: threshold_key, phrase: phrase)
-
-                                phrase = ""
-                                alertContent = "delete seed phrase complete"
+                                do {
+                                    try await SeedPhraseModule.delete_seed_phrase(threshold_key: threshold_key, phrase: phrase)
+                                    phrase = ""
+                                    alertContent = "delete seed phrase complete"
+                                } catch {
+                                    alertContent = "delete seed phrase failed"
+                                }
 
                                 showAlert = true
                             }
@@ -339,34 +373,42 @@ struct ThresholdKeyView: View {
                     }
                 }.disabled(!tkeyReconstructed)
                     .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                
                 Section(header: Text("Share Serialization")) {
                     HStack {
                         Text("Export share")
                         Spacer()
                         Button(action: {
                             Task {
-                                let shareStore = try! await threshold_key.generate_new_share()
-                                let index = shareStore.hex
+                                do {
+                                    let shareStore = try await threshold_key.generate_new_share()
+                                    let index = shareStore.hex
 
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
-                                shareIndexCreated = index
+                                    let key_details = try threshold_key.get_key_details()
+                                    totalShares = Int(key_details.total_shares)
+                                    threshold = Int(key_details.threshold)
+                                    shareIndexCreated = index
 
-                                let shareOut = try! threshold_key.output_share(shareIndex: index, shareType: nil)
+                                    let shareOut = try threshold_key.output_share(shareIndex: index, shareType: nil)
 
-                                let result = try! ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
-                                alertContent = "serialize result is \(result)"
-                                showAlert = true
+                                    let result = try ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                                    alertContent = "serialize result is \(result)"
+                                    showAlert = true
+                                } catch {
+                                    // Handle the error here
+                                    alertContent = "Export share failed: \(error.localizedDescription)"
+                                    showAlert = true
+                                }
                             }
                         }) {
                             Text("")
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
-                }.disabled(!tkeyReconstructed)
-                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                    }.disabled(!tkeyReconstructed)
+                        .opacity( !tkeyReconstructed ? 0.5 : 1 )
+
+                }
 
                 Section(header: Text("Private Key")) {
                     HStack {
@@ -396,9 +438,12 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let result = try! PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
-
-                                alertContent = "Get private key result is \(result)"
+                                do {
+                                    let result = try PrivateKeysModule.get_private_keys(threshold_key: threshold_key)
+                                    alertContent = "Get private key result is \(result)"
+                                } catch {
+                                    alertContent = "Failed to get private key"
+                                }
                                 showAlert = true
                             }
                         }) {
@@ -413,9 +458,12 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let result = try! PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
-
-                                alertContent = "Get accounts result is \(result)"
+                                do {
+                                    let result = try PrivateKeysModule.get_private_key_accounts(threshold_key: threshold_key)
+                                    alertContent = "Get accounts result is \(result)"
+                                } catch {
+                                    alertContent = "Failed to get accounts"
+                                }
                                 showAlert = true
                             }
                         }) {
@@ -424,6 +472,7 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+
                 }.disabled(!tkeyReconstructed)
                     .opacity( !tkeyReconstructed ? 0.5 : 1 )
             }
