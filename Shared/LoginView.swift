@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject var vm: ViewModel
+    @StateObject var vm: LoginModel
     var body: some View {
         List {
             Button(
@@ -19,6 +19,6 @@ struct LoginView: View {
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginView(vm: ViewModel())
+        LoginView(vm: LoginModel())
     }
 }
