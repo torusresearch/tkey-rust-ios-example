@@ -20,7 +20,7 @@ class LoginModel: ObservableObject {
             navigationTitle = loggedIn ? "UserInfo" : "SignIn"
         })
     }
-    func loginWithAuth0() {
+    func loginWithOAuth() {
         Task {
             let sub = SubVerifierDetails(loginType: .web,
                                          loginProvider: .google,

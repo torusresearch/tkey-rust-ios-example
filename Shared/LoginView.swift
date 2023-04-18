@@ -6,7 +6,7 @@ struct LoginView: View {
         List {
             Button(
                 action: {
-                    vm.loginWithAuth0()
+                    vm.loginWithOAuth()
                 },
                 label: {
                     Text("Sign In With Google")

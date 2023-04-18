@@ -53,13 +53,18 @@ struct ThresholdKeyView: View {
 
                                 isLoading = true
                                 let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
-                                try! await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+
+                                // try? await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
+
+                                // FIX: check what this condition is ??
                                 if totalShares >= threshold {
                                     tkeyInitalized = true
                                 }
-
+                                
+                                // TODO: Add proper messages, 1/2 and 2/2 (old accounts, new accounts)
                                 alertContent = "\(totalShares) shares created"
                                 isLoading = false
                                 showAlert = true
@@ -75,11 +80,18 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                            let key = try! await threshold_key.reconstruct()
-                            finalKey = key.key
-                            alertContent = "\(key.key) is the final private key"
-                            showAlert = true
-                            tkeyReconstructed = true
+                                // Why does the application state Panic ??
+                                let key = try? await threshold_key.reconstruct()
+                                if key == nil {
+                                    alertContent = "Reconstruction failed"
+                                    showAlert = true
+                                    tkeyReconstructed = false
+                                } else {
+                                    finalKey = key!.key
+                                    alertContent = "\(key!.key) is the final private key"
+                                    showAlert = true
+                                    tkeyReconstructed = true
+                                }
                             }
                         }) {
                             Text("")
@@ -88,6 +100,7 @@ struct ThresholdKeyView: View {
                         }
                     }.disabled( !tkeyInitalized)
                         .opacity( !tkeyInitalized ? 0.5 : 1 )
+
                     HStack {
                         Text("Get key details")
                         Spacer()
@@ -107,6 +120,7 @@ struct ThresholdKeyView: View {
                         }
                     }.disabled(!tkeyInitalized)
                         .opacity( !tkeyInitalized ? 0.5 : 1 )
+
                     HStack {
                         Text("Generate new share")
                         Spacer()
@@ -150,6 +164,21 @@ struct ThresholdKeyView: View {
                         }
                     }.disabled(!tkeyReconstructed)
                         .opacity( !tkeyReconstructed ? 0.5 : 1 )
+
+                    HStack {
+                        Text("Reset account")
+                        Spacer()
+                        Button(action: {
+                            Task {
+                                // Set metadata for service provider to be empty.
+                                // storageLayer.setMetatadata(service_provider_key, { message: KEY_NOT_FOUND })
+                            }
+                        }) {
+                            Text("")
+                        } .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
                 }
                 Section(header: Text("Security Question")) {
                     HStack {
