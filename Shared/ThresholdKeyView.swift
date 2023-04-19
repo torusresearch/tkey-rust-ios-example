@@ -13,8 +13,6 @@ struct ThresholdKeyView: View {
     @State private var phrase = ""
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
-    @State var service_provider: ServiceProvider!
-    @State var storage_layer: StorageLayer!
     @State var threshold_key: ThresholdKey!
 
     var body: some View {
@@ -43,8 +41,8 @@ struct ThresholdKeyView: View {
                             Task {
                                 let postboxkey = userData["privateKey"] as! String
 
-                                storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-                                service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+                                let storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+                                let service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
                                 threshold_key = try! ThresholdKey(
                                     storage_layer: storage_layer,
                                     service_provider: service_provider,
@@ -170,8 +168,23 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                // Set metadata for service provider to be empty.
-                                // storageLayer.setMetatadata(service_provider_key, { message: KEY_NOT_FOUND })
+                                do {
+                                    let postboxkey = userData["privateKey"] as! String
+                                    let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+                                    let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+                                    let temp_threshold_key = try ThresholdKey(
+                                        storage_layer: temp_storage_layer,
+                                        service_provider: temp_service_provider,
+                                        enable_logging: true,
+                                        manual_sync: false )
+                                    try await temp_threshold_key.set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                    tkeyInitalized = false
+                                    tkeyReconstructed = false
+                                    showAlert = true
+                                    alertContent = "Account reset"
+                                } catch {
+                                    alertContent = "Reset failed"
+                                }
                             }
                         }) {
                             Text("")
