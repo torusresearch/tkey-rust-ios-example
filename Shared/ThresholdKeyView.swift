@@ -168,6 +168,7 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
+                                showAlert = true
                                 do {
                                     let postboxkey = userData["privateKey"] as! String
                                     let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
@@ -180,7 +181,6 @@ struct ThresholdKeyView: View {
                                     try await temp_threshold_key.set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
                                     tkeyInitalized = false
                                     tkeyReconstructed = false
-                                    showAlert = true
                                     alertContent = "Account reset"
                                 } catch {
                                     alertContent = "Reset failed"
