@@ -52,24 +52,27 @@ struct ThresholdKeyView: View {
                                     manual_sync: false )
 
                                 isLoading = true
-                                let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
+                                let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
+                                if key_details == nil {
+                                    alertContent = "initialize tkey failed"
+                                }
+                                else {
+                                    totalShares = Int(key_details!.total_shares)
+                                    let required_share = Int(key_details!.required_shares)
+                                    threshold = Int(key_details!.threshold)
 
-                                // try? await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
+                                    // try? await KeychainInterface.syncShare(threshold_key: threshold_key, share_index: nil)
 
-                                totalShares = Int(key_details.total_shares)
-                                let required_share = Int(key_details.required_shares)
-                                threshold = Int(key_details.threshold)
-
-                                // FIX: check what this condition is ??
-                                if totalShares >= threshold {
                                     tkeyInitalized = true
+                                    
+                                    if required_share >= 1 {
+                                        alertContent = "This tkey cannot be reconstructed because the existing device share doesn't exist in this device. Recover using another share you already have, or please clear the tkey and start over if you can't."
+                                    } else {
+                                        alertContent = "\(totalShares - required_share)/\(totalShares) shares created."
+                                    }
                                 }
-                                
-                                // TODO: Add proper messages, 1/2 and 2/2 (old accounts, new accounts)
-                                alertContent = "\(totalShares - required_share)/\(totalShares) shares created."
-                                if totalShares == 2 && required_share == 1 {
-                                    alertContent += "This tkey cannot be reconstructed because the existing device share has been lost. Please clear the tkey and start over."
-                                }
+
+
                                 isLoading = false
                                 showAlert = true
                             }
@@ -84,7 +87,6 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                // Why does the application state Panic ??
                                 let key = try? await threshold_key.reconstruct()
                                 if key == nil {
                                     alertContent = "Reconstruction failed. This is most likely caused by a non-zero value for required_share. "
@@ -235,27 +237,31 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
+                                do {
                                     let question = "what's your password?"
                                     let answer = "blublublu"
-                                    let result = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                    let result = try await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                    
                                     if result == false {
                                         alertContent = "Password changed failed"
-                                        showAlert = true
                                     } else {
-                                        let key_details = try! threshold_key.get_key_details()
+                                        let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
 
                                         alertContent = "Password changed to: \(answer)"
-                                        showAlert = true
                                     }
-
+                                } catch {
+                                    alertContent = "Error: \(error.localizedDescription)"
+                                }
+                                showAlert = true
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
+
                     }
 
                     HStack {
@@ -273,9 +279,8 @@ struct ThresholdKeyView: View {
                                     threshold = Int(key_details.threshold)
 
                                     alertContent = "Password is: \(data!)"
-                                    showAlert = true
                                 }
-
+                                showAlert = true
                             }
                         }) {
                             Text("")
@@ -336,10 +341,14 @@ struct ThresholdKeyView: View {
                         Button(action: {
                             Task {
                                 do {
-                                    let seedResult = try! SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
-                                    alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
+                                    let seedResult = try SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
+                                    if seedResult.isEmpty {
+                                        alertContent = "get seed phrase failed"
+                                    } else {
+                                        alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
+                                    }
                                 } catch {
-                                    alertContent = "get seed phrase failed"
+                                    alertContent = "Error: \(error.localizedDescription)"
                                 }
                                 showAlert = true
                             }
@@ -416,13 +425,17 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let key_module = try! PrivateKey.generate()
-
-                                let result = try! await PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
-                                if result {
-                                    alertContent = "setting private key completed"
-                                } else {
-                                    alertContent = "Setting private key failed"
+                                do {
+                                    let key_module = try PrivateKey.generate()
+                                    let result = try await PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
+                                    
+                                    if result {
+                                        alertContent = "Setting private key completed"
+                                    } else {
+                                        alertContent = "Setting private key failed"
+                                    }
+                                } catch {
+                                    alertContent = "Error: \(error.localizedDescription)"
                                 }
                                 showAlert = true
                             }
@@ -431,6 +444,7 @@ struct ThresholdKeyView: View {
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
+
                     }
 
                     HStack {
