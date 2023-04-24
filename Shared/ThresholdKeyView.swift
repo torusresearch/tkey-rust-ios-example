@@ -55,22 +55,6 @@ struct ThresholdKeyView: View {
                                     return
                                 }
 
-                                // fetch shares
-                                var shares: [String] = []
-                                shareCount = 0
-                                var finishedFetch = false
-                                repeat {
-                                    let fetchId = fetchKey + ":" + String(shareCount)
-                                    do {
-                                        let share = try KeychainInterface.fetch(key: fetchId)
-                                        shares.append(share)
-                                    } catch {
-                                        finishedFetch = true
-                                        break
-                                    }
-                                    shareCount += 1
-                                } while !finishedFetch
-
                                 guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                     alertContent = "Failed to create storage layer"
                                     showAlert = true
@@ -105,12 +89,28 @@ struct ThresholdKeyView: View {
                                 threshold = Int(key_details.threshold)
 
                                 tkeyInitalized = true
+                                
+                                // fetch all locally available shares for this google account
+                                var shares: [String] = []
+                                shareCount = 0
+                                var finishedFetch = false
+                                repeat {
+                                    let fetchId = fetchKey + ":" + String(shareCount)
+                                    do {
+                                        let share = try KeychainInterface.fetch(key: fetchId)
+                                        shares.append(share)
+                                    } catch {
+                                        finishedFetch = true
+                                        break
+                                    }
+                                    shareCount += 1
+                                } while !finishedFetch
 
-                                // assume new account
+                                // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
-                                    // reconstruct the key
+                                    // Attempt reconstruction
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key"
+                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
                                         resetAccount = true
                                         showAlert = true
                                         return
@@ -118,7 +118,8 @@ struct ThresholdKeyView: View {
 
                                     // save shares up to required threshold
                                     let shareIndexes = try threshold_key.get_shares_indexes()
-
+                                    
+                                    // TODO: Save only one share, which is device share and not all shares.
                                     for i in 0..<threshold {
                                         let saveId = fetchKey + ":" + String(i)
 
@@ -153,6 +154,7 @@ struct ThresholdKeyView: View {
                                         return
                                     }
                                     // import shares
+                                    // TODO: Handle failures of input_share gracefully. Its possible that locally available share was deleted.
                                     for item in shares {
                                         guard let _ = try? await threshold_key.input_share(share: item, shareType: nil) else {
                                             alertContent = "Incorrect share was used"
@@ -161,9 +163,9 @@ struct ThresholdKeyView: View {
                                             return
                                         }
                                     }
-
+                                    
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key"
+                                        alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
                                         return
@@ -252,7 +254,8 @@ struct ThresholdKeyView: View {
                             Task {
                                 showAlert = true
                                 do {
-
+                                    
+                                    // TODO: Add a confirmation popup here, inform that "This action will reset your account. Use it with extreme caution"
                                     let postboxkey = userData["privateKey"] as! String
                                     let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
                                     let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
