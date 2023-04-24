@@ -17,6 +17,18 @@ struct ThresholdKeyView: View {
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
 
+    func resetAppState() {
+        isLoading = true
+        totalShares = 0
+        threshold = 0
+        reconstructedKey = ""
+        shareIndexCreated = ""
+        phrase = ""
+        tkeyInitalized = false
+        tkeyReconstructed = false
+        resetAccount = true
+    }
+
     var body: some View {
         VStack {
             HStack {
@@ -87,8 +99,17 @@ struct ThresholdKeyView: View {
 
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
-
                                 tkeyInitalized = true
+                                
+                                let reconstructionDetails = try? await threshold_key.reconstruct()
+                                if reconstructionDetails != nil {
+                                    reconstructedKey = reconstructionDetails!.key
+                                    alertContent = "\(reconstructedKey) is the private key"
+                                    showAlert = true
+                                    tkeyReconstructed = true
+                                    resetAccount = false
+                                    return
+                                }
 
                                 // fetch all locally available shares for this google account
                                 var shares: [String] = []
@@ -270,7 +291,8 @@ struct ThresholdKeyView: View {
                                     tkeyReconstructed = false
                                     resetAccount = false
                                     alertContent = "Account reset successful"
-                                    // TODO: Reset application state to defaults
+
+                                    resetAppState() // Allow reinitialize
                                 } catch {
                                     // This method should never fail
                                     alertContent = "Reset failed"
@@ -288,6 +310,8 @@ struct ThresholdKeyView: View {
                         Text("Add password")
                         Spacer()
                         Button(action: {
+                            // TODO: allow users to input password in a popup.
+                            // TODO: add loader as well, API call could take a >3 seconds
                             let question = "what's your password?"
                             let answer = "blublu"
                             Task {
