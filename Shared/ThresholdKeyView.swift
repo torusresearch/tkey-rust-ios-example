@@ -5,17 +5,29 @@ struct ThresholdKeyView: View {
     @State var userData: [String: Any]
     @State private var isLoading = true
     @State private var showAlert = false
-    @State private var alertContent = "Sample"
+    @State private var alertContent = ""
     @State private var totalShares = 0
     @State private var threshold = 0
-    @State private var finalKey = ""
+    @State private var reconstructedKey = ""
     @State private var shareIndexCreated = ""
     @State private var phrase = ""
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
-    @State var service_provider: ServiceProvider!
-    @State var storage_layer: StorageLayer!
+    @State private var resetAccount = true
     @State var threshold_key: ThresholdKey!
+    @State var shareCount = 0
+
+    func resetAppState() {
+        isLoading = true
+        totalShares = 0
+        threshold = 0
+        reconstructedKey = ""
+        shareIndexCreated = ""
+        phrase = ""
+        tkeyInitalized = false
+        tkeyReconstructed = false
+        resetAccount = true
+    }
 
     var body: some View {
         VStack {
@@ -24,7 +36,7 @@ struct ThresholdKeyView: View {
                     .resizable()
                     .frame(width: 50, height: 50)
                 VStack(alignment: .leading) {
-                    Text("Final key: \(finalKey)")
+                    Text("Reconstructed key: \(reconstructedKey)")
                         .font(.subheadline)
                     Text("total shares: \(totalShares)")
                         .font(.subheadline)
@@ -37,96 +49,187 @@ struct ThresholdKeyView: View {
             List {
                 Section(header: Text("Basic functionality")) {
                     HStack {
-                        Text("Initialize tkey")
+                        Text("Initialize and reconstruct tkey")
                         Spacer()
                         Button(action: {
                             Task {
-                                let postboxkey = userData["privateKey"] as! String
+                                isLoading = true
 
-                                storage_layer = try! StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-                                service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                threshold_key = try! ThresholdKey(
+                                guard let fetchKey = userData["publicAddress"] as? String else {
+                                    alertContent = "Failed to get public address from userinfo"
+                                    showAlert = true
+                                    return
+                                }
+
+                                guard let postboxkey = userData["privateKey"] as? String else {
+                                    alertContent = "Failed to get postboxkey"
+                                    showAlert = true
+                                    return
+                                }
+
+                                guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
+                                    alertContent = "Failed to create storage layer"
+                                    showAlert = true
+                                    return
+                                }
+
+                                guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey) else {
+                                    alertContent = "Failed to create service provider"
+                                    showAlert = true
+                                    return
+                                }
+
+                                guard let thresholdKey = try? ThresholdKey(
                                     storage_layer: storage_layer,
                                     service_provider: service_provider,
                                     enable_logging: true,
-                                    manual_sync: false )
+                                    manual_sync: false) else {
+                                        alertContent = "Failed to create threshold key"
+                                        showAlert = true
+                                        return
+                                    }
 
-                                isLoading = true
-                                let key_details = try! await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false)
+                                threshold_key = thresholdKey
 
-                                // try? await KeychainInterface.save(item: "", key: "")
+                                guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
+                                    alertContent = "Failed to get key details"
+                                    showAlert = true
+                                    return
+                                }
 
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
-
-                                // FIX: check what this condition is ??
-                                if totalShares >= threshold {
-                                    tkeyInitalized = true
+                                tkeyInitalized = true
+                                
+                                let reconstructionDetails = try? await threshold_key.reconstruct()
+                                if reconstructionDetails != nil {
+                                    reconstructedKey = reconstructionDetails!.key
+                                    alertContent = "\(reconstructedKey) is the private key"
+                                    showAlert = true
+                                    tkeyReconstructed = true
+                                    resetAccount = false
+                                    return
                                 }
 
-                                // TODO: Add proper messages, 1/2 and 2/2 (old accounts, new accounts)
-                                alertContent = "\(totalShares) shares created"
+                                // fetch all locally available shares for this google account
+                                var shares: [String] = []
+                                shareCount = 0
+                                var finishedFetch = false
+                                repeat {
+                                    let fetchId = fetchKey + ":" + String(shareCount)
+                                    do {
+                                        let share = try KeychainInterface.fetch(key: fetchId)
+                                        shares.append(share)
+                                    } catch {
+                                        finishedFetch = true
+                                        break
+                                    }
+                                    shareCount += 1
+                                } while !finishedFetch
+
+                                // There are 0 locally available shares for this tkey
+                                if shareCount == 0 {
+                                    // Attempt reconstruction
+                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        resetAccount = true
+                                        showAlert = true
+                                        return
+                                    }
+
+                                    // save shares up to required threshold
+                                    let shareIndexes = try threshold_key.get_shares_indexes()
+
+                                    // TODO: Save only one share, which is device share and not all shares.
+                                    for i in 0..<threshold {
+                                        let saveId = fetchKey + ":" + String(i)
+
+                                        guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)], shareType: nil) else {
+                                            alertContent = "Failed to output share"
+                                            resetAccount = true
+                                            showAlert = true
+                                            return
+                                        }
+
+                                        guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
+                                            alertContent = "Failed to save share"
+                                            resetAccount = true
+                                            showAlert = true
+                                            return
+                                        }
+                                    }
+
+                                    reconstructedKey = reconstructionDetails.key
+                                    alertContent = "\(reconstructedKey) is the private key"
+                                    showAlert = true
+                                    tkeyReconstructed = true
+                                    resetAccount = false
+                                }
+                                // existing account
+                                else {
+                                    // check enough shares are available
+                                    if shareCount < threshold {
+                                        alertContent = "Not enough shares for reconstruction"
+                                        showAlert = true
+                                        resetAccount = true
+                                        return
+                                    }
+                                    // import shares
+                                    // TODO: Handle failures of input_share gracefully. Its possible that locally available share was deleted.
+                                    for item in shares {
+                                        guard let _ = try? await threshold_key.input_share(share: item, shareType: nil) else {
+                                            alertContent = "Incorrect share was used"
+                                            showAlert = true
+                                            resetAccount = true
+                                            return
+                                        }
+                                    }
+
+                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        alertContent = "Failed to reconstruct key with available shares."
+                                        resetAccount = true
+                                        showAlert = true
+                                        return
+                                    }
+
+                                    reconstructedKey = reconstructionDetails.key
+                                    alertContent = "\(reconstructedKey) is the private key"
+                                    showAlert = true
+                                    tkeyReconstructed = true
+                                    resetAccount = false
+                                }
                                 isLoading = false
-                                showAlert = true
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                    HStack {
-                        Text("Reconstruct key")
-                        Spacer()
-                        Button(action: {
-                            Task {
-                                // Why does the application state Panic ??
-                                let key = try? await threshold_key.reconstruct()
-                                if key == nil {
-                                    alertContent = "Reconstruction failed"
-                                    showAlert = true
-                                    tkeyReconstructed = false
-                                } else {
-                                    finalKey = key!.key
-                                    alertContent = "\(key!.key) is the final private key"
-                                    showAlert = true
-                                    tkeyReconstructed = true
-                                }
-                            }
-                        }) {
-                            Text("")
-                        } .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                        }
-                    }.disabled( !tkeyInitalized)
-                        .opacity( !tkeyInitalized ? 0.5 : 1 )
-
                     HStack {
                         Text("Get key details")
                         Spacer()
                         Button(action: {
                             Task {
-                            let key_details = try! threshold_key.get_key_details()
-                            totalShares = Int(key_details.total_shares)
-                            threshold = Int(key_details.threshold)
-                            alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key"
-                            showAlert = true
-
+                                let key_details = try! threshold_key.get_key_details()
+                                totalShares = Int(key_details.total_shares)
+                                threshold = Int(key_details.threshold)
+                                alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
+                                showAlert = true
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }.disabled(!tkeyInitalized)
-                        .opacity( !tkeyInitalized ? 0.5 : 1 )
+                        .opacity(!tkeyInitalized ? 0.5 : 1)
 
                     HStack {
                         Text("Generate new share")
                         Spacer()
                         Button(action: {
                             Task {
-
                                 let shares = try! await threshold_key.generate_new_share()
                                 let index = shares.hex
 
@@ -139,18 +242,18 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }.disabled(!tkeyReconstructed)
-                        .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                        .opacity(!tkeyReconstructed ? 0.5 : 1)
 
                     HStack {
                         Text("Delete share")
                         Spacer()
                         Button(action: {
                             Task {
-                                try! await threshold_key.delete_share(share_index: shareIndexCreated )
+                                try! await threshold_key.delete_share(share_index: shareIndexCreated)
                                 let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
@@ -159,23 +262,45 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }.disabled(!tkeyReconstructed)
-                        .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                        .opacity(!tkeyReconstructed ? 0.5 : 1)
 
                     HStack {
                         Text("Reset account")
                         Spacer()
                         Button(action: {
                             Task {
-                                // Set metadata for service provider to be empty.
-                                // storageLayer.setMetatadata(service_provider_key, { message: KEY_NOT_FOUND })
+                                showAlert = true
+                                do {
+
+                                    // TODO: Add a confirmation popup here, inform that "This action will reset your account. Use it with extreme caution"
+                                    let postboxkey = userData["privateKey"] as! String
+                                    let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+                                    let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+                                    let temp_threshold_key = try ThresholdKey(
+                                        storage_layer: temp_storage_layer,
+                                        service_provider: temp_service_provider,
+                                        enable_logging: true,
+                                        manual_sync: false)
+
+                                    try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                    tkeyInitalized = false
+                                    tkeyReconstructed = false
+                                    resetAccount = false
+                                    alertContent = "Account reset successful"
+
+                                    resetAppState() // Allow reinitialize
+                                } catch {
+                                    // This method should never fail
+                                    alertContent = "Reset failed"
+                                }
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -185,10 +310,11 @@ struct ThresholdKeyView: View {
                         Text("Add password")
                         Spacer()
                         Button(action: {
+                            // TODO: allow users to input password in a popup.
+                            // TODO: add loader as well, API call could take a >3 seconds
                             let question = "what's your password?"
                             let answer = "blublu"
                             Task {
-
                                 do {
                                     let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
                                     print(share.share_store, share.hex)
@@ -206,7 +332,7 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -228,7 +354,7 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -238,7 +364,6 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
                                 let data = try! SecurityQuestionModule.get_answer(threshold_key: threshold_key)
                                 let key_details = try! threshold_key.get_key_details()
                                 totalShares = Int(key_details.total_shares)
@@ -249,19 +374,18 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        } .alert(isPresented: $showAlert) {
+                        }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
                 }.disabled(!tkeyReconstructed)
-                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                    .opacity(!tkeyReconstructed ? 0.5 : 1)
                 Section(header: Text("seed phrase")) {
                     HStack {
                         Text("Set seed pharse")
                         Spacer()
                         Button(action: {
                             Task {
-
                                 let seedPhraseToSet = "seed sock milk update focus rotate barely fade car face mechanic mercy"
 
                                 try! await SeedPhraseModule.set_seed_phrase(threshold_key: threshold_key, format: "HD Key Tree", phrase: seedPhraseToSet, number_of_wallets: 0)
@@ -301,9 +425,8 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
                                 let seedResult = try!
-                                SeedPhraseModule
+                                    SeedPhraseModule
                                     .get_seed_phrases(threshold_key: threshold_key)
                                 print("result", seedResult)
                                 alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
@@ -323,7 +446,7 @@ struct ThresholdKeyView: View {
                         Button(action: {
                             Task {
                                 try! await
-                                SeedPhraseModule
+                                    SeedPhraseModule
                                     .delete_seed_phrase(threshold_key: threshold_key, phrase: phrase)
 
                                 phrase = ""
@@ -338,7 +461,7 @@ struct ThresholdKeyView: View {
                         }
                     }
                 }.disabled(!tkeyReconstructed)
-                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                    .opacity(!tkeyReconstructed ? 0.5 : 1)
                 Section(header: Text("Share Serialization")) {
                     HStack {
                         Text("Export share")
@@ -366,7 +489,7 @@ struct ThresholdKeyView: View {
                         }
                     }
                 }.disabled(!tkeyReconstructed)
-                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                    .opacity(!tkeyReconstructed ? 0.5 : 1)
 
                 Section(header: Text("Private Key")) {
                     HStack {
@@ -425,7 +548,7 @@ struct ThresholdKeyView: View {
                         }
                     }
                 }.disabled(!tkeyReconstructed)
-                    .opacity( !tkeyReconstructed ? 0.5 : 1 )
+                    .opacity(!tkeyReconstructed ? 0.5 : 1)
             }
         }
     }

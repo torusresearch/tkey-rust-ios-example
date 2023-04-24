@@ -12,6 +12,8 @@ public class KeychainInterface {
         case unexpectedStatus(OSStatus)
     }
 
+    // TODO: add delete function
+
     public static func save(item: String, key: String, identifier: String = "web3auth.tkey-ios") throws {
         let query: [String: AnyObject] = [
             kSecAttrService as String: identifier as AnyObject,
