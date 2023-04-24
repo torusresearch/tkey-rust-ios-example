@@ -19,8 +19,6 @@ struct ContentView: View {
                         .tabItem {
                             Image(systemName: "person")
                             Text("Profile")
-                        }.alert(isPresented: $showAlert) {
-                            Alert(title: Text("Alert"), message: Text("Please setup a security question first. This account might be lost if security question not created"), dismissButton: .default(Text("OK")))
                         }
                 } else {
                     LoginView(vm: vm)
