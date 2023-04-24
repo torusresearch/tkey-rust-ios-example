@@ -262,7 +262,7 @@ struct ThresholdKeyView: View {
                                         enable_logging: true,
                                         manual_sync: false)
 
-                                    try await temp_threshold_key.set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                    try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
                                     tkeyInitalized = false
                                     tkeyReconstructed = false
                                     resetAccount = false
