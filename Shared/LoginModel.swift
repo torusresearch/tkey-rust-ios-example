@@ -20,7 +20,8 @@ class LoginModel: ObservableObject {
             navigationTitle = loggedIn ? "UserInfo" : "SignIn"
         })
     }
-    func loginWithOAuth() {
+
+    func loginWithCustomAuth() {
         Task {
             let sub = SubVerifierDetails(loginType: .web,
                                          loginProvider: .google,
@@ -29,7 +30,7 @@ class LoginModel: ObservableObject {
                                          redirectURL: "tdsdk://tdsdk/oauthCallback",
                                          browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
             let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET)
-            let data = try! await tdsdk.triggerLogin()
+            let data = try await tdsdk.triggerLogin()
             await MainActor.run(body: {
                 self.userData = data
                 loggedIn = true
