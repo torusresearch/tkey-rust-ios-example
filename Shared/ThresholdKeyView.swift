@@ -13,7 +13,7 @@ struct ThresholdKeyView: View {
     @State private var phrase = ""
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
-    @State private var resetAccount = false
+    @State private var resetAccount = true
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
 
@@ -89,7 +89,7 @@ struct ThresholdKeyView: View {
                                 threshold = Int(key_details.threshold)
 
                                 tkeyInitalized = true
-                                
+
                                 // fetch all locally available shares for this google account
                                 var shares: [String] = []
                                 shareCount = 0
@@ -118,7 +118,7 @@ struct ThresholdKeyView: View {
 
                                     // save shares up to required threshold
                                     let shareIndexes = try threshold_key.get_shares_indexes()
-                                    
+
                                     // TODO: Save only one share, which is device share and not all shares.
                                     for i in 0..<threshold {
                                         let saveId = fetchKey + ":" + String(i)
@@ -163,7 +163,7 @@ struct ThresholdKeyView: View {
                                             return
                                         }
                                     }
-                                    
+
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
@@ -254,7 +254,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 showAlert = true
                                 do {
-                                    
+
                                     // TODO: Add a confirmation popup here, inform that "This action will reset your account. Use it with extreme caution"
                                     let postboxkey = userData["privateKey"] as! String
                                     let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
@@ -269,8 +269,10 @@ struct ThresholdKeyView: View {
                                     tkeyInitalized = false
                                     tkeyReconstructed = false
                                     resetAccount = false
-                                    alertContent = "Account reset"
+                                    alertContent = "Account reset successful"
+                                    // TODO: Reset application state to defaults
                                 } catch {
+                                    // This method should never fail
                                     alertContent = "Reset failed"
                                 }
                             }
@@ -279,8 +281,7 @@ struct ThresholdKeyView: View {
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }.disabled(!resetAccount)
-                        .opacity(!tkeyReconstructed ? 0.5 : 1)
+                    }
                 }
                 Section(header: Text("Security Question")) {
                     HStack {
