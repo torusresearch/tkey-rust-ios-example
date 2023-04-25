@@ -14,11 +14,13 @@ struct ThresholdKeyView: View {
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
     @State private var resetAccount = true
+    @State private var passwordLoading = false
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
 
     func resetAppState() {
         isLoading = true
+        passwordLoading = false
         totalShares = 0
         threshold = 0
         reconstructedKey = ""
@@ -108,6 +110,11 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     tkeyReconstructed = true
                                     resetAccount = false
+                                    let shareIndexes = try threshold_key.get_shares_indexes()
+                                    let share = try! threshold_key.output_share(shareIndex: shareIndexes[1], shareType: nil)
+                                    let saveId = fetchKey + ":1" //save the device share
+                                    print(shareIndexes)
+                                    try! KeychainInterface.save(item: share, key: saveId)
                                     return
                                 }
 
@@ -175,13 +182,9 @@ struct ThresholdKeyView: View {
                                         return
                                     }
                                     // import shares
-                                    // TODO: Handle failures of input_share gracefully. Its possible that locally available share was deleted.
                                     for item in shares {
                                         guard let _ = try? await threshold_key.input_share(share: item, shareType: nil) else {
-                                            alertContent = "Incorrect share was used"
-                                            showAlert = true
-                                            resetAccount = true
-                                            return
+                                            continue
                                         }
                                     }
 
@@ -272,31 +275,36 @@ struct ThresholdKeyView: View {
                         Text("Reset account")
                         Spacer()
                         Button(action: {
-                            Task {
-                                showAlert = true
-                                do {
+                            let alert = UIAlertController(title: "Reset Account", message: "This action will reset your account. Use it with extreme caution.", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            alert.addAction(UIAlertAction(title: "Reset", style: .destructive, handler: { _ in
+                                Task {
+                                    showAlert = true
+                                    alertContent = "Resetting your accuont.."
+                                    do {
+                                        let postboxkey = userData["privateKey"] as! String
+                                        let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+                                        let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+                                        let temp_threshold_key = try ThresholdKey(
+                                            storage_layer: temp_storage_layer,
+                                            service_provider: temp_service_provider,
+                                            enable_logging: true,
+                                            manual_sync: false)
 
-                                    // TODO: Add a confirmation popup here, inform that "This action will reset your account. Use it with extreme caution"
-                                    let postboxkey = userData["privateKey"] as! String
-                                    let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-                                    let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                    let temp_threshold_key = try ThresholdKey(
-                                        storage_layer: temp_storage_layer,
-                                        service_provider: temp_service_provider,
-                                        enable_logging: true,
-                                        manual_sync: false)
+                                        try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                        tkeyInitalized = false
+                                        tkeyReconstructed = false
+                                        resetAccount = false
+                                        alertContent = "Account reset successful"
 
-                                    try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
-                                    tkeyInitalized = false
-                                    tkeyReconstructed = false
-                                    resetAccount = false
-                                    alertContent = "Account reset successful"
-
-                                    resetAppState() // Allow reinitialize
-                                } catch {
-                                    // This method should never fail
-                                    alertContent = "Reset failed"
+                                        resetAppState() // Allow reinitialize
+                                    } catch {
+                                        alertContent = "Reset failed"
+                                    }
                                 }
+                            }))
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                             }
                         }) {
                             Text("")
@@ -304,38 +312,54 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+
                 }
                 Section(header: Text("Security Question")) {
                     HStack {
                         Text("Add password")
                         Spacer()
                         Button(action: {
-                            // TODO: allow users to input password in a popup.
-                            // TODO: add loader as well, API call could take a >3 seconds
-                            let question = "what's your password?"
-                            let answer = "blublu"
-                            Task {
-                                do {
-                                    let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
-                                    print(share.share_store, share.hex)
+                            let alert = UIAlertController(title: "Enter Password", message: nil, preferredStyle: .alert)
+                            alert.addTextField { textField in
+                                textField.placeholder = "Password"
+                            }
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                                guard let textField = alert?.textFields?.first, let answer = textField.text else { return }
+                                passwordLoading = true // show the loading indicator
+                                Task {
+                                    do {
+                                        let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: "what's your password?", answer: answer)
+                                        print(share.share_store, share.hex)
 
-                                    let key_details = try! threshold_key.get_key_details()
-                                    totalShares = Int(key_details.total_shares)
-                                    threshold = Int(key_details.threshold)
+                                        let key_details = try! threshold_key.get_key_details()
+                                        totalShares = Int(key_details.total_shares)
+                                        threshold = Int(key_details.threshold)
 
-                                    alertContent = "New password share created with password: \(answer)"
-                                    showAlert = true
-                                } catch {
-                                    alertContent = "Password share already exists"
-                                    showAlert = true
+                                        alertContent = "New password share created with password: \(answer)"
+                                        showAlert = true
+                                    } catch {
+                                        alertContent = "Password share already exists"
+                                        showAlert = true
+                                    }
+                                    passwordLoading = false
                                 }
+                            }))
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                             }
                         }) {
-                            Text("")
+                            if passwordLoading {
+                                ProgressView() // Show a loading indicator while isLoading is true
+                            } else {
+                                Text("")
+                            }
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+
+
 
                     HStack {
                         Text("Change password")
