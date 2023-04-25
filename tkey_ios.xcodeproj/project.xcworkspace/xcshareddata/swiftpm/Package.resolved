@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
       "state" : {
-        "revision" : "95c18f1c1bc44d5547728621ed680850368f7a45",
-        "version" : "1.7.0"
+        "revision" : "eee9ad754926c40a0f7e73f152357d37b119b7fa",
+        "version" : "1.7.1"
       }
     },
     {
@@ -60,7 +60,7 @@
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
         "branch" : "master",
-        "revision" : "0007047cfb47852cad9c3c6316e3c7793a133324"
+        "revision" : "bf319759b6f0aea0ee933e87f05693c25a641093"
       }
     },
     {
