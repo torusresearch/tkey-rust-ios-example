@@ -17,6 +17,9 @@ struct ThresholdKeyView: View {
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
     @State private var isLoadingAddPassword = false
+    @State private var isLoadingChangePassword = false
+    @State private var showInputPasswordAlert = false
+    @State private var password = ""
     
     func resetAppState() {
         isLoading = false
@@ -28,6 +31,20 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
+    }
+    
+    func changeQnA() async {
+        isLoadingChangePassword = true
+        let question = "what's your password?"
+        let answer = password
+        _ = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+        let key_details = try! threshold_key.get_key_details()
+        totalShares = Int(key_details.total_shares)
+        threshold = Int(key_details.threshold)
+
+        alertContent = "Password changed to: \(answer)"
+        showAlert = true
+        isLoadingChangePassword = false
     }
 
     var body: some View {
@@ -367,23 +384,31 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Change password")
                         Spacer()
+                        if isLoadingChangePassword {
+                            LoaderView()
+                        }
                         Button(action: {
-                            Task {
-                                let question = "what's your password?"
-                                let answer = "blublublu"
-                                _ = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
-
-                                alertContent = "Password changed to: \(answer)"
-                                showAlert = true
-                            }
-                        }) {
+                        Task {
+                            showInputPasswordAlert.toggle()
+                        }
+                        }){
                             Text("")
-                        }.alert(isPresented: $showAlert) {
+                        }.alert("Input Password", isPresented: $showInputPasswordAlert) {
+                            SecureField("New Password", text: $password)
+                            Button("Save", action: {
+                                Task {
+                                    await changeQnA()
+                                }
+                            })
+                            Button("Cancel", role: .cancel){}
+                        } message: {
+                            Text("Please enter new password")
+                        }
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
+                        .disabled(isLoadingChangePassword)
+                            .opacity(isLoadingChangePassword ? 0.5 : 1)
                     }
 
                     HStack {
