@@ -3,7 +3,7 @@ import tkey_pkg
 
 struct ThresholdKeyView: View {
     @State var userData: [String: Any]
-    @State private var isLoading = true
+    @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertContent = ""
     @State private var totalShares = 0
@@ -16,9 +16,10 @@ struct ThresholdKeyView: View {
     @State private var resetAccount = true
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
-
+    @State private var isLoadingAddPassword = false
+    
     func resetAppState() {
-        isLoading = true
+        isLoading = false
         totalShares = 0
         threshold = 0
         reconstructedKey = ""
@@ -51,6 +52,9 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Initialize and reconstruct tkey")
                         Spacer()
+                        if isLoading {
+                            LoaderView()
+                        }
                         Button(action: {
                             Task {
                                 isLoading = true
@@ -58,24 +62,28 @@ struct ThresholdKeyView: View {
                                 guard let fetchKey = userData["publicAddress"] as? String else {
                                     alertContent = "Failed to get public address from userinfo"
                                     showAlert = true
+                                    isLoading = false
                                     return
                                 }
 
                                 guard let postboxkey = userData["privateKey"] as? String else {
                                     alertContent = "Failed to get postboxkey"
                                     showAlert = true
+                                    isLoading = false
                                     return
                                 }
 
                                 guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                     alertContent = "Failed to create storage layer"
                                     showAlert = true
+                                    isLoading = false
                                     return
                                 }
 
                                 guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey) else {
                                     alertContent = "Failed to create service provider"
                                     showAlert = true
+                                    isLoading = false
                                     return
                                 }
 
@@ -86,6 +94,7 @@ struct ThresholdKeyView: View {
                                     manual_sync: false) else {
                                         alertContent = "Failed to create threshold key"
                                         showAlert = true
+                                        isLoading = false
                                         return
                                     }
 
@@ -94,6 +103,7 @@ struct ThresholdKeyView: View {
                                 guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
                                     alertContent = "Failed to get key details"
                                     showAlert = true
+                                    isLoading = false
                                     return
                                 }
 
@@ -108,6 +118,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     tkeyReconstructed = true
                                     resetAccount = false
+                                    isLoading = false
                                     return
                                 }
 
@@ -134,6 +145,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
                                         resetAccount = true
                                         showAlert = true
+                                        isLoading = false
                                         return
                                     }
 
@@ -148,6 +160,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Failed to output share"
                                             resetAccount = true
                                             showAlert = true
+                                            isLoading = false
                                             return
                                         }
 
@@ -155,6 +168,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Failed to save share"
                                             resetAccount = true
                                             showAlert = true
+                                            isLoading = false
                                             return
                                         }
                                     }
@@ -164,6 +178,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     tkeyReconstructed = true
                                     resetAccount = false
+                                    isLoading = false
                                 }
                                 // existing account
                                 else {
@@ -172,6 +187,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Not enough shares for reconstruction"
                                         showAlert = true
                                         resetAccount = true
+                                        isLoading = false
                                         return
                                     }
                                     // import shares
@@ -181,6 +197,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Incorrect share was used"
                                             showAlert = true
                                             resetAccount = true
+                                            isLoading = false
                                             return
                                         }
                                     }
@@ -189,6 +206,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
+                                        isLoading = false
                                         return
                                     }
 
@@ -202,7 +220,10 @@ struct ThresholdKeyView: View {
                             }
                         }) {
                             Text("")
-                        }.alert(isPresented: $showAlert) {
+                        }
+                        .disabled(isLoading)
+                        .opacity(isLoading ? 0.5 : 1)
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -309,6 +330,9 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Add password")
                         Spacer()
+                        if isLoadingAddPassword {
+                            LoaderView()
+                        }
                         Button(action: {
                             // TODO: allow users to input password in a popup.
                             // TODO: add loader as well, API call could take a >3 seconds
@@ -316,6 +340,7 @@ struct ThresholdKeyView: View {
                             let answer = "blublu"
                             Task {
                                 do {
+                                    isLoadingAddPassword = true
                                     let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
                                     print(share.share_store, share.hex)
 
@@ -329,13 +354,15 @@ struct ThresholdKeyView: View {
                                     alertContent = "Password share already exists"
                                     showAlert = true
                                 }
+                                isLoadingAddPassword = false
                             }
                         }) {
                             Text("")
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled(isLoadingAddPassword)
+                        .opacity(isLoadingAddPassword ? 0.5 : 1)
 
                     HStack {
                         Text("Change password")
