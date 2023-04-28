@@ -1,9 +1,12 @@
 import SwiftUI
 import tkey_pkg
 
+enum SpinnerLocation {
+    case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
+}
+
 struct ThresholdKeyView: View {
     @State var userData: [String: Any]
-    @State private var isLoading = true
     @State private var showAlert = false
     @State private var alertContent = ""
     @State private var totalShares = 0
@@ -16,9 +19,11 @@ struct ThresholdKeyView: View {
     @State private var resetAccount = true
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
-
+    @State private var showInputPasswordAlert = false
+    @State private var password = ""
+    @State private var showSpinner = SpinnerLocation.nowhere
+    
     func resetAppState() {
-        isLoading = true
         totalShares = 0
         threshold = 0
         reconstructedKey = ""
@@ -29,6 +34,13 @@ struct ThresholdKeyView: View {
         resetAccount = true
     }
 
+    func randomPassword() -> String {
+        let len = 12 //or higher
+        let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()0123456789"
+        let rndPswd = String((0..<len).compactMap{ _ in pswdChars.randomElement() })
+        return rndPswd
+    }
+    
     var body: some View {
         VStack {
             HStack {
@@ -51,31 +63,38 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Initialize and reconstruct tkey")
                         Spacer()
+                        if (showSpinner == SpinnerLocation.init_reconstruct_btn) {
+                            LoaderView()
+                        }
                         Button(action: {
                             Task {
-                                isLoading = true
+                                showSpinner = SpinnerLocation.init_reconstruct_btn
 
                                 guard let fetchKey = userData["publicAddress"] as? String else {
                                     alertContent = "Failed to get public address from userinfo"
                                     showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
                                 guard let postboxkey = userData["privateKey"] as? String else {
                                     alertContent = "Failed to get postboxkey"
                                     showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
                                 guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                     alertContent = "Failed to create storage layer"
                                     showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
                                 guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey) else {
                                     alertContent = "Failed to create service provider"
                                     showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
@@ -86,6 +105,7 @@ struct ThresholdKeyView: View {
                                     manual_sync: false) else {
                                         alertContent = "Failed to create threshold key"
                                         showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
 
@@ -94,6 +114,7 @@ struct ThresholdKeyView: View {
                                 guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
                                     alertContent = "Failed to get key details"
                                     showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
@@ -108,6 +129,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     tkeyReconstructed = true
                                     resetAccount = false
+                                    showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
 
@@ -134,6 +156,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
                                         resetAccount = true
                                         showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
 
@@ -148,6 +171,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Failed to output share"
                                             resetAccount = true
                                             showAlert = true
+                                            showSpinner = SpinnerLocation.nowhere
                                             return
                                         }
 
@@ -155,6 +179,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Failed to save share"
                                             resetAccount = true
                                             showAlert = true
+                                            showSpinner = SpinnerLocation.nowhere
                                             return
                                         }
                                     }
@@ -164,6 +189,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     tkeyReconstructed = true
                                     resetAccount = false
+                                    showSpinner = SpinnerLocation.nowhere
                                 }
                                 // existing account
                                 else {
@@ -172,6 +198,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Not enough shares for reconstruction"
                                         showAlert = true
                                         resetAccount = true
+                                        showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
                                     // import shares
@@ -181,6 +208,7 @@ struct ThresholdKeyView: View {
                                             alertContent = "Incorrect share was used"
                                             showAlert = true
                                             resetAccount = true
+                                            showSpinner = SpinnerLocation.nowhere
                                             return
                                         }
                                     }
@@ -189,6 +217,7 @@ struct ThresholdKeyView: View {
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
 
@@ -198,11 +227,14 @@ struct ThresholdKeyView: View {
                                     tkeyReconstructed = true
                                     resetAccount = false
                                 }
-                                isLoading = false
+                                showSpinner = SpinnerLocation.nowhere
                             }
                         }) {
                             Text("")
-                        }.alert(isPresented: $showAlert) {
+                        }
+                        .disabled(showSpinner == SpinnerLocation.init_reconstruct_btn)
+                        .opacity(showSpinner == SpinnerLocation.init_reconstruct_btn ? 0.5 : 1)
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -309,54 +341,85 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Add password")
                         Spacer()
+                        if showSpinner == SpinnerLocation.add_password_btn {
+                            LoaderView()
+                        }
                         Button(action: {
                             // TODO: allow users to input password in a popup.
                             // TODO: add loader as well, API call could take a >3 seconds
                             let question = "what's your password?"
-                            let answer = "blublu"
+                            let answer = randomPassword()
                             Task {
                                 do {
+                                    showSpinner = SpinnerLocation.add_password_btn
                                     let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
                                     print(share.share_store, share.hex)
 
-                                    let key_details = try! threshold_key.get_key_details()
+                                    let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
 
-                                    alertContent = "New password share created with password: \(answer)"
+                                    alertContent = "New password share created with random password: \(answer)"
                                     showAlert = true
                                 } catch {
                                     alertContent = "Password share already exists"
                                     showAlert = true
                                 }
+                                showSpinner = SpinnerLocation.nowhere
                             }
                         }) {
                             Text("")
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled(showSpinner == SpinnerLocation.add_password_btn)
+                        .opacity(showSpinner == SpinnerLocation.add_password_btn ? 0.5 : 1)
 
                     HStack {
                         Text("Change password")
                         Spacer()
+                        if showSpinner == SpinnerLocation.change_password_btn {
+                            LoaderView()
+                        }
                         Button(action: {
-                            Task {
-                                let question = "what's your password?"
-                                let answer = "blublublu"
-                                _ = try! await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
-                                let key_details = try! threshold_key.get_key_details()
-                                totalShares = Int(key_details.total_shares)
-                                threshold = Int(key_details.threshold)
-
-                                alertContent = "Password changed to: \(answer)"
-                                showAlert = true
-                            }
-                        }) {
+                        Task {
+                            showInputPasswordAlert.toggle()
+                        }
+                        }){
                             Text("")
-                        }.alert(isPresented: $showAlert) {
+                        }.alert("Input Password", isPresented: $showInputPasswordAlert) {
+                            SecureField("New Password", text: $password)
+                            Button("Save", action: {
+                                Task {
+                                    do {
+                                        showSpinner = SpinnerLocation.change_password_btn
+                                        let question = "what's your password?"
+                                        let answer = password
+                                        // reset the password var to empty. we would not want to keep secret in state for longer.
+                                        password = ""
+                                        _ = try await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                        let key_details = try threshold_key.get_key_details()
+                                        totalShares = Int(key_details.total_shares)
+                                        threshold = Int(key_details.threshold)
+
+                                        alertContent = "Password changed to: \(answer)"
+                                        showAlert = true
+                                    } catch {
+                                        alertContent = "An unexpected error occured while changing password."
+                                        showAlert = true
+                                    }
+                                    showSpinner = SpinnerLocation.nowhere
+                                }
+                            })
+                            Button("Cancel", role: .cancel){}
+                        } message: {
+                            Text("Please enter new password")
+                        }
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
+                        .disabled(showSpinner == SpinnerLocation.change_password_btn)
+                        .opacity(showSpinner == SpinnerLocation.change_password_btn ? 0.5 : 1)
                     }
 
                     HStack {
