@@ -355,7 +355,7 @@ struct ThresholdKeyView: View {
                                     let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
                                     print(share.share_store, share.hex)
 
-                                    let key_details = try! threshold_key.get_key_details()
+                                    let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
 
