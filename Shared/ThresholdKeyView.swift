@@ -34,6 +34,13 @@ struct ThresholdKeyView: View {
         resetAccount = true
     }
 
+    func randomPassword() -> String {
+        let len = 6
+        let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        let rndPswd = String((0..<len).compactMap{ _ in pswdChars.randomElement() })
+        return rndPswd
+    }
+    
     var body: some View {
         VStack {
             HStack {
@@ -341,7 +348,7 @@ struct ThresholdKeyView: View {
                             // TODO: allow users to input password in a popup.
                             // TODO: add loader as well, API call could take a >3 seconds
                             let question = "what's your password?"
-                            let answer = "blublu"
+                            let answer = randomPassword()
                             Task {
                                 do {
                                     showSpinner = SpinnerLocation.add_password_btn
@@ -352,7 +359,7 @@ struct ThresholdKeyView: View {
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
 
-                                    alertContent = "New password share created with password: \(answer)"
+                                    alertContent = "New password share created with random password: \(answer)"
                                     showAlert = true
                                 } catch {
                                     alertContent = "Password share already exists"
@@ -388,15 +395,19 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.change_password_btn
                                         let question = "what's your password?"
                                         let answer = password
+                                        // reset the password var to empty. we would not want to keep secret in state for longer.
+                                        password = ""
                                         _ = try await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
-                                        let key_details = try! threshold_key.get_key_details()
+                                        let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
 
                                         alertContent = "Password changed to: \(answer)"
                                         showAlert = true
                                     } catch {
-                                        
+                                        print("Unexpected error: \(error).")
+                                        alertContent = "An unexpected error occured while changing password."
+                                        showAlert = true
                                     }
                                     showSpinner = SpinnerLocation.nowhere
                                 }
