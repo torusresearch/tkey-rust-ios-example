@@ -405,7 +405,6 @@ struct ThresholdKeyView: View {
                                         alertContent = "Password changed to: \(answer)"
                                         showAlert = true
                                     } catch {
-                                        print("Unexpected error: \(error).")
                                         alertContent = "An unexpected error occured while changing password."
                                         showAlert = true
                                     }
