@@ -35,7 +35,7 @@ struct ThresholdKeyView: View {
     }
 
     func randomPassword() -> String {
-        let len = 6
+        let len = 12 //or higher
         let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
         let rndPswd = String((0..<len).compactMap{ _ in pswdChars.randomElement() })
         return rndPswd
