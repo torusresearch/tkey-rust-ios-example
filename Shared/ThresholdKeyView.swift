@@ -111,9 +111,19 @@ struct ThresholdKeyView: View {
                                     tkeyReconstructed = true
                                     resetAccount = false
                                     let shareIndexes = try threshold_key.get_shares_indexes()
-                                    let share = try! threshold_key.output_share(shareIndex: shareIndexes[1], shareType: nil)
-                                    let saveId = fetchKey + ":1" //save the device share
-                                    print(shareIndexes)
+                                    
+                                    // let's get the device share index
+                                    var deviceShareIndex = ""
+                                    // "1" is for the social login share
+                                    if shareIndexes[0] == "1" {
+                                        deviceShareIndex = shareIndexes[1]
+                                    } else {
+                                        deviceShareIndex = shareIndexes[0]
+                                    }
+                                    
+                                    let share = try! threshold_key.output_share(shareIndex: deviceShareIndex, shareType: nil)
+                                    let saveId = fetchKey + ":0"
+                                    //save the device share
                                     try! KeychainInterface.save(item: share, key: saveId)
                                     return
                                 }
@@ -133,22 +143,14 @@ struct ThresholdKeyView: View {
                                     }
                                     shareCount += 1
                                 } while !finishedFetch
-
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
-                                    // Attempt reconstruction
-                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
-                                        resetAccount = true
-                                        showAlert = true
-                                        return
-                                    }
-
-                                    // save shares up to required threshold
                                     let shareIndexes = try threshold_key.get_shares_indexes()
 
-                                    // TODO: Save only one share, which is device share and not all shares.
-                                    for i in 0..<threshold {
+                                    for i in 0..<shareIndexes.count {
+                                        if shareIndexes[Int(i)] == "1" {
+                                            continue
+                                        }
                                         let saveId = fetchKey + ":" + String(i)
 
                                         guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)], shareType: nil) else {
@@ -164,6 +166,16 @@ struct ThresholdKeyView: View {
                                             showAlert = true
                                             return
                                         }
+                                        
+                                        // save only one share which will be device share, so break here
+                                        break
+                                    }
+                                    
+                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        resetAccount = true
+                                        showAlert = true
+                                        return
                                     }
 
                                     reconstructedKey = reconstructionDetails.key
@@ -174,21 +186,17 @@ struct ThresholdKeyView: View {
                                 }
                                 // existing account
                                 else {
-                                    // check enough shares are available
-                                    if shareCount < threshold {
-                                        alertContent = "Not enough shares for reconstruction"
-                                        showAlert = true
-                                        resetAccount = true
-                                        return
-                                    }
                                     // import shares
                                     for item in shares {
-                                        guard let _ = try? await threshold_key.input_share(share: item, shareType: nil) else {
-                                            continue
+                                        do {
+                                            _ = try await threshold_key.input_share(share: item, shareType: nil)
+                                        } catch {
+                                            print(error)
                                         }
                                     }
 
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
@@ -209,6 +217,72 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+                    
+                    HStack {
+                        Text("Enter SecurityQuestion password and reconstruct tkey & save share locally")
+                        Spacer()
+                        Button(action: {
+                            let alert = UIAlertController(title: "Enter Password", message: nil, preferredStyle: .alert)
+                            alert.addTextField { textField in
+                                textField.placeholder = "Password"
+                            }
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                                guard let textField = alert?.textFields?.first, let answer = textField.text else { return }
+                                Task {
+                                    do {
+                                        
+                                        let result = try await SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer)
+                                        if result {
+                                            // save this share locally
+                                            let shareIndexes = try threshold_key.get_shares_indexes()
+                                            
+                                            // let's get the device share index
+                                            var securityQuestionShareIndex = ""
+                                            if shareIndexes[0] == "1" {
+                                                securityQuestionShareIndex = shareIndexes[1]
+                                            } else {
+                                                securityQuestionShareIndex = shareIndexes[0]
+                                            }
+                                            
+                                            let share = try! threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
+                                            
+                                            guard let fetchKey = userData["publicAddress"] as? String else {
+                                                alertContent = "Failed to get public address from userinfo"
+                                                showAlert = true
+                                                return
+                                            }
+                                            
+                                            let saveId = fetchKey + ":0"
+                                            //save the security question share locally
+                                            try! KeychainInterface.save(item: share, key: saveId)
+                                            
+                                            let detail = try! await threshold_key.reconstruct()
+                                            reconstructedKey = detail.key
+                                            alertContent = "\(reconstructedKey) is the private key"
+                                            showAlert = true
+                                            tkeyReconstructed = true
+                                            resetAccount = false
+                                            
+                                        } else {
+                                            alertContent = "password incorrect"
+                                        }
+                                    } catch {
+                                        alertContent = "Password share input failed"
+                                    }
+                                    showAlert = true
+                                }
+                            }))
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                            }
+                        }) {
+                                Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }
+                    
                     HStack {
                         Text("Get key details")
                         Spacer()
@@ -358,6 +432,7 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+                
 
 
 
