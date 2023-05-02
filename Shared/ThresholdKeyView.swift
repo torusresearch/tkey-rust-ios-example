@@ -244,16 +244,17 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-                                let key_details = try? threshold_key.get_key_details()
-                                if key_details == nil {
+                                do {
+                                    let key_details = try threshold_key.get_key_details()
+                                    totalShares = Int(key_details.total_shares)
+                                    threshold = Int(key_details.threshold)
+                                        alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key\n threshold : \(threshold)\n pub_key: (\(try key_details.pub_key.getX()) , \(try! key_details.pub_key.getY())) \n share_descriptions: \(key_details.share_descriptions)"
+                                    showAlert = true
+                                } catch {
                                     alertContent = "get key details failed"
                                     showAlert = true
-                                } else{
-                                    totalShares = Int(key_details!.total_shares)
-                                    threshold = Int(key_details!.threshold)
-                                        alertContent = "You have \(totalShares) shares. \(key_details!.required_shares) are required to reconstruct the final key\n threshold : \(threshold)\n pub_key: (\(try! key_details!.pub_key.getX()) , \(try! key_details!.pub_key.getY())) \n share_descriptions: \(key_details!.share_descriptions)"
-                                    showAlert = true
                                 }
+                                
                             }
                         }) {
                             Text("")
@@ -268,22 +269,19 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
-                                let shares = try? await threshold_key.generate_new_share()
-                                if shares == nil {
-                                    alertContent = "generate new share failed"
-                                    showAlert = true
-                                } else {
-                                    let index = shares!.hex
-                                    let key_details = try! threshold_key.get_key_details()
+                                do {
+                                    let shares = try await threshold_key.generate_new_share()
+                                    let index = shares.hex
+                                    let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
                                     shareIndexCreated = index
                                     alertContent = "You have \(totalShares) shares. New share with index, \(index) was created"
                                     showAlert = true
+                                } catch {
+                                    alertContent = "generate new share failed"
+                                    showAlert = true
                                 }
-
-
                             }
                         }) {
                             Text("")
@@ -300,7 +298,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 do {
                                     try await threshold_key.delete_share(share_index: shareIndexCreated)
-                                    let key_details = try! threshold_key.get_key_details()
+                                    let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
                                     alertContent = "You have \(totalShares) shares. Share index, \(shareIndexCreated) was deleted"
@@ -449,19 +447,17 @@ struct ThresholdKeyView: View {
                         Spacer()
                         Button(action: {
                             Task {
-
-                                let data = try? SecurityQuestionModule.get_answer(threshold_key: threshold_key)
-                                if data == nil {
-                                    alertContent = "show password failed"
-                                } else {
-                                    let key_details = try! threshold_key.get_key_details()
+                                do {
+                                    let data = try SecurityQuestionModule.get_answer(threshold_key: threshold_key)
+                                    let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
-
-
-                                    alertContent = "Password is: \(data!)"
+                                    alertContent = "Password is: \(data)"
+                                    showAlert = true
+                                } catch {
+                                    alertContent = "show password failed"
+                                    showAlert = true
                                 }
-                                showAlert = true
                             }
                         }) {
                             Text("")
