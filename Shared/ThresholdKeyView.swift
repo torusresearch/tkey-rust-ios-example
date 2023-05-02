@@ -583,7 +583,6 @@ struct ThresholdKeyView: View {
                                     alertContent = "serialize result is \(result)"
                                     showAlert = true
                                 } catch {
-                                    // Handle the error here
                                     alertContent = "Export share failed: \(error.localizedDescription)"
                                     showAlert = true
                                 }
