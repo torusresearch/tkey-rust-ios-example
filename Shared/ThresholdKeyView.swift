@@ -25,7 +25,6 @@ struct ThresholdKeyView: View {
     @State private var showSpinner = SpinnerLocation.nowhere
     
     func resetAppState() {
-        isLoading = true
         passwordLoading = false
         totalShares = 0
         threshold = 0
