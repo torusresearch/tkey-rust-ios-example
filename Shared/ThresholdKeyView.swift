@@ -248,7 +248,8 @@ struct ThresholdKeyView: View {
                                     let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
-                                        alertContent = "You have \(totalShares) shares. \(key_details.required_shares) are required to reconstruct the final key\n threshold : \(threshold)\n pub_key: (\(try key_details.pub_key.getX()) , \(try! key_details.pub_key.getY())) \n share_descriptions: \(key_details.share_descriptions)"
+alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
+                                showAlert = true
                                     showAlert = true
                                 } catch {
                                     alertContent = "get key details failed"
