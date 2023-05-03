@@ -1,7 +1,8 @@
 #  Tkey ios example application document
 
 After building complete, you can login via your google account.
-Clicking this button will make account for you, using customAuth sdk.
+If you don't have tKey, you can make your own tkey account by clicking this button, using customAuth sdk.
+If you already have your account, existing account can be used as well.
 
 Once you're logged in, you can run a number of tkey-related functions.
 Buttons allow you to test various modules and tkey built-in functions.
@@ -9,11 +10,13 @@ Buttons allow you to test various modules and tkey built-in functions.
 ## Main Page
 ![image](mainPage.png)
 
-### how to start/Users/janghyeong-gyu/workspace/web3auth/tkey-rust-ios-example/mainPage.png
+### how to start
 
 Once you have the final tkey from initialize and reconstruct tkey, you can test all the features.
-The first time you run Initialize and reconstruct tkey, two shares will be created and the threshold will be set to two.
+The first time you run `Initialize and reconstruct tkey`, two shares will be created and the threshold will be set to two.
 This means that both shares will be required for login. (2/2 setting)
+
+On the other hand, if you log in with an existing account, you would need to have the saved shares for the reconstruction to succeed.
 
 ### testing on multiple device
 If you want to test logging in with the same google account on different devices, you need to set up additional settings.
