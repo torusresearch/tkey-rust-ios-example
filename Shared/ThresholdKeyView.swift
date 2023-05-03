@@ -521,7 +521,7 @@ struct ThresholdKeyView: View {
                                 do {
                                     let seedResult = try SeedPhraseModule.get_seed_phrases(threshold_key: threshold_key)
                                     if seedResult.isEmpty {
-                                        alertContent = "get seed phrase failed"
+                                        alertContent = "No seed phrases set"
                                     } else {
                                         alertContent = "seed phrase is `\(seedResult[0].seedPhrase)`"
                                     }
