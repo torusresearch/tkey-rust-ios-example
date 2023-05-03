@@ -142,10 +142,10 @@ struct ThresholdKeyView: View {
                                         deviceShareIndex = shareIndexes[0]
                                     }
                                     
-                                    let share = try! threshold_key.output_share(shareIndex: deviceShareIndex, shareType: nil)
+                                    let share = try threshold_key.output_share(shareIndex: deviceShareIndex, shareType: nil)
                                     let saveId = fetchKey + ":0"
                                     //save the device share
-                                    try! KeychainInterface.save(item: share, key: saveId)
+                                    try KeychainInterface.save(item: share, key: saveId)
                                     showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
@@ -211,14 +211,16 @@ struct ThresholdKeyView: View {
                                 }
                                 // existing account
                                 else {
-
                                     // import shares
                                     for item in shares {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            print(error)
+                                            alertContent = "Incorrect share was used"
+                                            showAlert = true
+                                            resetAccount = true
                                             showSpinner = SpinnerLocation.nowhere
+                                            return
                                         }
                                     }
 
@@ -276,7 +278,7 @@ struct ThresholdKeyView: View {
                                                 securityQuestionShareIndex = shareIndexes[0]
                                             }
                                             
-                                            let share = try! threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
+                                            let share = try threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
                                             
                                             guard let fetchKey = userData["publicAddress"] as? String else {
                                                 alertContent = "Failed to get public address from userinfo"
@@ -286,9 +288,16 @@ struct ThresholdKeyView: View {
                                             
                                             let saveId = fetchKey + ":0"
                                             //save the security question share locally
-                                            try! KeychainInterface.save(item: share, key: saveId)
+                                            try KeychainInterface.save(item: share, key: saveId)
                                             
-                                            let detail = try! await threshold_key.reconstruct()
+                                            guard let detail = try? await threshold_key.reconstruct() else {
+                                                
+                                                alertContent = "Failed to reconstruct key."
+                                                resetAccount = true
+                                                showAlert = true
+                                                showSpinner = SpinnerLocation.nowhere
+                                                return
+                                            }
                                             reconstructedKey = detail.key
                                             alertContent = "\(reconstructedKey) is the private key"
                                             showAlert = true
@@ -440,7 +449,7 @@ struct ThresholdKeyView: View {
                                         let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: "what's your password?", answer: answer)
                                         print(share.share_store, share.hex)
 
-                                        let key_details = try! threshold_key.get_key_details()
+                                        let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
 
