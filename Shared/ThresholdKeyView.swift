@@ -17,15 +17,14 @@ struct ThresholdKeyView: View {
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
     @State private var resetAccount = true
-    @State private var passwordLoading = false
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
     @State private var showInputPasswordAlert = false
+    @State private var showChangePasswordAlert = false
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
     
     func resetAppState() {
-        passwordLoading = false
         totalShares = 0
         threshold = 0
         reconstructedKey = ""
@@ -34,13 +33,6 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
-    }
-
-    func randomPassword() -> String {
-        let len = 12 //or higher
-        let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()0123456789"
-        let rndPswd = String((0..<len).compactMap{ _ in pswdChars.randomElement() })
-        return rndPswd
     }
     
     var body: some View {
@@ -465,6 +457,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                         threshold = Int(key_details.threshold)
 
                                         alertContent = "New password share created with password: \(password)"
+                                        password = ""
                                         showAlert = true
                                     } catch {
                                         alertContent = "Generate new share with password failed. It's because password share already exists, or execution went wrong"
@@ -475,7 +468,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                             })
                             Button("Cancel", role: .cancel){}
                         } message: {
-                            Text("Enter the password")
+                            Text("Enter the password and generate new security question share")
                         }
                         .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
@@ -496,11 +489,11 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                         Button(action: {
 
                         Task {
-                            showInputPasswordAlert.toggle()
+                            showChangePasswordAlert.toggle()
                         }
                         }){
                             Text("")
-                        }.alert("Input Password", isPresented: $showInputPasswordAlert) {
+                        }.alert("Change Password", isPresented: $showChangePasswordAlert) {
                             SecureField("New Password", text: $password)
                             Button("Save", action: {
                                 Task {
