@@ -32,6 +32,8 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
+        // remove any data saved to keychain for this app
+        // TODO: remove data for affected account
         let secItemClasses = [kSecClassGenericPassword,
             kSecClassInternetPassword,
             kSecClassCertificate,
