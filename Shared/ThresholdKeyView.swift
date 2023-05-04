@@ -167,34 +167,28 @@ struct ThresholdKeyView: View {
                                 } while !finishedFetch
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
-                                    let shareIndexes = try threshold_key.get_shares_indexes()
+                                    var shareIndexes = try threshold_key.get_shares_indexes()
+                                    shareIndexes.removeAll(where: {$0 == "1"})
+                                   
+                                    let saveId = fetchKey + ":0"
 
-                                    for i in 0..<shareIndexes.count {
-                                        if shareIndexes[Int(i)] == "1" {
-                                            continue
-                                        }
-                                        let saveId = fetchKey + ":" + String(i)
+                                    guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[0], shareType: nil) else {
+                                        alertContent = "Failed to output share"
+                                        resetAccount = true
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
 
-                                        guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)], shareType: nil) else {
-                                            alertContent = "Failed to output share"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
-                                            alertContent = "Failed to save share"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-                                        
-                                        // save only one share which will be device share, so break here
-                                        break
+                                    guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
+                                        alertContent = "Failed to save share"
+                                        resetAccount = true
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
                                     }
                                     
+                                
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
                                         alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
                                         resetAccount = true
@@ -216,11 +210,7 @@ struct ThresholdKeyView: View {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            alertContent = "Incorrect share was used"
-                                            showAlert = true
-                                            resetAccount = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
+                                            print("Incorrect share was used")
                                         }
                                     }
 
