@@ -32,6 +32,16 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
+        let secItemClasses = [kSecClassGenericPassword,
+            kSecClassInternetPassword,
+            kSecClassCertificate,
+            kSecClassKey,
+            kSecClassIdentity]
+        for secItemClass in secItemClasses {
+            let dictionary = [kSecClass as String: secItemClass]
+            SecItemDelete(dictionary as CFDictionary)
+        }
+
     }
 
     func randomPassword() -> String {
