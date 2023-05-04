@@ -426,50 +426,47 @@ struct ThresholdKeyView: View {
                             LoaderView()
                         }
                         Button(action: {
-                            let alert = UIAlertController(title: "Enter Password", message: nil, preferredStyle: .alert)
-                            alert.addTextField { textField in
-                                textField.placeholder = "Password"
-                            }
-                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
-                                guard let textField = alert?.textFields?.first, let answer = textField.text else { return }
-                                passwordLoading = true // show the loading indicator
+                        Task {
+                            showInputPasswordAlert.toggle()
+                        }
+                        }){
+                            Text("")
+                        }.alert("Enter Password", isPresented: $showInputPasswordAlert) {
+                            SecureField("Password", text: $password)
+                            Button("Save", action: {
                                 Task {
                                     do {
-                                        let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: "what's your password?", answer: answer)
-                                        print(share.share_store, share.hex)
+                                        showSpinner = SpinnerLocation.add_password_btn
+                                        let question = "what's your password?"
+                                        print("==",password)
+                                        let _ = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: password)
 
                                         let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
 
-                                        alertContent = "New password share created with password: \(answer)"
+                                        alertContent = "New password share created with password: \(password)"
                                         showAlert = true
                                     } catch {
-                                        alertContent = "Password share already exists"
+                                        alertContent = "An unexpected error occured while changing password."
                                         showAlert = true
                                     }
-                                    passwordLoading = false
                                     showSpinner = SpinnerLocation.nowhere
-
                                 }
-                            }))
-                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
-
-                            }
-                        }) {
-                            if passwordLoading {
-                                ProgressView() // Show a loading indicator while isLoading is true
-                            } else {
-                                Text("")
-                            }
-                        }.alert(isPresented: $showAlert) {
+                            })
+                            Button("Cancel", role: .cancel){}
+                        } message: {
+                            Text("Enter the password")
+                        }
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-
-                    }.disabled(showSpinner == SpinnerLocation.add_password_btn)
-                        .opacity(showSpinner == SpinnerLocation.add_password_btn ? 0.5 : 1)
+                        .disabled(showSpinner == SpinnerLocation.change_password_btn)
+                        .opacity(showSpinner == SpinnerLocation.change_password_btn ? 0.5 : 1)
+                    
+                    }
+ 
+                     
 
                     HStack {
                         Text("Change password")
