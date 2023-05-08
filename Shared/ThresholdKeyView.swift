@@ -168,7 +168,7 @@ struct ThresholdKeyView: View {
                                     for i in 0..<threshold {
                                         let saveId = fetchKey + ":" + String(i)
 
-                                        guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)], shareType: nil) else {
+                                        guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)]) else {
                                             alertContent = "Failed to output share"
                                             resetAccount = true
                                             showAlert = true
@@ -577,9 +577,9 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     threshold = Int(key_details.threshold)
                                     shareIndexCreated = index
 
-                                    let shareOut = try threshold_key.output_share(shareIndex: index, shareType: nil)
+                                    let shareOut = try threshold_key.output_share(shareIndex: index)
 
-                                    let result = try ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                                    let result = try ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut)
                                     alertContent = "serialize result is \(result)"
                                     showAlert = true
                                 } catch {
