@@ -22,7 +22,7 @@ struct ThresholdKeyView: View {
     @State private var showInputPasswordAlert = false
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
-    
+
     func resetAppState() {
         totalShares = 0
         threshold = 0
@@ -32,15 +32,27 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
+        // remove any data saved to keychain for this app
+        // TODO: remove data for affected account
+        let secItemClasses = [kSecClassGenericPassword,
+            kSecClassInternetPassword,
+            kSecClassCertificate,
+            kSecClassKey,
+            kSecClassIdentity]
+        for secItemClass in secItemClasses {
+            let dictionary = [kSecClass as String: secItemClass]
+            SecItemDelete(dictionary as CFDictionary)
+        }
+
     }
 
     func randomPassword() -> String {
-        let len = 12 //or higher
+        let len = 12 // or higher
         let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()0123456789"
-        let rndPswd = String((0..<len).compactMap{ _ in pswdChars.randomElement() })
+        let rndPswd = String((0..<len).compactMap { _ in pswdChars.randomElement() })
         return rndPswd
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -63,7 +75,7 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Initialize and reconstruct tkey")
                         Spacer()
-                        if (showSpinner == SpinnerLocation.init_reconstruct_btn) {
+                        if showSpinner == SpinnerLocation.init_reconstruct_btn {
                             LoaderView()
                         }
                         Button(action: {
@@ -109,7 +121,6 @@ struct ThresholdKeyView: View {
                                         return
                                     }
 
-
                                 threshold_key = thresholdKey
 
                                 guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
@@ -122,17 +133,6 @@ struct ThresholdKeyView: View {
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
                                 tkeyInitalized = true
-                                
-                                let reconstructionDetails = try? await threshold_key.reconstruct()
-                                if reconstructionDetails != nil {
-                                    reconstructedKey = reconstructionDetails!.key
-                                    alertContent = "\(reconstructedKey) is the private key"
-                                    showAlert = true
-                                    tkeyReconstructed = true
-                                    resetAccount = false
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
-                                }
 
                                 // fetch all locally available shares for this google account
                                 var shares: [String] = []
@@ -255,7 +255,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     alertContent = "get key details failed"
                                     showAlert = true
                                 }
-                                
+
                             }
                         }) {
                             Text("")
@@ -405,7 +405,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                         Task {
                             showInputPasswordAlert.toggle()
                         }
-                        }){
+                        }) {
                             Text("")
                         }.alert("Input Password", isPresented: $showInputPasswordAlert) {
                             SecureField("New Password", text: $password)
@@ -431,7 +431,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     showSpinner = SpinnerLocation.nowhere
                                 }
                             })
-                            Button("Cancel", role: .cancel){}
+                            Button("Cancel", role: .cancel) {}
                         } message: {
                             Text("Please enter new password")
                         }
@@ -552,7 +552,6 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     alertContent = "delete seed phrase failed"
                                 }
 
-
                                 showAlert = true
                             }
                         }) {
@@ -607,7 +606,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                 do {
                                     let key_module = try PrivateKey.generate()
                                     let result = try await PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
-                                    
+
                                     if result {
                                         alertContent = "Setting private key completed"
                                     } else {
