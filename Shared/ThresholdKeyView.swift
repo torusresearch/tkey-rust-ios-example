@@ -23,7 +23,7 @@ struct ThresholdKeyView: View {
     @State private var showChangePasswordAlert = false
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
-    
+
     func resetAppState() {
         totalShares = 0
         threshold = 0
@@ -33,6 +33,17 @@ struct ThresholdKeyView: View {
         tkeyInitalized = false
         tkeyReconstructed = false
         resetAccount = true
+        // remove any data saved to keychain for this app
+        // TODO: remove data for affected account
+        let secItemClasses = [kSecClassGenericPassword,
+            kSecClassInternetPassword,
+            kSecClassCertificate,
+            kSecClassKey,
+            kSecClassIdentity]
+        for secItemClass in secItemClasses {
+            let dictionary = [kSecClass as String: secItemClass]
+            SecItemDelete(dictionary as CFDictionary)
+        }
     }
     
     var body: some View {
@@ -57,7 +68,7 @@ struct ThresholdKeyView: View {
                     HStack {
                         Text("Initialize and reconstruct tkey")
                         Spacer()
-                        if (showSpinner == SpinnerLocation.init_reconstruct_btn) {
+                        if showSpinner == SpinnerLocation.init_reconstruct_btn {
                             LoaderView()
                         }
                         Button(action: {
@@ -116,32 +127,6 @@ struct ThresholdKeyView: View {
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
                                 tkeyInitalized = true
-                                
-                                let reconstructionDetails = try? await threshold_key.reconstruct()
-                                if reconstructionDetails != nil {
-                                    reconstructedKey = reconstructionDetails!.key
-                                    alertContent = "\(reconstructedKey) is the private key"
-                                    showAlert = true
-                                    tkeyReconstructed = true
-                                    resetAccount = false
-                                    let shareIndexes = try threshold_key.get_shares_indexes()
-                                    
-                                    // let's get the device share index
-                                    var deviceShareIndex = ""
-                                    // "1" is for the social login share
-                                    if shareIndexes[0] == "1" {
-                                        deviceShareIndex = shareIndexes[1]
-                                    } else {
-                                        deviceShareIndex = shareIndexes[0]
-                                    }
-                                    
-                                    let share = try threshold_key.output_share(shareIndex: deviceShareIndex, shareType: nil)
-                                    let saveId = fetchKey + ":0"
-                                    //save the device share
-                                    try KeychainInterface.save(item: share, key: saveId)
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
-                                }
 
                                 // fetch all locally available shares for this google account
                                 var shares: [String] = []
