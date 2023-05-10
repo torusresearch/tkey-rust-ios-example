@@ -163,6 +163,7 @@ struct ThresholdKeyView: View {
                                         return
                                     }
 
+
                                     guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
                                         alertContent = "Failed to save share"
                                         resetAccount = true
@@ -655,9 +656,9 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     threshold = Int(key_details.threshold)
                                     shareIndexCreated = index
 
-                                    let shareOut = try threshold_key.output_share(shareIndex: index, shareType: nil)
+                                    let shareOut = try threshold_key.output_share(shareIndex: index)
 
-                                    let result = try ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut, format: nil)
+                                    let result = try ShareSerializationModule.serialize_share(threshold_key: threshold_key, share: shareOut)
                                     alertContent = "serialize result is \(result)"
                                     showAlert = true
                                 } catch {
