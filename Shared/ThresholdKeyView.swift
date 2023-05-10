@@ -145,6 +145,12 @@ struct ThresholdKeyView: View {
                                 } while !finishedFetch
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
+                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        resetAccount = true
+                                        showAlert = true
+                                        return
+                                    }
                                     var shareIndexes = try threshold_key.get_shares_indexes()
                                     shareIndexes.removeAll(where: {$0 == "1"})
                                    
@@ -188,7 +194,10 @@ struct ThresholdKeyView: View {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            print("Incorrect share was used")
+                                            alertContent = "Incorrect share was used, try importing another share.."
+                                            showAlert = true
+                                            resetAccount = true
+                                            showSpinner = SpinnerLocation.nowhere
                                         }
                                     }
 
@@ -434,7 +443,6 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     do {
                                         showSpinner = SpinnerLocation.add_password_btn
                                         let question = "what's your password?"
-                                        print("==",password)
                                         let _ = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: password)
 
                                         let key_details = try threshold_key.get_key_details()
