@@ -45,7 +45,7 @@ struct ThresholdKeyView: View {
             SecItemDelete(dictionary as CFDictionary)
         }
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -113,7 +113,6 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-
 
                                 threshold_key = thresholdKey
 
@@ -316,7 +315,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     alertContent = "get key details failed"
                                     showAlert = true
                                 }
-                                
+
                             }
                         }) {
                             Text("")
@@ -484,7 +483,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                         Task {
                             showChangePasswordAlert.toggle()
                         }
-                        }){
+                        }) {
                             Text("")
                         }.alert("Change Password", isPresented: $showChangePasswordAlert) {
                             SecureField("New Password", text: $password)
@@ -510,7 +509,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     showSpinner = SpinnerLocation.nowhere
                                 }
                             })
-                            Button("Cancel", role: .cancel){}
+                            Button("Cancel", role: .cancel) {}
                         } message: {
                             Text("Please enter new password")
                         }
@@ -631,7 +630,6 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                     alertContent = "delete seed phrase failed"
                                 }
 
-
                                 showAlert = true
                             }
                         }) {
@@ -686,7 +684,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                                 do {
                                     let key_module = try PrivateKey.generate()
                                     let result = try await PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
-                                    
+
                                     if result {
                                         alertContent = "Setting private key completed"
                                     } else {
