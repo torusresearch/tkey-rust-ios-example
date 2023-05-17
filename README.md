@@ -1,11 +1,18 @@
 #  Tkey ios example application document
 
-After building complete, you can login via your google account.
+This repository is an example application created by implementing the [tkey ios SDK](https://github.com/torusresearch/tkey-rust-ios) and [customAuth swift SDK](https://github.com/torusresearch/customauth-swift-sdk).
+With this example app, you can test the various functions of the tkey SDK, and also google Social Login.
+
+After complete building, you can login via your google account.
 If you don't have tKey, you can make your own tkey account by clicking this button, using customAuth sdk.
 If you already have your account, existing account can be used as well.
 
 Once you're logged in, you can run a number of tkey-related functions.
 Buttons allow you to test various modules and tkey built-in functions.
+
+## dependency
+- [tkey ios SDK](https://github.com/torusresearch/tkey-rust-ios) 
+- [customAuth swift SDK](https://github.com/torusresearch/customauth-swift-sdk).
 
 ## Main Page
 ![image](mainPage.png)
