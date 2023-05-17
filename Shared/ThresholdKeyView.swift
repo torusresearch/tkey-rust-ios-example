@@ -462,7 +462,7 @@ struct ThresholdKeyView: View {
                             })
                             Button("Cancel", role: .cancel){}
                         } message: {
-                            Text("Enter the password and generate new security question share")
+                            Text("Enter the password and generate new security question share. Please set your password securely")
                         }
                         .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
