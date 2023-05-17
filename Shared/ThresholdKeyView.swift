@@ -194,10 +194,11 @@ struct ThresholdKeyView: View {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            alertContent = "Incorrect share was used, try importing another share.."
+                                            alertContent = "Incorrect share was used"
                                             showAlert = true
                                             resetAccount = true
                                             showSpinner = SpinnerLocation.nowhere
+                                            return
                                         }
                                     }
 
@@ -263,7 +264,7 @@ struct ThresholdKeyView: View {
                                                 return
                                             }
                                             
-                                            let saveId = fetchKey + ":0"
+                                            let saveId = fetchKey + ":" + String(shareCount)
                                             //save the security question share locally
                                             try KeychainInterface.save(item: share, key: saveId)
                                             
@@ -309,7 +310,7 @@ struct ThresholdKeyView: View {
                                     let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
-alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
+                                    alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
                                 showAlert = true
                                     showAlert = true
                                 } catch {
