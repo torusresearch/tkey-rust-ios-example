@@ -145,9 +145,10 @@ struct ThresholdKeyView: View {
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. We suggest you to enter security question PW to recover your account"
                                         resetAccount = true
                                         showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
                                     var shareIndexes = try threshold_key.get_shares_indexes()
@@ -174,7 +175,7 @@ struct ThresholdKeyView: View {
                                     
                                 
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
                                         resetAccount = true
                                         showAlert = true
                                         return
@@ -194,7 +195,7 @@ struct ThresholdKeyView: View {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            alertContent = "Incorrect share was used"
+                                            alertContent = "Incorrect share was used. We suggest you to enter security question PW to recover your account"
                                             showAlert = true
                                             resetAccount = true
                                             showSpinner = SpinnerLocation.nowhere
@@ -299,7 +300,9 @@ struct ThresholdKeyView: View {
                         }.alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }
+                    }.disabled(!tkeyInitalized)
+                        .opacity(!tkeyInitalized ? 0.5 : 1)
+
                     
                     HStack {
                         Text("Get key details")
