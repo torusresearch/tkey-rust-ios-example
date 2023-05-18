@@ -145,7 +145,7 @@ struct ThresholdKeyView: View {
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. We suggest you to enter security question PW to recover your account"
+                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
                                         resetAccount = true
                                         showAlert = true
                                         showSpinner = SpinnerLocation.nowhere
@@ -195,7 +195,7 @@ struct ThresholdKeyView: View {
                                         do {
                                             _ = try await threshold_key.input_share(share: item, shareType: nil)
                                         } catch {
-                                            alertContent = "Incorrect share was used. We suggest you to enter security question PW to recover your account"
+                                            alertContent = "Incorrect share was used."
                                             showAlert = true
                                             resetAccount = true
                                             showSpinner = SpinnerLocation.nowhere
