@@ -20,6 +20,7 @@ struct ThresholdKeyView: View {
     @State var threshold_key: ThresholdKey!
     @State var shareCount = 0
     @State private var showInputPasswordAlert = false
+    @State private var showChangePasswordAlert = false
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
 
@@ -43,14 +44,6 @@ struct ThresholdKeyView: View {
             let dictionary = [kSecClass as String: secItemClass]
             SecItemDelete(dictionary as CFDictionary)
         }
-
-    }
-
-    func randomPassword() -> String {
-        let len = 12 // or higher
-        let pswdChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()0123456789"
-        let rndPswd = String((0..<len).compactMap { _ in pswdChars.randomElement() })
-        return rndPswd
     }
 
     var body: some View {
@@ -149,40 +142,43 @@ struct ThresholdKeyView: View {
                                     }
                                     shareCount += 1
                                 } while !finishedFetch
-
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
-                                    // Attempt reconstruction
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        alertContent = "Failed to reconstruct key. \(threshold) more share(s) required"
+                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
+                                        resetAccount = true
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+                                    var shareIndexes = try threshold_key.get_shares_indexes()
+                                    shareIndexes.removeAll(where: {$0 == "1"})
+                                   
+                                    let saveId = fetchKey + ":0"
+
+                                    guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[0], shareType: nil) else {
+                                        alertContent = "Failed to output share"
                                         resetAccount = true
                                         showAlert = true
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
 
-                                    // save shares up to required threshold
-                                    let shareIndexes = try threshold_key.get_shares_indexes()
 
-                                    // TODO: Save only one share, which is device share and not all shares.
-                                    for i in 0..<threshold {
-                                        let saveId = fetchKey + ":" + String(i)
-
-                                        guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[Int(i)]) else {
-                                            alertContent = "Failed to output share"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
-                                            alertContent = "Failed to save share"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
+                                    guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
+                                        alertContent = "Failed to save share"
+                                        resetAccount = true
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+                                    
+                                
+                                    guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
+                                        resetAccount = true
+                                        showAlert = true
+                                        return
                                     }
 
                                     reconstructedKey = reconstructionDetails.key
@@ -194,19 +190,12 @@ struct ThresholdKeyView: View {
                                 }
                                 // existing account
                                 else {
-                                    // check enough shares are available
-                                    if shareCount < threshold {
-                                        alertContent = "Not enough shares for reconstruction"
-                                        showAlert = true
-                                        resetAccount = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
                                     // import shares
-                                    // TODO: Handle failures of input_share gracefully. Its possible that locally available share was deleted.
                                     for item in shares {
-                                        guard let _ = try? await threshold_key.input_share(share: item, shareType: nil) else {
-                                            alertContent = "Incorrect share was used"
+                                        do {
+                                            _ = try await threshold_key.input_share(share: item, shareType: nil)
+                                        } catch {
+                                            alertContent = "Incorrect share was used."
                                             showAlert = true
                                             resetAccount = true
                                             showSpinner = SpinnerLocation.nowhere
@@ -215,6 +204,7 @@ struct ThresholdKeyView: View {
                                     }
 
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
@@ -239,6 +229,84 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+                    
+                    HStack {
+                        Text("Enter SecurityQuestion password and reconstruct tkey & save share locally")
+                        Spacer()
+                        Button(action: {
+                            let alert = UIAlertController(title: "Enter Password", message: nil, preferredStyle: .alert)
+                            alert.addTextField { textField in
+                                textField.placeholder = "Password"
+                            }
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                                guard let textField = alert?.textFields?.first, let answer = textField.text else { return }
+                                Task {
+                                    do {
+                                        guard let result = try? await SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer) else {
+                                            alertContent = "input share failed. Make sure threshold key is initialized"
+                                            showAlert = true
+                                            return
+                                        }
+                                        if result {
+                                            // save this share locally
+                                            let shareIndexes = try threshold_key.get_shares_indexes()
+                                            
+                                            // let's get the device share index
+                                            var securityQuestionShareIndex = ""
+                                            if shareIndexes[0] == "1" {
+                                                securityQuestionShareIndex = shareIndexes[1]
+                                            } else {
+                                                securityQuestionShareIndex = shareIndexes[0]
+                                            }
+                                            
+                                            let share = try threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
+                                            
+                                            guard let fetchKey = userData["publicAddress"] as? String else {
+                                                alertContent = "Failed to get public address from userinfo"
+                                                showAlert = true
+                                                return
+                                            }
+                                            
+                                            let saveId = fetchKey + ":" + String(shareCount)
+                                            //save the security question share locally
+                                            try KeychainInterface.save(item: share, key: saveId)
+                                            
+                                            guard let detail = try? await threshold_key.reconstruct() else {
+                                                
+                                                alertContent = "Failed to reconstruct key."
+                                                resetAccount = true
+                                                showAlert = true
+                                                showSpinner = SpinnerLocation.nowhere
+                                                return
+                                            }
+                                            reconstructedKey = detail.key
+                                            alertContent = "\(reconstructedKey) is the private key"
+                                            showAlert = true
+                                            tkeyReconstructed = true
+                                            resetAccount = false
+                                            
+                                        } else {
+                                            alertContent = "password incorrect"
+                                        }
+                                    } catch {
+                                        alertContent = "Password share input failed"
+                                    }
+                                    showAlert = true
+                                }
+                            }))
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                            }
+                        }) {
+                                Text("")
+                        }.alert(isPresented: $showAlert) {
+                            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                        }
+                    }.disabled(!tkeyInitalized)
+                        .opacity(!tkeyInitalized ? 0.5 : 1)
+
+                    
                     HStack {
                         Text("Get key details")
                         Spacer()
@@ -248,7 +316,7 @@ struct ThresholdKeyView: View {
                                     let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
-alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
+                                    alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
                                 showAlert = true
                                     showAlert = true
                                 } catch {
@@ -322,32 +390,37 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                         Text("Reset account")
                         Spacer()
                         Button(action: {
-                            Task {
+                            let alert = UIAlertController(title: "Reset Account", message: "This action will reset your account. Use it with extreme caution.", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            alert.addAction(UIAlertAction(title: "Reset", style: .destructive, handler: { _ in
+                                Task {
+                                    showAlert = true
+                                    alertContent = "Resetting your accuont.."
+                                    do {
+                                        let postboxkey = userData["privateKey"] as! String
+                                        let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+                                        let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+                                        let temp_threshold_key = try ThresholdKey(
+                                            storage_layer: temp_storage_layer,
+                                            service_provider: temp_service_provider,
+                                            enable_logging: true,
+                                            manual_sync: false)
 
-                                showAlert = true
-                                do {
+                                        try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                        tkeyInitalized = false
+                                        tkeyReconstructed = false
+                                        resetAccount = false
+                                        alertContent = "Account reset successful"
 
-                                    // TODO: Add a confirmation popup here, inform that "This action will reset your account. Use it with extreme caution"
-                                    let postboxkey = userData["privateKey"] as! String
-                                    let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-                                    let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                    let temp_threshold_key = try ThresholdKey(
-                                        storage_layer: temp_storage_layer,
-                                        service_provider: temp_service_provider,
-                                        enable_logging: true,
-                                        manual_sync: false)
+                                        resetAppState() // Allow reinitialize
+                                    } catch {
+                                        alertContent = "Reset failed"
+                                    }
 
-                                    try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
-                                    tkeyInitalized = false
-                                    tkeyReconstructed = false
-                                    resetAccount = false
-                                    alertContent = "Account reset successful"
-
-                                    resetAppState() // Allow reinitialize
-                                } catch {
-                                    // This method should never fail
-                                    alertContent = "Reset failed"
                                 }
+                            }))
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                             }
                         }) {
                             Text("")
@@ -355,6 +428,7 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
+
                 }
                 Section(header: Text("Security Question")) {
                     HStack {
@@ -364,35 +438,47 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                             LoaderView()
                         }
                         Button(action: {
-                            // TODO: allow users to input password in a popup.
-                            // TODO: add loader as well, API call could take a >3 seconds
-                            let question = "what's your password?"
-                            let answer = randomPassword()
-                            Task {
-                                do {
-                                    showSpinner = SpinnerLocation.add_password_btn
-                                    let share = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: answer)
-                                    print(share.share_store, share.hex)
-
-                                    let key_details = try threshold_key.get_key_details()
-                                    totalShares = Int(key_details.total_shares)
-                                    threshold = Int(key_details.threshold)
-
-                                    alertContent = "New password share created with random password: \(answer)"
-                                    showAlert = true
-                                } catch {
-                                    alertContent = "Generate new share with password failed. It's because password share already exists, or execution went wrong"
-                                    showAlert = true
-                                }
-                                showSpinner = SpinnerLocation.nowhere
-                            }
-                        }) {
+                        Task {
+                            showInputPasswordAlert.toggle()
+                        }
+                        }){
                             Text("")
-                        }.alert(isPresented: $showAlert) {
+                        }.alert("Enter Password", isPresented: $showInputPasswordAlert) {
+                            SecureField("Password", text: $password)
+                            Button("Save", action: {
+                                Task {
+                                    do {
+                                        showSpinner = SpinnerLocation.add_password_btn
+                                        let question = "what's your password?"
+                                        let _ = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: password)
+
+                                        let key_details = try threshold_key.get_key_details()
+                                        totalShares = Int(key_details.total_shares)
+                                        threshold = Int(key_details.threshold)
+
+                                        alertContent = "New password share created with password: \(password)"
+                                        password = ""
+                                        showAlert = true
+                                    } catch {
+                                        alertContent = "Generate new share with password failed. It's because password share already exists, or execution went wrong"
+                                        showAlert = true
+                                    }
+                                    showSpinner = SpinnerLocation.nowhere
+                                }
+                            })
+                            Button("Cancel", role: .cancel){}
+                        } message: {
+                            Text("Enter the password and generate new security question share. Please set your password securely")
+                        }
+                        .alert(isPresented: $showAlert) {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
-                    }.disabled(showSpinner == SpinnerLocation.add_password_btn)
-                        .opacity(showSpinner == SpinnerLocation.add_password_btn ? 0.5 : 1)
+                        .disabled(showSpinner == SpinnerLocation.change_password_btn)
+                        .opacity(showSpinner == SpinnerLocation.change_password_btn ? 0.5 : 1)
+                    
+                    }
+ 
+                     
 
                     HStack {
                         Text("Change password")
@@ -403,11 +489,11 @@ alertContent = "There are \(totalShares) available shares. \(key_details.require
                         Button(action: {
 
                         Task {
-                            showInputPasswordAlert.toggle()
+                            showChangePasswordAlert.toggle()
                         }
                         }) {
                             Text("")
-                        }.alert("Input Password", isPresented: $showInputPasswordAlert) {
+                        }.alert("Change Password", isPresented: $showChangePasswordAlert) {
                             SecureField("New Password", text: $password)
                             Button("Save", action: {
                                 Task {
