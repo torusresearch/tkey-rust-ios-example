@@ -243,8 +243,11 @@ struct ThresholdKeyView: View {
                                 guard let textField = alert?.textFields?.first, let answer = textField.text else { return }
                                 Task {
                                     do {
-                                        
-                                        let result = try await SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer)
+                                        guard let result = try? await SecurityQuestionModule.input_share(threshold_key: threshold_key, answer: answer) else {
+                                            alertContent = "input share failed. Make sure threshold key is initialized"
+                                            showAlert = true
+                                            return
+                                        }
                                         if result {
                                             // save this share locally
                                             let shareIndexes = try threshold_key.get_shares_indexes()
