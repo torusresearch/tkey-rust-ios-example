@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable",
+      "state" : {
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "0.6.7"
+      }
+    },
+    {
       "identity" : "bigint",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/attaswift/BigInt",
@@ -23,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/customauth-swift-sdk",
       "state" : {
-        "branch" : "master",
-        "revision" : "db234de0aed06f0f0e9112066b754fe193ea7209"
+        "branch" : "feat/sapphire",
+        "revision" : "1f047cc07bb430fedbbd2f16ffc7c50856fb0911"
       }
     },
     {
@@ -32,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/fetch-node-details-swift.git",
       "state" : {
-        "revision" : "94a0ee598abfcc2104ceeda80eecf4b55242ba62",
-        "version" : "4.0.1"
+        "branch" : "sapphire",
+        "revision" : "5dc0393cb895e577f8666c30911dc07879748d62"
       }
     },
     {
@@ -50,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/auth0/JWTDecode.swift.git",
       "state" : {
-        "revision" : "3cd207fb9e943b6168a117baa3936c823204c2dc",
-        "version" : "2.6.3"
+        "revision" : "58af7278797871e460d79496621b3e5366b865b2",
+        "version" : "3.1.0"
       }
     },
     {
@@ -59,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
-        "branch" : "master",
-        "revision" : "54452e80d237615b2615b1d0b41802e6682ed762"
+        "branch" : "feat/v2-tss",
+        "revision" : "7749703a03220b7ef70950bf11f649b427678796"
       }
     },
     {
@@ -75,10 +84,10 @@
     {
       "identity" : "torus-utils-swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/torusresearch/torus-utils-swift.git",
+      "location" : "https://github.com/torusresearch/torus-utils-swift",
       "state" : {
-        "revision" : "902bf105ecfb5cb83dc1911692163289633316f5",
-        "version" : "4.0.0"
+        "branch" : "sapphire-fix",
+        "revision" : "76bf518b88dc7483490f20156014556fbfedfcbd"
       }
     },
     {

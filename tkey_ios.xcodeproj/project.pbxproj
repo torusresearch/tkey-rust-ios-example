@@ -873,7 +873,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = master;
+				branch = feat/sapphire;
 				kind = branch;
 			};
 		};
@@ -881,7 +881,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
 			requirement = {
-				branch = master;
+				branch = "feat/v2-tss";
 				kind = branch;
 			};
 		};
