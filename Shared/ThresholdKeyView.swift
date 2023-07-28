@@ -283,7 +283,13 @@ struct ThresholdKeyView: View {
 
                                             let share = try threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
 
-                                            guard let fetchKey = userData["publicAddress"] as? String else {
+                                            guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
+                                                alertContent = "Failed to get public address from userinfo"
+                                                showAlert = true
+                                                showSpinner = SpinnerLocation.nowhere
+                                                return
+                                            }
+                                            guard let fetchKey = finalKeyData["evmAddress"] as? String else {
                                                 alertContent = "Failed to get public address from userinfo"
                                                 showAlert = true
                                                 return
@@ -417,7 +423,13 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     alertContent = "Resetting your accuont.."
                                     do {
-                                        let postboxkey = userData["privateKey"] as! String
+                                        guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
+                                            alertContent = "Failed to get public address from userinfo"
+                                            showAlert = true
+                                            showSpinner = SpinnerLocation.nowhere
+                                            return
+                                        }
+                                        let postboxkey = finalKeyData["privKey"] as! String
                                         let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
                                         let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
                                         let temp_threshold_key = try ThresholdKey(

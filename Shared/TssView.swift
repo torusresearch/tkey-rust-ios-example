@@ -36,8 +36,6 @@ struct TssView: View {
                             let saveId = tag + ":" + "0"
                             // generate factor key
                             let factorKey = try PrivateKey.generate()
-                            // set factor key into keychain
-                            try KeychainInterface.save(item: factorKey.hex, key: saveId)
                             // derive factor pub
                             let factorPub = try factorKey.toPublic()
                             print("enter 2")
@@ -51,6 +49,8 @@ struct TssView: View {
                                 print("enter 4")
                                 tss_modules[tag] = tss
                                 print(tss_modules)
+                                // set factor key into keychain
+                                try KeychainInterface.save(item: factorKey.hex, key: saveId)
 
                             } catch {
 
