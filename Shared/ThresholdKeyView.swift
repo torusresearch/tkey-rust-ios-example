@@ -26,6 +26,13 @@ struct ThresholdKeyView: View {
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
 
+    @State private var signatures: [String]!
+    @State private var tssEndpoint: [String]!
+    @State private var verifier: String!
+    @State private var verifierId: String!
+    @State private var tssModules: [String: TssModule] = [:]
+//    @State
+
     func resetAppState() {
         totalShares = 0
         threshold = 0
@@ -68,7 +75,10 @@ struct ThresholdKeyView: View {
 
             List {
 
-                TssView( threshold_key: $threshold_key )
+//                TssView( threshold_key: $threshold_key )
+                if threshold_key != nil {
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint)
+                }
                 Section(header: Text("Basic functionality")) {
                     HStack {
                         Text("Initialize and reconstruct tkey")
@@ -93,18 +103,38 @@ struct ThresholdKeyView: View {
                                     return
                                 }
 
-                                guard let verifier = userData["verifier"] as? String, let verifierId = userData["verifierId"] as? String else {
+                                guard let verifierLocal = userData["verifier"] as? String, let verifierIdLocal = userData["verifierId"] as? String else {
                                     alertContent = "Failed to get verifier or verifierId from userinfo"
                                     showAlert = true
                                     showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
+                                verifier = verifierLocal
+                                verifierId = verifierIdLocal
 
                                 guard let postboxkey = finalKeyData["privKey"] as? String else {
                                     alertContent = "Failed to get postboxkey"
                                     showAlert = true
                                     showSpinner = SpinnerLocation.nowhere
                                     return
+                                }
+
+                                print(finalKeyData)
+                                guard let sessionData = userData["sessionData"] as? [String: Any] else {
+                                    alertContent = "Failed to get sessionData"
+                                    showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
+                                    return
+                                }
+                                guard let sessionTokenData = sessionData["sessionTokenData"] as? [SessionToken] else {
+                                    alertContent = "Failed to get sessionTokenData"
+                                    showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
+                                    return
+                                }
+
+                                signatures = sessionTokenData.map { token in
+                                    return token.signature
                                 }
 
                                 guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
@@ -116,6 +146,9 @@ struct ThresholdKeyView: View {
                                 let torusUtils = TorusUtils()
                                 let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
                                 let nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
+
+                                tssEndpoint = nodeDetails.torusNodeTSSEndpoints
+
                                 guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails, torusUtils: torusUtils )
 
                                 else {

@@ -13,12 +13,17 @@ import tss_client_swift
 
 struct TssView: View {
     @Binding var threshold_key: ThresholdKey!
-    @State private var tss_modules: [String: TssModule] = [:]
+    @Binding var verifier: String!
+    @Binding var verifierId: String!
+    @Binding var signatures: [String]!
+    @Binding var tssEndpoints: [String]!
+
+    @State var tssModules: [String: TssModule] = [:]
     @State var showAlert: Bool = false
     @State private var selected_tag: String = ""
 
     func getTssModule ( tag: String ) throws -> TssModule {
-        guard let tss =  tss_modules[tag] else {
+        guard let tss =  tssModules[tag] else {
             throw RuntimeError("tss not found")
         }
         return tss
@@ -32,7 +37,7 @@ struct TssView: View {
                         Task {
                             print("enter")
                             // show input popup
-                            let tag = "default"
+                            let tag = "default1"
                             let saveId = tag + ":" + "0"
                             // generate factor key
                             let factorKey = try PrivateKey.generate()
@@ -47,8 +52,8 @@ struct TssView: View {
                                 print("enter 3")
                                 try tss.create_tagged_tss_share(deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2)
                                 print("enter 4")
-                                tss_modules[tag] = tss
-                                print(tss_modules)
+                                tssModules[tag] = tss
+                                print(tssModules)
                                 // set factor key into keychain
                                 try KeychainInterface.save(item: factorKey.hex, key: saveId)
 
@@ -59,23 +64,24 @@ struct TssView: View {
                         }
                     }) { Text("create new tagged tss") }
                 }
+            }.onAppear {
+                Task {
+                    let allTags = try threshold_key.get_all_tss_tag()
+                    print("get all tags ===========================")
+                    print(allTags)
+                    // instantate tssModule
+                    for tag in allTags {
+                        let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
+                        // add to state
+                        tssModules[tag] = tss
+                    }
+                }
             }
-//            .onAppear {
-//                Task {
-//                    let allTags = try threshold_key.get_all_tss_tag()
-//                    // instantate tssModule
-//                    for tag in allTags {
-//                        let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
-//                        // add to state
-//                        tss_modules[tag] = tss
-//                    }
-//                }
-//            }
 
-            if !tss_modules.isEmpty {
+            if !tssModules.isEmpty {
                 Section(header: Text("Tss Module")) {
                     VStack {
-                        ForEach(Array(tss_modules.keys), id: \.self) { key in
+                        ForEach(Array(tssModules.keys), id: \.self) { key in
                             HStack {
                                 Button(action: {
                                     Task {
@@ -132,22 +138,40 @@ struct TssView: View {
                     Button(action: {
                         Task {
                             // get factor key from keychain
+                            let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
                             // get tss share using factor key
+                            let tss = try getTssModule(tag: selected_tag)
+                            let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
+
+                            let userTssIndex = BigInt(tssIndex, radix: 16)!
+
+                            let nonce = String( try tss.get_tss_nonce() )
+                            let result = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce)
+
+                            guard let dkgpubkey = result?.publicKey else {
+                                throw RuntimeError("invalid dkgpubkey")
+                            }
+                            let nodeIndexes = result!.nodeIndexes.map { index in
+                                return BigInt(index)
+                            }
+                            let sessionNonce = "1134134"
+
                             // sign transaction using tss client
                             let parties = 4
                             let msg = "hello world"
                             let msgHash = TSSHelpers.hashMessage(message: msg)
                             let clientIndex = Int32(parties-1)
-                            let session = TSSHelpers.assembleFullSession(verifier: "", verifierId: "", tssTag: "", tssNonce: "", sessionNonce: "")
-                            let sigs: [String] = []
-                            let endpoints: [String?] = []
-                            let socketEndpoints: [String?] = []
+                            let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
+                            let sigs: [String] = [] // signature
+                            let endpoints: [String?] = [] // tss endpoint
+                            let socketEndpoints: [String?] = [] // tss endpoint
                             let partyIndexes: [Int32] = [0, 1, 2, 3]
-                            let share = BigInt(1)
-                            let userSharePublicKey = Data(BigInt(1).serialize().suffix(32))
-                            let dkgPub = Data(BigInt(1).serialize().suffix(32))
-                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPub, userSharePubKey: userSharePublicKey, userTssIndex: BigInt(1))
-                            let coeffs = try! TSSHelpers.getServerCoeffiecients(participatingServerDKGIndexes: [BigInt(1)], userTssIndex: BigInt(1), serverIndex: BigInt(1))
+                            let share = BigInt(1) // userShare
+                            let userSharePublicKey = Data(hex: tssShare)!
+
+                            let dkgPub = Data(BigInt(1).serialize().suffix(32)) // @ check
+                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPub, userSharePubKey: userSharePublicKey, userTssIndex: userTssIndex) //
+                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexes, userTssIndex: userTssIndex)
 
                             let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: endpoints.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketEndpoints.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
                             while !client.checkConnected() {
