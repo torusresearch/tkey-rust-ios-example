@@ -12,44 +12,84 @@ import tkey_pkg
 import tss_client_swift
 
 struct TssView: View {
-    @State var threshold_key: ThresholdKey!
+    @Binding var threshold_key: ThresholdKey!
     @State private var tss_modules: [String: TssModule] = [:]
     @State var showAlert: Bool = false
+    @State private var selected_tag: String = ""
 
+    func getTssModule ( tag: String ) throws -> TssModule {
+        guard let tss =  tss_modules[tag] else {
+            throw RuntimeError("tss not found")
+        }
+        return tss
+    }
     var body: some View {
+
             Section(header: Text("Tss Module")) {
-
-                HStack {
-                    Button(action: {
-                        Task {
-
-                        }
-                    }) { Text("text") }
-                }
-
-                Spacer()
                 HStack {
 
                     Button(action: {
                         Task {
+                            print("enter")
                             // show input popup
+                            let tag = "default"
+                            let saveId = tag + ":" + "0"
                             // generate factor key
+                            let factorKey = try PrivateKey.generate()
                             // set factor key into keychain
+                            try KeychainInterface.save(item: factorKey.hex, key: saveId)
                             // derive factor pub
+                            let factorPub = try factorKey.toPublic()
+                            print("enter 2")
                             // use input to create tag tss share
+                            do {
+                                print(try threshold_key.get_all_tss_tag())
+                                let tss = try await TssModule( threshold_key: threshold_key, tss_tag: tag)
+
+                                print("enter 3")
+                                try tss.create_tagged_tss_share(deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2)
+                                print("enter 4")
+                                tss_modules[tag] = tss
+                                print(tss_modules)
+
+                            } catch {
+
+                                print("error tss")
+                            }
                         }
                     }) { Text("create new tagged tss") }
-
                 }
-            }.onAppear {
-                Task {
-                    // threshold_key.get_tss_tag()
-                    // instantate tssModule
-                    // add to state
+            }
+//            .onAppear {
+//                Task {
+//                    let allTags = try threshold_key.get_all_tss_tag()
+//                    // instantate tssModule
+//                    for tag in allTags {
+//                        let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
+//                        // add to state
+//                        tss_modules[tag] = tss
+//                    }
+//                }
+//            }
+
+            if !tss_modules.isEmpty {
+                Section(header: Text("Tss Module")) {
+                    VStack {
+                        ForEach(Array(tss_modules.keys), id: \.self) { key in
+                            HStack {
+                                Button(action: {
+                                    Task {
+                                        selected_tag = key
+                                    }
+                                }) { Text(key) }
+                            }
+                        }
+                    }
                 }
             }
 
-            Section(header: Text("Tss :" ) ) {
+        if !selected_tag.isEmpty {
+            Section(header: Text("Tss : " + selected_tag ) ) {
                 HStack {
                     Button(action: {
                         Task {
@@ -129,6 +169,7 @@ struct TssView: View {
                     }) { Text("sign with tagged tss share") }
                 }
             }
+        }
         }
 
 }

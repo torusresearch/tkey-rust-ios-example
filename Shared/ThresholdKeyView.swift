@@ -1,5 +1,7 @@
 import SwiftUI
 import tkey_pkg
+import TorusUtils
+import FetchNodeDetails
 
 enum SpinnerLocation {
     case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
@@ -66,7 +68,7 @@ struct ThresholdKeyView: View {
 
             List {
 
-                TssView()
+                TssView( threshold_key: $threshold_key )
                 Section(header: Text("Basic functionality")) {
                     HStack {
                         Text("Initialize and reconstruct tkey")
@@ -91,6 +93,13 @@ struct ThresholdKeyView: View {
                                     return
                                 }
 
+                                guard let verifier = userData["verifier"] as? String, let verifierId = userData["verifierId"] as? String else {
+                                    alertContent = "Failed to get verifier or verifierId from userinfo"
+                                    showAlert = true
+                                    showSpinner = SpinnerLocation.nowhere
+                                    return
+                                }
+
                                 guard let postboxkey = finalKeyData["privKey"] as? String else {
                                     alertContent = "Failed to get postboxkey"
                                     showAlert = true
@@ -104,19 +113,24 @@ struct ThresholdKeyView: View {
                                     showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
+                                let torusUtils = TorusUtils()
+                                let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
+                                let nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
+                                guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails, torusUtils: torusUtils )
 
-                                guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey) else {
+                                else {
                                     alertContent = "Failed to create service provider"
                                     showAlert = true
                                     showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
-
+                                let rss_comm = try RssComm()
                                 guard let thresholdKey = try? ThresholdKey(
                                     storage_layer: storage_layer,
                                     service_provider: service_provider,
                                     enable_logging: true,
-                                    manual_sync: false) else {
+                                    manual_sync: false,
+                                    rss_comm: rss_comm) else {
                                         alertContent = "Failed to create threshold key"
                                         showAlert = true
                                         showSpinner = SpinnerLocation.nowhere
