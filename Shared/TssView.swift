@@ -11,8 +11,8 @@ import BigInt
 import tkey_pkg
 import tss_client_swift
 
-func selectEndpoints(endpoints: [String], indexes: [Int32]?) -> ([String?], [String?], [Int32]) {
-    if let indexes {
+func selectEndpoints(endpoints: [String], indexes: [Int32]) -> ([String?], [String?], [Int32]) {
+    if !indexes.isEmpty {
         var selected: [String?] = []
         var socket: [String?] = []
         var selectedIndexes: [Int32] = []
@@ -238,6 +238,8 @@ struct TssView: View {
                             print(signatures)
                             let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
 
+                            print(tssEndpoints)
+                            print(nodeIndexesI32)
                             let (urls, socketUrls, indexes) = selectEndpoints(endpoints: tssEndpoints, indexes: nodeIndexesI32)
                             print(urls)
                             print(socketUrls)
