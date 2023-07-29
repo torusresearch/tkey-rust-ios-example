@@ -151,7 +151,7 @@ struct TssView: View {
                                 // show factor key used
                             }
                         }))
-                                                      
+
                         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                           windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                         }
@@ -199,15 +199,17 @@ struct TssView: View {
                             let sessionNonce = try PrivateKey.generate().hex
 
                             // sign transaction using tss client
-                            let parties = 4
+                            let parties = 6
                             let msg = "hello world"
                             let msgHash = TSSHelpers.hashMessage(message: msg)
                             let clientIndex = Int32(parties-1)
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
-                            let partyIndexes: [Int32] = [0, 1, 2, 3]
+                            let partyIndexes: [Int32] = [0, 1, 2, 3, 4, 5]
                             let sigs: [String] = signatures
-                            let endpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
-                            let socketEndpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
+                            var endpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
+                            endpoints.append(nil)
+                            var socketEndpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0.replacingOccurrences(of: "/tss", with: "") }
+                            socketEndpoints.append(nil)
                             let share = BigInt(tssShare, radix: 16)!
                             let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
 
