@@ -11,33 +11,70 @@ import BigInt
 import tkey_pkg
 import tss_client_swift
 
-func selectEndpoints(endpoints: [String], indexes: [Int32]) -> ([String?], [String?], [Int32]) {
-    if !indexes.isEmpty {
-        var selected: [String?] = []
-        var socket: [String?] = []
-        var selectedIndexes: [Int32] = []
-        for i in 0..<indexes.count {
+// export function generateEndpoints(parties: number, clientIndex: number, network: TORUS_SAPPHIRE_NETWORK_TYPE, nodeIndexes: number[] = []) {
+//  console.log("generateEndpoints node indexes", nodeIndexes);
+//  const networkConfig = fetchLocalConfig(network);
+//  const endpoints = [];
+//  const tssWSEndpoints = [];
+//  const partyIndexes = [];
+//
+//  for (let i = 0; i < parties; i++) {
+//    partyIndexes.push(i);
+//
+//    if (i === clientIndex) {
+//      endpoints.push(null);
+//      tssWSEndpoints.push(null);
+//    } else {
+//      endpoints.push(networkConfig.torusNodeTSSEndpoints[nodeIndexes[i] ?  nodeIndexes[i] - 1 : i]);
+//      let wsEndpoint = networkConfig.torusNodeEndpoints[nodeIndexes[i] ? nodeIndexes[i] - 1 : i]
+//      if (wsEndpoint) {
+//        const urlObject = new URL(wsEndpoint);
+//        wsEndpoint = urlObject.origin;
+//      }
+//      tssWSEndpoints.push(wsEndpoint);
+//    }
+//  }
+//
+//  return {
+//    endpoints: endpoints,
+//    tssWSEndpoints: tssWSEndpoints,
+//    partyIndexes: partyIndexes
+//  };
+// }
+
+// endpoint [ a, b, c, d, e ]
+// 2,3,4
+
+func selectEndpoints( endpoints: [String], nodeIndexes: [Int32]) -> ([String?], [String?], [Int32], [Int32] ) {
+    let threshold = Int( endpoints.count / 2 ) + 1
+
+    var selected: [String?] = []
+    var socket: [String?] = []
+    var partiesIndexes: [Int32] = []
+    var nodeIndexesReturn: [Int32] = []
+
+    if !nodeIndexes.isEmpty {
+        for i in 0..<nodeIndexes.count {
             selected.append(endpoints[i])
             socket.append(endpoints[i].replacingOccurrences(of: "/tss", with: ""))
-            selectedIndexes.append(Int32(i))
+            partiesIndexes.append( Int32(i) )
         }
         socket.append(nil)
         selected.append(nil)
-        selectedIndexes.append(Int32(indexes.count))
-        return (selected, socket, selectedIndexes)
+        partiesIndexes.append(Int32(nodeIndexes.count))
+        return (selected, socket, partiesIndexes, nodeIndexes)
     }
-    var selectedIndexes: [Int32] = []
-    var selected: [String?] = []
-    var socket: [String?] = []
-    for i in 0..<endpoints.count {
+
+    for i in 0..<threshold {
         selected.append(endpoints[i])
         socket.append(endpoints[i].replacingOccurrences(of: "/tss", with: ""))
-        selectedIndexes.append(Int32(i))
+        partiesIndexes.append(Int32(i))
+        nodeIndexesReturn.append(Int32( i + 1 ))
     }
     socket.append(nil)
     selected.append(nil)
-    selectedIndexes.append(Int32(endpoints.count))
-    return (selected, socket, selectedIndexes)
+    partiesIndexes.append(Int32( threshold ))
+    return (selected, socket, partiesIndexes, nodeIndexesReturn)
 }
 
 struct TssView: View {
@@ -240,15 +277,14 @@ struct TssView: View {
 
                             print(tssEndpoints)
                             print(nodeIndexesI32)
-                            let (urls, socketUrls, indexes) = selectEndpoints(endpoints: tssEndpoints, indexes: nodeIndexesI32)
+                            let (urls, socketUrls, partyIndexes, nodeIndexesReturn) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexesI32)
                             print(urls)
                             print(socketUrls)
-                            print(indexes)
+                            print(partyIndexes)
 
-                            let parties = indexes.count
+                            let parties = partyIndexes.count
                             let clientIndex = Int32(parties-1)
 
-                            let partyIndexes: [Int32] = indexes
                             let endpoints: [String?] = urls
                             let socketEndpoints: [String?] = socketUrls
 
@@ -256,11 +292,14 @@ struct TssView: View {
                             let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
 
                             let dkgPub =  try! KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
-                            let userSharePublicKey = try! KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-compressed")
+                            let userSharePublicKey = try! KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-comprezssed")
 
                             let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex) //
-                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexes, userTssIndex: userTssIndex)
 
+                            print(userTssIndex)
+                            print(nodeIndexesReturn)
+                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexesReturn.map { BigInt($0) }, userTssIndex: userTssIndex)
+                            print(coeffs)
                             let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: endpoints.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketEndpoints.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
                             while !client.checkConnected() {
 

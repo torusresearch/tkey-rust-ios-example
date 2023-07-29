@@ -165,12 +165,18 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-                                    let torusUtils = TorusUtils()
+                                    let torusUtils = TorusUtils( enableOneKey: true,
+//                                                                 allowHost: "https://signer.tor.us/api/allow",
+                                                                 network: .sapphire(.SAPPHIRE_DEVNET)
+//                                                                 metadataHost: "https://sapphire-dev-2-1.authnetwork.dev/metadata",
+//                                                                 clientId: "YOUR_CLIENT_ID"
+                                                             )
                                     let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
                                     let nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
 
                                     tssEndpoint = nodeDetails.torusNodeTSSEndpoints
-
+                                    print(verifier!)
+                                    print(verifierId!)
                                     guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails, torusUtils: torusUtils )
 
                                     else {
