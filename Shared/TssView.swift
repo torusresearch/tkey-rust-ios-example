@@ -79,7 +79,7 @@ struct TssView: View {
                             guard let textField = alert?.textFields?.first else { return }
                             Task {
                                 let tag = textField.text ?? "default"
-                                let saveId = tag + ":" + "0"
+                                let saveId = tag + ":0"
                                 // generate factor key
                                 let factorKey = try PrivateKey.generate()
                                 // derive factor pub
