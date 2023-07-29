@@ -1,10 +1,3 @@
-//
-//  TssView.swift
-//  tkey_ios
-//
-//  Created by CW Lee on 28/07/2023.
-//
-
 import Foundation
 import SwiftUI
 import BigInt
@@ -12,14 +5,14 @@ import tkey_pkg
 import tss_client_swift
 
 // this function assumes the partyIndex of the client will always be the last index
-func selectEndpoints( endpoints: [String], nodeIndexes: [Int]) -> ([String?], [String?], [Int32], [Int] ) {
+func selectEndpoints( endpoints: [String], nodeIndexes: [Int]) -> ([String?], [String?], [Int32], [BigInt] ) {
 
     let threshold = Int( endpoints.count / 2 ) + 1
 
     var selected: [String?] = []
     var socket: [String?] = []
     var partiesIndexes: [Int32] = []
-    var nodeIndexesReturn: [Int] = []
+    var nodeIndexesReturn: [BigInt] = []
 
     if !nodeIndexes.isEmpty {
         for i in 0..<nodeIndexes.count {
@@ -30,14 +23,14 @@ func selectEndpoints( endpoints: [String], nodeIndexes: [Int]) -> ([String?], [S
         socket.append(nil)
         selected.append(nil)
         partiesIndexes.append(Int32(nodeIndexes.count))
-        return (selected, socket, partiesIndexes, nodeIndexes)
+        return (selected, socket, partiesIndexes, nodeIndexes.map({ BigInt($0)}))
     }
 
     for i in 0..<threshold {
         selected.append(endpoints[i])
         socket.append(endpoints[i].replacingOccurrences(of: "/tss", with: ""))
         partiesIndexes.append(Int32(i))
-        nodeIndexesReturn.append(i + 1)
+        nodeIndexesReturn.append(BigInt(i + 1))
     }
     socket.append(nil)
     selected.append(nil)
@@ -177,7 +170,7 @@ struct TssView: View {
                         }
                         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
-                            guard let textField = alert?.textFields?.first else { return }
+                            guard (alert?.textFields?.first) != nil else { return }
                             Task {
                                 // generate factor key if input is empty
                                 // derive factor pub
@@ -230,16 +223,16 @@ struct TssView: View {
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
 
                             guard let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce) else {
-                                throw RuntimeError("invalid dkgpubkey")
+                                throw RuntimeError("Could not get tss public address info")
                             }
                             let nodeIndexes = tssPublicAddressInfo.nodeIndexes
-                            
+
                             // get  the urls, socketUrls, partyIndexes and nodeIndexes
                             // using existing data
                             let (urls, socketUrls, partyIndexes, nodeTssIndexes) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexes)
 
                             // calculate server coefficients
-                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeTssIndexes.map { BigInt($0) }, userTssIndex: userTssIndex)
+                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeTssIndexes, userTssIndex: userTssIndex)
 
                             // total parties, including the client
                             let parties = partyIndexes.count
@@ -249,7 +242,7 @@ struct TssView: View {
                             let shareUnsigned = BigUInt(tssShare, radix: 16)!
                             let share = BigInt(sign: .plus, magnitude: shareUnsigned)
                             let userPublicKey = SECP256K1.privateToPublic(privateKey: Data(share.serialize().suffix(32)), compressed: false)!
-                            
+
                             let dkgPubKeyPoint = tssPublicAddressInfo.publicKey
                             var dkgPubKey = Data()
                             dkgPubKey.append(0x04) // Uncompressed key prefix
@@ -264,7 +257,7 @@ struct TssView: View {
 
                             // Wait for sockets to be connected
                             while !client.checkConnected() {
-                                //no-op
+                                // no-op
                             }
 
                             // Create a precompute, each server also creates a precompute.
@@ -274,9 +267,9 @@ struct TssView: View {
                             // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
                             // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
                             let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
-                            
+
                             while !(try! client.isReady()) {
-                                //no-op
+                                // no-op
                             }
 
                             // hash a message

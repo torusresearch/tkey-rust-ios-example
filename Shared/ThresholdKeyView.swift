@@ -150,14 +150,9 @@ struct ThresholdKeyView: View {
                                     }
 
                                     signatures = sessionTokenData.map { token in
-//                                        return TokenSignature.init(
-//                                            data: token.token,
-//                                            sig: token.signature
-//                                        )
                                         return [  "data": Data(hex: token.token)!.base64EncodedString(),
                                                    "sig": token.signature ]
                                     }
-                                    print(signatures)
 
                                     guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                         alertContent = "Failed to create storage layer"
