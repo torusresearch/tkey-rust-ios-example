@@ -272,7 +272,7 @@ struct TssView: View {
                             // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
                             // This will also fail if a single failure notification is received.
                             // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
-                            // Once ~checkpt123_raw is recieved, precompute_complete notifications should be received shortly thereafter.
+                            // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
                             let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
                             
                             while !(try! client.isReady()) {
