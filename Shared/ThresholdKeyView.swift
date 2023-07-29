@@ -223,7 +223,7 @@ struct ThresholdKeyView: View {
                                     } while !finishedFetch
                                     // There are 0 locally available shares for this tkey
                                     if shareCount == 0 {
-                                        guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                                        guard (try? await threshold_key.reconstruct()) != nil else {
                                             alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
                                             resetAccount = true
                                             showAlert = true
