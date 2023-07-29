@@ -69,7 +69,7 @@
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
         "branch" : "feat/v2-tss",
-        "revision" : "16373e7a79ddaaaebe53d7642df1e5c78c1bdd50"
+        "revision" : "4c58871469c904bf626baaa99f3bab1063b59bfd"
       }
     },
     {
@@ -114,7 +114,7 @@
       "location" : "https://github.com/torusresearch/tss-client-swift/",
       "state" : {
         "branch" : "main",
-        "revision" : "a82ed783e1dbc4cac78620fb9298fc1e523f2db2"
+        "revision" : "6bf81e49d48543a0306a7a842c1561aaabc24a33"
       }
     },
     {

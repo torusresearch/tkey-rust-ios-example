@@ -129,21 +129,33 @@ struct TssView: View {
                             alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
                             showAlert = true
                         }
-                    }) { Text("get tss share") }
+                    }) { Text(selected_tag + " :get tss share") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
 
                 HStack {
                     Button(action: {
-                        Task {
-                            // show input popup
-                            // generate factor key if input is empty
-                            // derive factor pub
-                            // use input to generate tss share with index 3
-                            // show factor key used
+                        // show input popup
+                        let alert = UIAlertController(title: "Key in Factor Key or randomly generated if left empty", message: nil, preferredStyle: .alert)
+                        alert.addTextField { textField in
+                            textField.placeholder = "Factor Key"
                         }
-                    }) { Text("add factor pub") }
+                        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                            guard let textField = alert?.textFields?.first else { return }
+                            Task {
+                                // generate factor key if input is empty
+                                // derive factor pub
+                                // use input to generate tss share with index 3
+                                // show factor key used
+                            }
+                        }))
+                                                      
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                          windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                        }
+                    }) { Text( selected_tag + " : add factor pub") }
                 }
                 HStack {
                     Button(action: {
@@ -152,7 +164,7 @@ struct TssView: View {
                             // get factor key from keychain
                             // copy factor pub
                         }
-                    }) { Text("copy factor pub") }
+                    }) { Text( selected_tag + " : copy factor pub") }
                 }
                 HStack {
                     Button(action: {
@@ -161,7 +173,7 @@ struct TssView: View {
                             // get factor key into keychain if input is empty
                             // delete factor pub
                         }
-                    }) { Text("delete factor pub") }
+                    }) { Text( selected_tag + " : delete factor pub") }
                 }
                 HStack {
                     Button(action: {
@@ -183,7 +195,8 @@ struct TssView: View {
                             let nodeIndexes = result!.nodeIndexes.map { index in
                                 return BigInt(index)
                             }
-                            let sessionNonce = "1134134"
+//                            let sessionNonce = "1134134"
+                            let sessionNonce = try PrivateKey.generate().hex
 
                             // sign transaction using tss client
                             let parties = 4
@@ -196,10 +209,10 @@ struct TssView: View {
                             let endpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
                             let socketEndpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
                             let share = BigInt(tssShare, radix: 16)!
-                            let userPublicHex = try PrivateKey(hex: tssShare).toPublic()
+                            let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
 
-                            let dkgPub =  try KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
-                            let userSharePublicKey = try KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-compressed")
+                            let dkgPub =  try! KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
+                            let userSharePublicKey = try! KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-compressed")
 
                             let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex) //
                             let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexes, userTssIndex: userTssIndex)
@@ -221,7 +234,7 @@ struct TssView: View {
                                 exit(EXIT_FAILURE)
                             }
                         }
-                    }) { Text("sign with " + selected_tag + " tss share") }
+                    }) { Text( selected_tag + ": sign with " + selected_tag + " tss share") }
                 }
             }
         }
