@@ -264,8 +264,10 @@ struct TssView: View {
                             let nodeIndexesI32 = result!.nodeIndexes.map { index in
                                 return Int32(index)
                             }
-//                            let sessionNonce = "1134134"
-                            let sessionNonce = try PrivateKey.generate().hex
+
+                            let randomKey = BigUInt(SECP256K1.generatePrivateKey()!)
+                            let random = BigInt(sign: .plus, magnitude: randomKey) + BigInt(Date().timeIntervalSince1970)
+                            let sessionNonce = TSSHelpers.hashMessage(message: String(random))
 
                             // sign transaction using tss client
                             let msg = "hello world"
