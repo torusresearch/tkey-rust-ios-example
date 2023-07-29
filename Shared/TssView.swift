@@ -11,7 +11,7 @@ import BigInt
 import tkey_pkg
 import tss_client_swift
 
-func selectEndpoints(endpoints: [String], indexes: [Int32]?) -> ([String?],[String?],[Int32]) {
+func selectEndpoints(endpoints: [String], indexes: [Int32]?) -> ([String?], [String?], [Int32]) {
     if let indexes {
         var selected: [String?] = []
         var socket: [String?] = []
@@ -23,9 +23,10 @@ func selectEndpoints(endpoints: [String], indexes: [Int32]?) -> ([String?],[Stri
         }
         socket.append(nil)
         selected.append(nil)
-        return (selected,socket, selectedIndexes)
+        selectedIndexes.append(Int32(indexes.count))
+        return (selected, socket, selectedIndexes)
     }
-    var selectedIndexes:[Int32] = []
+    var selectedIndexes: [Int32] = []
     var selected: [String?] = []
     var socket: [String?] = []
     for i in 0..<endpoints.count {
@@ -35,6 +36,7 @@ func selectEndpoints(endpoints: [String], indexes: [Int32]?) -> ([String?],[Stri
     }
     socket.append(nil)
     selected.append(nil)
+    selectedIndexes.append(Int32(endpoints.count))
     return (selected, socket, selectedIndexes)
 }
 
@@ -42,7 +44,7 @@ struct TssView: View {
     @Binding var threshold_key: ThresholdKey!
     @Binding var verifier: String!
     @Binding var verifierId: String!
-    @Binding var signatures: [String]!
+    @Binding var signatures: [[String: Any]]!
     @Binding var tssEndpoints: [String]!
     @Binding var showTss: Bool
 
@@ -222,6 +224,9 @@ struct TssView: View {
                             let nodeIndexes = result!.nodeIndexes.map { index in
                                 return BigInt(index)
                             }
+                            let nodeIndexesI32 = result!.nodeIndexes.map { index in
+                                return Int32(index)
+                            }
 //                            let sessionNonce = "1134134"
                             let sessionNonce = try PrivateKey.generate().hex
 
@@ -229,18 +234,22 @@ struct TssView: View {
                             let msg = "hello world"
                             let msgHash = TSSHelpers.hashMessage(message: msg)
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
-                            
-                            
-                            
-                            let (urls, socketUrls, indexes) = selectEndpoints(endpoints: tssEndpoints, indexes: <#T##[Int32]?#>)
+
+                            print(signatures)
+                            let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                            let (urls, socketUrls, indexes) = selectEndpoints(endpoints: tssEndpoints, indexes: nodeIndexesI32)
+                            print(urls)
+                            print(socketUrls)
+                            print(indexes)
+
                             let parties = indexes.count
                             let clientIndex = Int32(parties-1)
-                            
+
                             let partyIndexes: [Int32] = indexes
-                            let sigs: [String] = signatures
-                            var endpoints: [String?] = urls
-                            var socketEndpoints: [String?] = socketUrls
-                            
+                            let endpoints: [String?] = urls
+                            let socketEndpoints: [String?] = socketUrls
+
                             let share = BigInt(tssShare, radix: 16)!
                             let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
 

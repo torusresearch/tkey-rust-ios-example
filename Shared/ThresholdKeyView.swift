@@ -7,6 +7,11 @@ enum SpinnerLocation {
     case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
 }
 
+// struct TokenSignature: Codable {
+//    var data: String // base64
+//    var sig: String // hex
+// }
+
 struct ThresholdKeyView: View {
     @State var userData: [String: Any]
     @State private var showAlert = false
@@ -26,7 +31,7 @@ struct ThresholdKeyView: View {
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
 
-    @State private var signatures: [String]!
+    @State private var signatures: [[String: Any]]!
     @State private var tssEndpoint: [String]!
     @State private var verifier: String!
     @State private var verifierId: String!
@@ -145,8 +150,14 @@ struct ThresholdKeyView: View {
                                     }
 
                                     signatures = sessionTokenData.map { token in
-                                        return token.signature
+//                                        return TokenSignature.init(
+//                                            data: token.token,
+//                                            sig: token.signature
+//                                        )
+                                        return [  "data": Data(hex: token.token)!.base64EncodedString(),
+                                                   "sig": token.signature ]
                                     }
+                                    print(signatures)
 
                                     guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                         alertContent = "Failed to create storage layer"
