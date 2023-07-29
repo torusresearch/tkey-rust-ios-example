@@ -11,47 +11,15 @@ import BigInt
 import tkey_pkg
 import tss_client_swift
 
-// export function generateEndpoints(parties: number, clientIndex: number, network: TORUS_SAPPHIRE_NETWORK_TYPE, nodeIndexes: number[] = []) {
-//  console.log("generateEndpoints node indexes", nodeIndexes);
-//  const networkConfig = fetchLocalConfig(network);
-//  const endpoints = [];
-//  const tssWSEndpoints = [];
-//  const partyIndexes = [];
-//
-//  for (let i = 0; i < parties; i++) {
-//    partyIndexes.push(i);
-//
-//    if (i === clientIndex) {
-//      endpoints.push(null);
-//      tssWSEndpoints.push(null);
-//    } else {
-//      endpoints.push(networkConfig.torusNodeTSSEndpoints[nodeIndexes[i] ?  nodeIndexes[i] - 1 : i]);
-//      let wsEndpoint = networkConfig.torusNodeEndpoints[nodeIndexes[i] ? nodeIndexes[i] - 1 : i]
-//      if (wsEndpoint) {
-//        const urlObject = new URL(wsEndpoint);
-//        wsEndpoint = urlObject.origin;
-//      }
-//      tssWSEndpoints.push(wsEndpoint);
-//    }
-//  }
-//
-//  return {
-//    endpoints: endpoints,
-//    tssWSEndpoints: tssWSEndpoints,
-//    partyIndexes: partyIndexes
-//  };
-// }
+// this function assumes the partyIndex of the client will always be the last index
+func selectEndpoints( endpoints: [String], nodeIndexes: [Int]) -> ([String?], [String?], [Int32], [Int] ) {
 
-// endpoint [ a, b, c, d, e ]
-// 2,3,4
-
-func selectEndpoints( endpoints: [String], nodeIndexes: [Int32]) -> ([String?], [String?], [Int32], [Int32] ) {
     let threshold = Int( endpoints.count / 2 ) + 1
 
     var selected: [String?] = []
     var socket: [String?] = []
     var partiesIndexes: [Int32] = []
-    var nodeIndexesReturn: [Int32] = []
+    var nodeIndexesReturn: [Int] = []
 
     if !nodeIndexes.isEmpty {
         for i in 0..<nodeIndexes.count {
@@ -69,7 +37,7 @@ func selectEndpoints( endpoints: [String], nodeIndexes: [Int32]) -> ([String?], 
         selected.append(endpoints[i])
         socket.append(endpoints[i].replacingOccurrences(of: "/tss", with: ""))
         partiesIndexes.append(Int32(i))
-        nodeIndexesReturn.append(Int32( i + 1 ))
+        nodeIndexesReturn.append(i + 1)
     }
     socket.append(nil)
     selected.append(nil)
@@ -244,75 +212,77 @@ struct TssView: View {
                 HStack {
                     Button(action: {
                         Task {
-                            // get factor key from keychain
+                            // tss node signatures
+                            let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                            // get the factor key information
                             let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
-                            // get tss share using factor key
                             let tss = try getTssModule(tag: selected_tag)
                             let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
-
                             let userTssIndex = BigInt(tssIndex, radix: 16)!
 
                             let nonce = String( try tss.get_tss_nonce() )
-                            let result = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce)
-
-                            guard let dkgPubkey = result?.publicKey.toFullAddr() else {
+                            let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce)
+                            guard let dkgPubkey = tssPublicAddressInfo?.publicKey.toFullAddr() else {
                                 throw RuntimeError("invalid dkgpubkey")
                             }
-                            let nodeIndexes = result!.nodeIndexes.map { index in
-                                return BigInt(index)
-                            }
-                            let nodeIndexesI32 = result!.nodeIndexes.map { index in
-                                return Int32(index)
-                            }
+                            let nodeIndexes = tssPublicAddressInfo!.nodeIndexes
 
+                            // generate a random nonce for sessionID
                             let randomKey = BigUInt(SECP256K1.generatePrivateKey()!)
                             let random = BigInt(sign: .plus, magnitude: randomKey) + BigInt(Date().timeIntervalSince1970)
                             let sessionNonce = TSSHelpers.hashMessage(message: String(random))
-
-                            // sign transaction using tss client
-                            let msg = "hello world"
-                            let msgHash = TSSHelpers.hashMessage(message: msg)
+                            // create the full session string
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
 
-                            print(signatures)
-                            let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                            // get  the urls, socketUrls, partyIndexes and nodeIndexes
+                            // using existing data
+                            let (urls, socketUrls, partyIndexes, nodeTssIndexes) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexes)
 
-                            print(tssEndpoints)
-                            print(nodeIndexesI32)
-                            let (urls, socketUrls, partyIndexes, nodeIndexesReturn) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexesI32)
-                            print(urls)
-                            print(socketUrls)
-                            print(partyIndexes)
+                            // calculate server coefficients
+                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeTssIndexes.map { BigInt($0) }, userTssIndex: userTssIndex)
 
+                            // total parties, including the client
                             let parties = partyIndexes.count
+                            // index of the client, last index of partiesIndexes
                             let clientIndex = Int32(parties-1)
-
-                            let endpoints: [String?] = urls
-                            let socketEndpoints: [String?] = socketUrls
 
                             let share = BigInt(tssShare, radix: 16)!
                             let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
 
+                            // Get the Tss PublicKey
                             let dkgPub =  try! KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
                             let userSharePublicKey = try! KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-comprezssed")
+                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex)
 
-                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex) //
+                            // Create the tss client
+                            let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
 
-                            print(userTssIndex)
-                            print(nodeIndexesReturn)
-                            let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexesReturn.map { BigInt($0) }, userTssIndex: userTssIndex)
-                            print(coeffs)
-                            let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: endpoints.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketEndpoints.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
+                            // Wait for sockets to be connected
                             while !client.checkConnected() {
-
+                                //no-op
                             }
 
+                            // Create a precompute, each server also creates a precompute.
+                            // This calls setup() followed by precompute()
+                            // for all parties
                             let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
+                            
                             while !(try! client.isReady()) {
-
+                                //no-op
                             }
+
+                            // hash a message
+                            let msg = "hello world"
+                            let msgHash = TSSHelpers.hashMessage(message: msg)
+
+                            // sign a hashed message, collecting signature fragments from the server
                             let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
+
+                            // cleanup sockets
                             try! client.cleanup(signatures: sigs)
+
+                            // verify the signature
                             if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: publicKey) {
                                 showAlert = true
                             } else {
