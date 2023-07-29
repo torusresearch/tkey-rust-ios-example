@@ -17,10 +17,12 @@ struct TssView: View {
     @Binding var verifierId: String!
     @Binding var signatures: [String]!
     @Binding var tssEndpoints: [String]!
+    @Binding var showTss: Bool
 
     @State var tssModules: [String: TssModule] = [:]
     @State var showAlert: Bool = false
     @State private var selected_tag: String = ""
+    @State private var alertContent = ""
 
     func getTssModule ( tag: String ) throws -> TssModule {
         guard let tss =  tssModules[tag] else {
@@ -29,46 +31,61 @@ struct TssView: View {
         return tss
     }
     var body: some View {
+            Button(action: {
+                Task {
+                    showTss = false
+                }
+            }) { Text("TKey Demo") }
 
             Section(header: Text("Tss Module")) {
                 HStack {
 
                     Button(action: {
-                        Task {
-                            print("enter")
-                            // show input popup
-                            let tag = "default1"
-                            let saveId = tag + ":" + "0"
-                            // generate factor key
-                            let factorKey = try PrivateKey.generate()
-                            // derive factor pub
-                            let factorPub = try factorKey.toPublic()
-                            print("enter 2")
-                            // use input to create tag tss share
-                            do {
-                                print(try threshold_key.get_all_tss_tag())
-                                let tss = try await TssModule( threshold_key: threshold_key, tss_tag: tag)
+                        print("enter")
+                        // show input popup
+                        let alert = UIAlertController(title: "Enter New Tss Tag", message: nil, preferredStyle: .alert)
+                        alert.addTextField { textField in
+                            textField.placeholder = "New Tag"
+                        }
+                        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                            guard let textField = alert?.textFields?.first else { return }
+                            Task {
+                                let tag = textField.text ?? "default"
+                                let saveId = tag + ":" + "0"
+                                // generate factor key
+                                let factorKey = try PrivateKey.generate()
+                                // derive factor pub
+                                let factorPub = try factorKey.toPublic()
+                                print("enter 2")
+                                // use input to create tag tss share
+                                do {
+                                    print(try threshold_key.get_all_tss_tag())
+                                    let tss = try await TssModule( threshold_key: threshold_key, tss_tag: tag)
 
-                                print("enter 3")
-                                try tss.create_tagged_tss_share(deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2)
-                                print("enter 4")
-                                tssModules[tag] = tss
-                                print(tssModules)
-                                // set factor key into keychain
-                                try KeychainInterface.save(item: factorKey.hex, key: saveId)
+                                    print("enter 3")
+                                    try tss.create_tagged_tss_share(deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2)
+                                    print("enter 4")
+                                    tssModules[tag] = tss
+                                    print(tssModules)
+                                    // set factor key into keychain
+                                    try KeychainInterface.save(item: factorKey.hex, key: saveId)
 
-                            } catch {
-
-                                print("error tss")
+                                    alertContent = factorKey.hex
+                                } catch {
+                                    print("error tss")
+                                }
                             }
+                        }))
+
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                            windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                         }
                     }) { Text("create new tagged tss") }
                 }
             }.onAppear {
                 Task {
                     let allTags = try threshold_key.get_all_tss_tag()
-                    print("get all tags ===========================")
-                    print(allTags)
                     // instantate tssModule
                     for tag in allTags {
                         let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
@@ -76,11 +93,12 @@ struct TssView: View {
                         tssModules[tag] = tss
                     }
                 }
+            }.alert(isPresented: $showAlert) {
+                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
             }
 
             if !tssModules.isEmpty {
                 Section(header: Text("Tss Module")) {
-                    VStack {
                         ForEach(Array(tssModules.keys), id: \.self) { key in
                             HStack {
                                 Button(action: {
@@ -90,7 +108,7 @@ struct TssView: View {
                                 }) { Text(key) }
                             }
                         }
-                    }
+
                 }
             }
 
@@ -101,10 +119,21 @@ struct TssView: View {
                         Task {
                             // show input popup for factor key input
                             // get factor key into keychain if input is empty
+                            let saveId = selected_tag + ":" + "0"
+                            let factorKey = try KeychainInterface.fetch(key: saveId )
                             // get tss share using factor key
+                            let tss = try getTssModule(tag: selected_tag)
+                            let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
+                            print( "tssIndex:" + tssIndex)
+                            print( "tssShare:" + tssShare)
+                            alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
+                            showAlert = true
                         }
                     }) { Text("get tss share") }
+                }.alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
+
                 HStack {
                     Button(action: {
                         Task {
@@ -148,7 +177,7 @@ struct TssView: View {
                             let nonce = String( try tss.get_tss_nonce() )
                             let result = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce)
 
-                            guard let dkgpubkey = result?.publicKey else {
+                            guard let dkgPubkey = result?.publicKey.toFullAddr() else {
                                 throw RuntimeError("invalid dkgpubkey")
                             }
                             let nodeIndexes = result!.nodeIndexes.map { index in
@@ -162,15 +191,17 @@ struct TssView: View {
                             let msgHash = TSSHelpers.hashMessage(message: msg)
                             let clientIndex = Int32(parties-1)
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
-                            let sigs: [String] = [] // signature
-                            let endpoints: [String?] = [] // tss endpoint
-                            let socketEndpoints: [String?] = [] // tss endpoint
                             let partyIndexes: [Int32] = [0, 1, 2, 3]
-                            let share = BigInt(1) // userShare
-                            let userSharePublicKey = Data(hex: tssShare)!
+                            let sigs: [String] = signatures
+                            let endpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
+                            let socketEndpoints: [String?] = tssEndpoints.prefix(partyIndexes.count).map { $0 }
+                            let share = BigInt(tssShare, radix: 16)!
+                            let userPublicHex = try PrivateKey(hex: tssShare).toPublic()
 
-                            let dkgPub = Data(BigInt(1).serialize().suffix(32)) // @ check
-                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPub, userSharePubKey: userSharePublicKey, userTssIndex: userTssIndex) //
+                            let dkgPub =  try KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
+                            let userSharePublicKey = try KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-compressed")
+
+                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex) //
                             let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeIndexes, userTssIndex: userTssIndex)
 
                             let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: endpoints.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketEndpoints.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
@@ -190,7 +221,7 @@ struct TssView: View {
                                 exit(EXIT_FAILURE)
                             }
                         }
-                    }) { Text("sign with tagged tss share") }
+                    }) { Text("sign with " + selected_tag + " tss share") }
                 }
             }
         }
