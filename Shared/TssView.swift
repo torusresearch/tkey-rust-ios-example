@@ -295,7 +295,7 @@ struct TssView: View {
                             // verify the signature
                             if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: publicKey) {
                                 showAlert = true
-                            print(TSSHelpers.hexSignature(s: s, r: r, v: v))
+                                print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
                             } else {
                                 exit(EXIT_FAILURE)
                             }
