@@ -268,8 +268,11 @@ struct TssView: View {
                             }
 
                             // Create a precompute, each server also creates a precompute.
-                            // This calls setup() followed by precompute()
-                            // for all parties
+                            // This calls setup() followed by precompute() for all parties
+                            // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
+                            // This will also fail if a single failure notification is received.
+                            // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
+                            // Once ~checkpt123_raw is recieved, precompute_complete notifications should be received shortly thereafter.
                             let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
                             
                             while !(try! client.isReady()) {
@@ -280,7 +283,10 @@ struct TssView: View {
                             let msg = "hello world"
                             let msgHash = TSSHelpers.hashMessage(message: msg)
 
-                            // sign a hashed message, collecting signature fragments from the server
+                            // signs a hashed message, collecting signature fragments from the servers
+                            // this function signs locally to produce its' own fragment
+                            // this is combined with the server fragments
+                            // local_verify is then used with the client precompute to produce a full signature and return the components
                             let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
 
                             // cleanup sockets
