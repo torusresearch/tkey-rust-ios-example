@@ -220,13 +220,7 @@ struct TssView: View {
                             let tss = try getTssModule(tag: selected_tag)
                             let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
                             let userTssIndex = BigInt(tssIndex, radix: 16)!
-
                             let nonce = String( try tss.get_tss_nonce() )
-                            let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce)
-                            guard let dkgPubkey = tssPublicAddressInfo?.publicKey.toFullAddr() else {
-                                throw RuntimeError("invalid dkgpubkey")
-                            }
-                            let nodeIndexes = tssPublicAddressInfo!.nodeIndexes
 
                             // generate a random nonce for sessionID
                             let randomKey = BigUInt(SECP256K1.generatePrivateKey()!)
@@ -235,6 +229,11 @@ struct TssView: View {
                             // create the full session string
                             let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: nonce, sessionNonce: sessionNonce)
 
+                            guard let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: nonce) else {
+                                throw RuntimeError("invalid dkgpubkey")
+                            }
+                            let nodeIndexes = tssPublicAddressInfo.nodeIndexes
+                            
                             // get  the urls, socketUrls, partyIndexes and nodeIndexes
                             // using existing data
                             let (urls, socketUrls, partyIndexes, nodeTssIndexes) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexes)
@@ -247,13 +246,18 @@ struct TssView: View {
                             // index of the client, last index of partiesIndexes
                             let clientIndex = Int32(parties-1)
 
-                            let share = BigInt(tssShare, radix: 16)!
-                            let userPublicHex = try! PrivateKey(hex: tssShare).toPublic()
+                            let shareUnsigned = BigUInt(tssShare, radix: 16)!
+                            let share = BigInt(sign: .plus, magnitude: shareUnsigned)
+                            let userPublicKey = SECP256K1.privateToPublic(privateKey: Data(share.serialize().suffix(32)), compressed: false)!
+                            
+                            let dkgPubKeyPoint = tssPublicAddressInfo.publicKey
+                            var dkgPubKey = Data()
+                            dkgPubKey.append(0x04) // Uncompressed key prefix
+                            dkgPubKey.append(Data(hexString: dkgPubKeyPoint.x.padLeft(padChar: "0", count: 64))!)
+                            dkgPubKey.append(Data(hexString: dkgPubKeyPoint.y.padLeft(padChar: "0", count: 64))!)
 
                             // Get the Tss PublicKey
-                            let dkgPub =  try! KeyPoint(address: dkgPubkey).getAsCompressedPublicKey(format: "elliptic-compressed")
-                            let userSharePublicKey = try! KeyPoint(address: userPublicHex).getAsCompressedPublicKey(format: "elliptic-comprezssed")
-                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: Data(hexString: dkgPub)!, userSharePubKey: Data(hexString: userSharePublicKey)!, userTssIndex: userTssIndex)
+                            let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPubKey, userSharePubKey: userPublicKey, userTssIndex: userTssIndex)
 
                             // Create the tss client
                             let client = try! TSSClient(session: session, index: clientIndex, parties: partyIndexes, endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: publicKey))
