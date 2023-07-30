@@ -149,6 +149,7 @@ struct ThresholdKeyView: View {
                                         return
                                     }
 
+                                    assert(signatures.isEmpty != true)
                                     signatures = sessionTokenData.map { token in
                                         return [  "data": Data(hex: token.token)!.base64EncodedString(),
                                                    "sig": token.signature ]
