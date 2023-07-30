@@ -44,10 +44,11 @@ func generateEndpoints(parties: Int, clientIndex: Int, nodeIndexes: [Int?], urls
         } else {
             // nodeIndexes[i] ?  nodeIndexes[i] - 1 : i
             var index = i
-            let currentIndex = i
+            var currentIndex = i
             if (i >= nodeIndexes.count) == false
             {
-                index = nodeIndexes[i]!-1
+                currentIndex = nodeIndexes[i]!
+                index = currentIndex-1
                 serverIndexes.append(currentIndex)
             } else {
                 serverIndexes.append(index+1)
