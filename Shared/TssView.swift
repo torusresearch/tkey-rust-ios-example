@@ -53,7 +53,7 @@ func generateEndpoints(parties: Int, clientIndex: Int, nodeIndexes: [Int?], urls
                 serverIndexes.append(index+1)
             }
             endpoints.append(urls[index])
-            endpoints.append(urls[index].replacingOccurrences(of: "/tss", with: ""))
+            tssWSEndpoints.append(urls[index].replacingOccurrences(of: "/tss", with: ""))
         }
     }
     return (endpoints, tssWSEndpoints, partyIndexes, serverIndexes)
