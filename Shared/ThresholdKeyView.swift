@@ -149,11 +149,11 @@ struct ThresholdKeyView: View {
                                         return
                                     }
 
-                                    assert(signatures.isEmpty != true)
                                     signatures = sessionTokenData.map { token in
                                         return [  "data": Data(hex: token.token)!.base64EncodedString(),
                                                    "sig": token.signature ]
                                     }
+                                    assert(signatures.isEmpty != true)
 
                                     guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
                                         alertContent = "Failed to create storage layer"

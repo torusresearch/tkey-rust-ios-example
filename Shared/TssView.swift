@@ -45,8 +45,7 @@ func generateEndpoints(parties: Int, clientIndex: Int, nodeIndexes: [Int?], urls
             // nodeIndexes[i] ?  nodeIndexes[i] - 1 : i
             var index = i
             var currentIndex = i
-            if (i >= nodeIndexes.count) == false
-            {
+            if (i >= nodeIndexes.count) == false {
                 currentIndex = nodeIndexes[i]!
                 index = currentIndex-1
                 serverIndexes.append(currentIndex)
@@ -54,7 +53,7 @@ func generateEndpoints(parties: Int, clientIndex: Int, nodeIndexes: [Int?], urls
                 serverIndexes.append(index+1)
             }
             endpoints.append(urls[index])
-            endpoints.append(urls[index].replacingOccurrences(of: "/tss", with: ""))
+            tssWSEndpoints.append(urls[index].replacingOccurrences(of: "/tss", with: ""))
         }
     }
     return (endpoints, tssWSEndpoints, partyIndexes, serverIndexes)
