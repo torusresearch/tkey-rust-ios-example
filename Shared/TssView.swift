@@ -332,7 +332,7 @@ struct TssView: View {
                             let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPubKey, userSharePubKey: userPublicKey, userTssIndex: userTssIndex)
 
                             self.publicKey = publicKey
-                            signingData = true
+                            self.signingData = true
                         }
                     }) { Text("Prepare signing data") }
                 }
