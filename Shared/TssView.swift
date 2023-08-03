@@ -117,6 +117,7 @@ struct TssView: View {
     @State var urls: [String?] = []
     @State var sigs: [String] = []
     @State var coeffs: [String: String] = [:]
+    @State var signingData = false
 
     func getTssModule(tag: String) throws -> TssModule {
         guard let tss = tssModules[tag] else {
@@ -331,6 +332,7 @@ struct TssView: View {
                             let publicKey = try! TSSHelpers.getFinalTssPublicKey(dkgPubKey: dkgPubKey, userSharePubKey: userPublicKey, userTssIndex: userTssIndex)
 
                             self.publicKey = publicKey
+                            signingData = true
                         }
                     }) { Text("Prepare signing data") }
                 }
@@ -377,6 +379,6 @@ struct TssView: View {
             } else {
                 exit(EXIT_FAILURE)
             }
-        }) { Text("Sign") }
+        }) { Text("Sign") }.disabled( !signingData )
     }
 }
