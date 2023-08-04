@@ -33,7 +33,7 @@
       "location" : "https://github.com/torusresearch/customauth-swift-sdk",
       "state" : {
         "branch" : "feat/sapphire",
-        "revision" : "6ab7c332553e3f8b630774e255b4078b5cb639dc"
+        "revision" : "03123f475091864cb98f00d1dadb2919eabbabbe"
       }
     },
     {
@@ -42,7 +42,7 @@
       "location" : "https://github.com/torusresearch/fetch-node-details-swift.git",
       "state" : {
         "branch" : "sapphire",
-        "revision" : "5dc0393cb895e577f8666c30911dc07879748d62"
+        "revision" : "9ec971573426247b0806e46b88a82fa8f96cf34a"
       }
     },
     {
@@ -114,7 +114,7 @@
       "location" : "https://github.com/torusresearch/tss-client-swift/",
       "state" : {
         "branch" : "main",
-        "revision" : "ec536e671f7b880c3f1f71fec177752acb297415"
+        "revision" : "58e840c302a4ed08a3383af7d4c9008481678d9e"
       }
     },
     {

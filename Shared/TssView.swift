@@ -118,6 +118,7 @@ struct TssView: View {
     @State var sigs: [String] = []
     @State var coeffs: [String: String] = [:]
     @State var signingData = false
+    @State var sigHex = false
 
     func getTssModule(tag: String) throws -> TssModule {
         guard let tss = tssModules[tag] else {
@@ -374,6 +375,8 @@ struct TssView: View {
 
             // verify the signature
             if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: self.publicKey!) {
+                let sigHex = try! TSSHelpers.hexSignature(s: s, r: r, v: v)
+                alertContent = "Signature: " + sigHex
                 showAlert = true
                 print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
             } else {
