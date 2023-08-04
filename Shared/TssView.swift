@@ -240,39 +240,140 @@ struct TssView: View {
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
                             guard (alert?.textFields?.first) != nil else { return }
                             Task {
+                                do {
+                                    let checkSaveId = selected_tag + ":" + "1"
+                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
+                                    alertContent = "There is exisitng copied Factor Key"
+                                    showAlert = true
+                                    return
+                                } catch {}
                                 // generate factor key if input is empty
                                 // derive factor pub
+                                let newFactorKey = try PrivateKey.generate()
+                                let newFactorPub = try newFactorKey.toPublic()
+
                                 // use input to generate tss share with index 3
+                                let saveId = selected_tag + ":" + "0"
+                                let factorKey = try KeychainInterface.fetch(key: saveId )
+                                let tss = try getTssModule(tag: selected_tag)
+                                let tssShareIndex = Int32(3)
+                                let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                                try await tss.add_factor_pub(factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex )
+
+                                let saveNewFactorId = selected_tag + ":" + "1"
+                                try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
                                 // show factor key used
+
+                                let (newTssIndex, newTssShare) = try tss.get_tss_share(factorKey: newFactorKey.hex)
+                                alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
+                                showAlert = true
                             }
                         }))
 
                         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                             windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                         }
-                    }) { Text(selected_tag + " : add factor pub") }
+                    }) { Text( selected_tag + " : add factor pub") }
+                }.alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
+
                 HStack {
                     Button(action: {
-                        Task {
-                            // show input popup for factor key input
-                            // get factor key from keychain
-                            // copy factor pub
+                        // show input popup
+                        let alert = UIAlertController(title: "Key in Factor Key or randomly generated if left empty", message: nil, preferredStyle: .alert)
+                        alert.addTextField { textField in
+                            textField.placeholder = "Factor Key"
                         }
-                    }) { Text(selected_tag + " : copy factor pub") }
+                        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+                            guard (alert?.textFields?.first) != nil else { return }
+                            Task {
+                                do {
+                                    let checkSaveId = selected_tag + ":" + "2"
+                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
+                                    alertContent = "There is exisitng copied Factor Key"
+                                    showAlert = true
+                                    return
+                                } catch {}
+                                // generate factor key if input is empty
+                                // derive factor pub
+                                let newFactorKey = try PrivateKey.generate()
+                                let newFactorPub = try newFactorKey.toPublic()
+
+                                // get existing factor key
+                                let saveId = selected_tag + ":" + "0"
+                                let factorKey = try KeychainInterface.fetch(key: saveId )
+                                // use input to generate tss share with index 3
+                                let tss = try getTssModule(tag: selected_tag)
+                                let tssShareIndex = Int32(2)
+                                try tss.copy_factor_pub(factorKey: factorKey, newFactorPub: newFactorPub, tss_index: tssShareIndex)
+
+                                let saveNewFactorId = selected_tag + ":" + "2"
+                                try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
+                                // show factor key used
+
+                                let (newTssIndex, newTssShare) = try tss.get_tss_share(factorKey: newFactorKey.hex)
+                                alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
+                                showAlert = true
+                                // copy factor pub
+                            }
+                        }))
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                          windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                        }
+                    }) { Text( selected_tag + " : copy factor pub") }
+                }.alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
+
                 HStack {
                     Button(action: {
                         Task {
-                            // show input popup for factor pub input
-                            // get factor key into keychain if input is empty
+                            // get factor key from keychain if input is empty
+                            var deleteFactorKey: String?
+                            do {
+                                let saveId = selected_tag + ":" + "1"
+                                deleteFactorKey = try KeychainInterface.fetch(key: saveId )
+                            } catch {
+                                do {
+                                    let saveId = selected_tag + ":" + "2"
+                                    deleteFactorKey = try KeychainInterface.fetch(key: saveId )
+                                } catch {
+                                    alertContent = "There is not extra factor key to be deleted"
+                                    showAlert = true
+                                    return
+                                }
+                            }
+                            guard let deleteFactorKey = deleteFactorKey else {
+                                alertContent = "There is not extra factor key to be deleted"
+                                showAlert = true
+                                return
+                            }
                             // delete factor pub
+                            let deleteFactorPK = PrivateKey(hex: deleteFactorKey)
+
+                            let saveId = selected_tag + ":" + "0"
+                            let factorKey = try KeychainInterface.fetch(key: saveId )
+
+                            let tss = try getTssModule(tag: selected_tag)
+                            let tssShareIndex = Int32(3)
+                            let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                            try await tss.delete_factor_pub(factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic())
+
+                            alertContent = "deleted factor key :" + deleteFactorKey
+
                         }
-                    }) { Text(selected_tag + " : delete factor pub") }
+                    }) { Text( selected_tag + " : delete factor pub") }
+                }.alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
+
                 HStack {
                     Button(action: {
                         Task {
+
+//                            generateEndpoints()
                             // tss node signatures
                             assert(signatures.isEmpty != true)
 
@@ -284,6 +385,13 @@ struct TssView: View {
                             let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
                             let tss = try getTssModule(tag: selected_tag)
                             let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
+                            let finalPub = try tss.get_tss_pub_key()
+
+                            print(signatures)
+                            print("tssShare:", tssShare)
+                            print("tssIndex:", tssIndex)
+                            print("tssShareByte", Data(hexString: tssShare)!.count )
+
                             let userTssIndex = BigInt(tssIndex, radix: 16)!
                             let nonce = String(try tss.get_tss_nonce())
 
@@ -308,7 +416,7 @@ struct TssView: View {
                             self.clientIndex = clientIndex
                             // get  the urls, socketUrls, partyIndexes and nodeIndexes
                             // using existing data
-                            // let (urls, socketUrls, partyIndexes, nodeTssIndexes) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexes)
+//                             let (urls, socketUrls, partyIndexes, nodeTssIndexes) = selectEndpoints(endpoints: tssEndpoints, nodeIndexes: nodeIndexes)
                             let (urls, socketUrls, partyIndexes, nodeInd) = generateEndpoints(parties: parties, clientIndex: Int(clientIndex), nodeIndexes: nodeIndexes, urls: tssEndpoints)
                             self.urls = urls
                             self.socketUrls = socketUrls
