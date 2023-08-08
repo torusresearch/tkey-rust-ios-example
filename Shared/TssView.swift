@@ -308,18 +308,18 @@ struct TssView: View {
                                     targetSaveId = selected_tag + ":" + "2"
                                     deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId )
                                 } catch {
-                                    alertContent = "There is not extra factor key to be deleted"
+                                    alertContent = "There is no extra factor key to be deleted"
                                     showAlert = true
                                     return
                                 }
                             }
                             guard let deleteFactorKey = deleteFactorKey else {
-                                alertContent = "There is not extra factor key to be deleted"
+                                alertContent = "There is no extra factor key to be deleted"
                                 showAlert = true
                                 return
                             }
                             if deleteFactorKey == "" {
-                                alertContent = "There is not extra factor key to be deleted"
+                                alertContent = "There is no extra factor key to be deleted"
                                 showAlert = true
                                 return
                             }
