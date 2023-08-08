@@ -3,6 +3,7 @@ import Foundation
 import SwiftUI
 import tkey_pkg
 import tss_client_swift
+import web3
 
 func helperTssClient ( threshold_key: ThresholdKey, tssModule: TssModule, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String] ) async throws -> (TSSClient, [String: String]) {
     let selected_tag = try tssModule.get_tss_tag()
@@ -409,5 +410,78 @@ struct TssView: View {
                 }
             }
         }) { Text("Sign") }// .disabled( !signingData )
+        
+        Button(action: {
+            Task {
+                // step 1. building transaction
+                let nonce = Int(hex: "0x00")!
+                let gasPrice = BigUInt(hex: "0x04a817c800")!
+                let gasLimit = BigUInt(hex: "0x5208")!
+                let to = EthereumAddress("0x3535353535353535353535353535353535353535")
+                let value = BigUInt(hex: "0x0")!
+                
+                let tx = EthereumTransaction(from: nil, to: to, value: value, data: nil, nonce: nonce, gasPrice: gasPrice, gasLimit: gasLimit, chainId: 37)
+
+                // not sure using txHash as a hash message
+                let txm = tx.hash?.toHexString()
+                let msgHash = TSSHelpers.hashMessage(message: txm!)
+
+                // step 2. getting signature
+                let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
+                // Create tss Client using helper
+                let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
+                
+                do {
+                    // Wait for sockets to be connected
+                    var connected = false
+                    while !connected {
+                        connected = try client.checkConnected()
+                    }
+                    // no-op
+                } catch {
+                    print( "error")
+                    return
+                }
+                
+                let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
+
+                while !(try! client.isReady()) {
+                    // no-op
+                }
+                
+                let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: txm, precompute: precompute, signatures: sigs)
+
+                // cleanup sockets
+                try! client.cleanup(signatures: sigs)
+
+//                // verify the signature
+//                let tss = try getTssModule(tag: selected_tag)
+//                let publicKey = try tss.get_tss_pub_key()
+//                let keypoint = try KeyPoint(address: publicKey)
+//                let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+//
+//                var sigHex = ""
+//                if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+//                    sigHex = try! TSSHelpers.hexSignature(s: s, r: r, v: v)
+//                    print(sigHex)
+//                    alertContent = "Signature: " + sigHex
+//                    showAlert = true
+//                    print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
+//                } else {
+//                    exit(EXIT_FAILURE)
+//                }
+//                
+//                sigHex = "0x" + sigHex
+                let signed = SignedTransaction(transaction: tx, v: Int(v), r: r.serialize(), s: s.serialize())
+
+                let hash = signed.hash!.web3.hexString
+                alertContent = "transaction hash: " + hash
+                showAlert = true
+                
+                
+            }
+        }) { Text("transaction signing: send eth") }
     }
 }
