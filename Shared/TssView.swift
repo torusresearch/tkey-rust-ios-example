@@ -299,7 +299,6 @@ struct TssView: View {
                             var deleteFactorKey: String?
                             var targetSaveId = selected_tag + ":" + "1"
                             do {
-                                try KeychainInterface.save(item: "", key: targetSaveId)
                                 deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId )
                                 if deleteFactorKey == "" {
                                     throw RuntimeError("")
