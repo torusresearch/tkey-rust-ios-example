@@ -64,6 +64,14 @@ struct ThresholdKeyView: View {
 
     var body: some View {
         VStack {
+
+            if showTss {
+
+                List {
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss)
+                }
+            } else {
+
             HStack {
                 Image(systemName: "person")
                     .resizable()
@@ -81,11 +89,6 @@ struct ThresholdKeyView: View {
             .padding()
 
             List {
-
-                if showTss {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss)
-                } else {
-
                     HStack {
                         Button(action: {
                             Task {
