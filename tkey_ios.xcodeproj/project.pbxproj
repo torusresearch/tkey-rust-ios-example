@@ -895,7 +895,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
 			requirement = {
-				branch = "feat/v2-tss";
+				branch = "feat/v2-tss-test";
 				kind = branch;
 			};
 		};
@@ -903,8 +903,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/tss-client-swift/";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

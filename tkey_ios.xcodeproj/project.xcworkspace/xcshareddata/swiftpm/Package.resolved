@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
-        "branch" : "feat/v2-tss",
-        "revision" : "e173fb94ae424aeb4497800cc2ee1f35cb491944"
+        "branch" : "feat/v2-tss-test",
+        "revision" : "7e43ca35de4a93f8bc99d1463e57c5b0b29003cb"
       }
     },
     {
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/tss-client-swift/",
       "state" : {
-        "branch" : "main",
-        "revision" : "58e840c302a4ed08a3383af7d4c9008481678d9e"
+        "revision" : "a10c946beeb76078d2caf255a8820868b232c177",
+        "version" : "1.0.1"
       }
     },
     {
