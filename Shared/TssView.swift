@@ -369,9 +369,9 @@ struct TssView: View {
                     // This will also fail if a single failure notification is received.
                     // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
                     // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
-                    let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
+                    let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
 
-                    while !(try! client.isReady()) {
+                    while !(try client.isReady()) {
                         // no-op
                     }
 
@@ -383,10 +383,10 @@ struct TssView: View {
                     // this function signs locally to produce its' own fragment
                     // this is combined with the server fragments
                     // local_verify is then used with the client precompute to produce a full signature and return the components
-                    let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
+                    let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
 
                     // cleanup sockets
-                    try! client.cleanup(signatures: sigs)
+                    try client.cleanup(signatures: sigs)
 
                     // verify the signature
                     let tss = try getTssModule(tag: selected_tag)
@@ -395,10 +395,10 @@ struct TssView: View {
                     let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
                     if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
-                        let sigHex = try! TSSHelpers.hexSignature(s: s, r: r, v: v)
+                        let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
                         alertContent = "Signature: " + sigHex
                         showAlert = true
-                        print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
+                        print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
                     } else {
                         alertContent = "Signature could not be verified"
                         showAlert = true
@@ -447,7 +447,7 @@ struct TssView: View {
 
                     let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
 
-                    while !(try! client.isReady()) {
+                    while !(try client.isReady()) {
                         // no-op
                     }
 
