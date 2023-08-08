@@ -402,7 +402,11 @@ struct ThresholdKeyView: View {
                                         let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
-                                        alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are required to reconstruct the private key"
+                                        if key_details.required_shares > 0 {
+                                            alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are still required to be inserted to reconstruct the key."
+                                        } else {
+                                            alertContent = "There are \(totalShares) available shares."
+                                        }
                                         showAlert = true
                                         showAlert = true
                                     } catch {
