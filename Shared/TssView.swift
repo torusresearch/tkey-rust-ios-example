@@ -256,7 +256,7 @@ struct TssView: View {
                                 do {
                                     let checkSaveId = selected_tag + ":" + "1"
                                     let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
-                                    if checkSaveId != "" {
+                                    if checkFactorKey != "" {
                                         alertContent = "There is exisitng backup Factor Key"
                                         showAlert = true
                                         return
@@ -352,7 +352,6 @@ struct TssView: View {
                             var deleteFactorKey: String?
                             var targetSaveId = selected_tag + ":" + "1"
                             do {
-                                try KeychainInterface.save(item: "", key: targetSaveId)
                                 deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId )
                                 if deleteFactorKey == "" {
                                     throw RuntimeError("")
