@@ -80,7 +80,6 @@
 		B30B6B3028BCC8AC00812C1E /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		B30B6B3628BCC8AC00812C1E /* Tests_macOSLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOSLaunchTests.swift; sourceTree = "<group>"; };
-		B3DA79ED2A7644AB0021D7E8 /* tkey-ios--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "tkey-ios--iOS--Info.plist"; sourceTree = "<group>"; };
 		B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdKeyView.swift; sourceTree = "<group>"; };
 		B3E5316829EC4ED000174AF1 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		B3E5316E29EE75CA00174AF1 /* KeyChain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
@@ -125,7 +124,6 @@
 		B30B6B0A28BCC8A900812C1E = {
 			isa = PBXGroup;
 			children = (
-				B3DA79ED2A7644AB0021D7E8 /* tkey-ios--iOS--Info.plist */,
 				B30B6B0F28BCC8A900812C1E /* Shared */,
 				B30B6B1E28BCC8AC00812C1E /* macOS */,
 				B30B6B2728BCC8AC00812C1E /* Tests iOS */,
@@ -556,7 +554,6 @@
 				ENABLE_PREVIEWS = YES;
 				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "tkey-ios--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -595,7 +592,6 @@
 				DEVELOPMENT_TEAM = 2Q63NCPY55;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "tkey-ios--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -892,8 +888,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/tss-client-swift/";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.0.3;
 			};
 		};
 		F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */ = {
