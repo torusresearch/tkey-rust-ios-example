@@ -64,15 +64,6 @@
       }
     },
     {
-      "identity" : "libtkey-pkg",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/torusresearch/libtkey-pkg/",
-      "state" : {
-        "branch" : "feat/v2-tss-test",
-        "revision" : "7e43ca35de4a93f8bc99d1463e57c5b0b29003cb"
-      }
-    },
-    {
       "identity" : "secp256k1.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Boilertalk/secp256k1.swift",
@@ -100,6 +91,15 @@
       }
     },
     {
+      "identity" : "tkey-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tkey/tkey-ios",
+      "state" : {
+        "branch" : "feat/v2-tss-test",
+        "revision" : "7e43ca35de4a93f8bc99d1463e57c5b0b29003cb"
+      }
+    },
+    {
       "identity" : "torus-utils-swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/torus-utils-swift.git",
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/tss-client-swift/",
       "state" : {
-        "revision" : "a10c946beeb76078d2caf255a8820868b232c177",
-        "version" : "1.0.1"
+        "revision" : "6f1f6632d3c2631ac12608af7421c49f5fa4fa4f",
+        "version" : "1.0.3"
       }
     },
     {
