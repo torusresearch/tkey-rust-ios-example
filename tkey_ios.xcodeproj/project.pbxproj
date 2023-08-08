@@ -12,6 +12,12 @@
 		14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* LoginModel.swift */; };
 		14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* LoginModel.swift */; };
 		146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 146B0D6829CC01F7000473A8 /* CustomAuth */; };
+		A3F814C92A82C40900018736 /* EthereumTssAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814C82A82C40900018736 /* EthereumTssAccount.swift */; };
+		A3F814CA2A82C40900018736 /* EthereumTssAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814C82A82C40900018736 /* EthereumTssAccount.swift */; };
+		A3F814CC2A82D8B300018736 /* RLP.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CB2A82D8B300018736 /* RLP.swift */; };
+		A3F814CD2A82D8B300018736 /* RLP.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CB2A82D8B300018736 /* RLP.swift */; };
+		A3F814CF2A82DACE00018736 /* TorusWeb3Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */; };
+		A3F814D02A82DACE00018736 /* TorusWeb3Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
 		B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */; };
@@ -68,6 +74,9 @@
 /* Begin PBXFileReference section */
 		14446F3529CD642100B7EFE2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		14446F3829CD644100B7EFE2 /* LoginModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginModel.swift; sourceTree = "<group>"; };
+		A3F814C82A82C40900018736 /* EthereumTssAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTssAccount.swift; sourceTree = "<group>"; };
+		A3F814CB2A82D8B300018736 /* RLP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLP.swift; sourceTree = "<group>"; };
+		A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorusWeb3Utils.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -137,6 +146,8 @@
 			isa = PBXGroup;
 			children = (
 				B3E5316E29EE75CA00174AF1 /* KeyChain.swift */,
+				A3F814C82A82C40900018736 /* EthereumTssAccount.swift */,
+				A3F814CB2A82D8B300018736 /* RLP.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
 				B30B6B1228BCC8AC00812C1E /* Assets.xcassets */,
@@ -145,6 +156,7 @@
 				B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */,
 				B3E5316829EC4ED000174AF1 /* LoaderView.swift */,
 				F0E2AC432A73A3C900F6C17A /* TssView.swift */,
+				A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -369,10 +381,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */,
+				A3F814C92A82C40900018736 /* EthereumTssAccount.swift in Sources */,
 				B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				A3F814CC2A82D8B300018736 /* RLP.swift in Sources */,
 				14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */,
+				A3F814CF2A82DACE00018736 /* TorusWeb3Utils.swift in Sources */,
 				F0E2AC442A73A3C900F6C17A /* TssView.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 				B3E5316929EC4ED000174AF1 /* LoaderView.swift in Sources */,
@@ -384,10 +399,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */,
+				A3F814CA2A82C40900018736 /* EthereumTssAccount.swift in Sources */,
 				B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
+				A3F814CD2A82D8B300018736 /* RLP.swift in Sources */,
 				14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */,
+				A3F814D02A82DACE00018736 /* TorusWeb3Utils.swift in Sources */,
 				F0E2AC452A73A3C900F6C17A /* TssView.swift in Sources */,
 				B30B6B3928BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
 				B3E5316A29EC4ED000174AF1 /* LoaderView.swift in Sources */,
