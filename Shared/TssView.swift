@@ -257,7 +257,7 @@ struct TssView: View {
                                     let checkSaveId = selected_tag + ":" + "1"
                                     let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
                                     if checkFactorKey != "" {
-                                        alertContent = "There is exisitng backup Factor Key"
+                                        alertContent = "There is existing backup Factor Key"
                                         showAlert = true
                                         return
                                     }
