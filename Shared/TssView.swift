@@ -33,7 +33,7 @@ func helperTssClient ( threshold_key: ThresholdKey, tssModule: TssModule, factor
 
     let (urls, socketUrls, partyIndexes, nodeInd) = try TSSHelpers.generateEndpoints(parties: parties, clientIndex: Int(clientIndex), nodeIndexes: nodeIndexes, urls: tssEndpoints)
 
-    let coeffs = try! TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeInd.map({ BigInt($0) }), userTssIndex: userTssIndex)
+    let coeffs = try TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeInd.map({ BigInt($0) }), userTssIndex: userTssIndex)
 
     let shareUnsigned = BigUInt(tssShare, radix: 16)!
     let share = BigInt(sign: .plus, magnitude: shareUnsigned)
@@ -42,7 +42,7 @@ func helperTssClient ( threshold_key: ThresholdKey, tssModule: TssModule, factor
     let keypoint = try KeyPoint(address: publicKey)
     let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
-    let client = try! TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({Int32($0)}), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
+    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({Int32($0)}), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
 
     return (client, coeffs, publicKey)
  }
@@ -353,96 +353,143 @@ struct TssView: View {
         Button(action: {
             Task {
 
-                let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-                // get the factor key information
-
-                let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
-                // Create tss Client using helper
-                let (client, coeffs, tssPublicKey) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
-
-                // Create the tss client
-                //            let client = try! TSSClient(session: self.session!, index: Int32(self.clientIndex!), parties: self.partyIndexes.map({Int32($0!)}), endpoints: self.urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: self.socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: self.share!), pubKey: try TSSHelpers.base64PublicKey(pubKey: self.publicKey!))
                 do {
-                    // Wait for sockets to be connected
+                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                    // get the factor key information
+
+                    let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
+                    // Create tss Client using helper
+                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
+
+                    // wait for sockets to connect
                     var connected = false
                     while !connected {
                         connected = try client.checkConnected()
                     }
-                    // no-op
+
+                    // Create a precompute, each server also creates a precompute.
+                    // This calls setup() followed by precompute() for all parties
+                    // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
+                    // This will also fail if a single failure notification is received.
+                    // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
+                    // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
+                    let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
+
+                    while !(try client.isReady()) {
+                        // no-op
+                    }
+
+                    // hash a message
+                    let msg = "hello world"
+                    let msgHash = TSSHelpers.hashMessage(message: msg)
+
+                    // signs a hashed message, collecting signature fragments from the servers
+                    // this function signs locally to produce its' own fragment
+                    // this is combined with the server fragments
+                    // local_verify is then used with the client precompute to produce a full signature and return the components
+                    let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
+
+                    // cleanup sockets
+                    try client.cleanup(signatures: sigs)
+
+                    // verify the signature
+                    let tss = try getTssModule(tag: selected_tag)
+                    let publicKey = try tss.get_tss_pub_key()
+                    let keypoint = try KeyPoint(address: publicKey)
+                    let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+
+                    if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+                        let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
+                        alertContent = "Signature: " + sigHex
+                        showAlert = true
+                        print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
+                    } else {
+                        alertContent = "Signature could not be verified"
+                        showAlert = true
+                    }
                 } catch {
-                    print( "error")
-                    return
-                }
-                // Create a precompute, each server also creates a precompute.
-                // This calls setup() followed by precompute() for all parties
-                // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
-                // This will also fail if a single failure notification is received.
-                // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
-                // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
-                let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
-
-                while !(try! client.isReady()) {
-                    // no-op
-                }
-
-                // hash a message
-                let msg = "hello world"
-                let msgHash = TSSHelpers.hashMessage(message: msg)
-
-                // signs a hashed message, collecting signature fragments from the servers
-                // this function signs locally to produce its' own fragment
-                // this is combined with the server fragments
-                // local_verify is then used with the client precompute to produce a full signature and return the components
-                let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
-
-                // cleanup sockets
-                try! client.cleanup(signatures: sigs)
-
-                // verify the signature
-                let tss = try getTssModule(tag: selected_tag)
-                let publicKey = try tss.get_tss_pub_key()
-                let keypoint = try KeyPoint(address: publicKey)
-                let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
-
-                if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
-                    let sigHex = try! TSSHelpers.hexSignature(s: s, r: r, v: v)
-                    alertContent = "Signature: " + sigHex
+                    alertContent = "Signing could not be completed. please try again"
                     showAlert = true
-                    print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
-                } else {
-                    exit(EXIT_FAILURE)
                 }
             }
         }) { Text("Sign") }// .disabled( !signingData )
-        
+
         Button(action: {
             Task {
-
-
-                // step 2. getting signature
-                let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-
-                let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
-                // Create tss Client using helper
-                let (client, coeffs, tssPublicKey) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
-                
                 do {
-                    // Wait for sockets to be connected
-                    var connected = false
-                    while !connected {
-                        connected = try client.checkConnected()
+                    // step 1. building transaction
+                    let nonce = Int(hex: "0x00")!
+                    let gasPrice = BigUInt(hex: "0x04a817c800")!
+                    let gasLimit = BigUInt(hex: "0x5208")!
+                    let to = EthereumAddress("0x3535353535353535353535353535353535353535")
+                    let value = BigUInt(hex: "0x0")!
+
+                    let tx = EthereumTransaction(from: nil, to: to, value: value, data: nil, nonce: nonce, gasPrice: gasPrice, gasLimit: gasLimit, chainId: 37)
+
+                    // not sure using txHash as a hash message
+                    let txm = tx.hash?.toHexString()
+                    let msgHash = TSSHelpers.hashMessage(message: txm!)
+
+                    // step 2. getting signature
+                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                    let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
+                    // Create tss Client using helper
+                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
+
+                    do {
+                        // Wait for sockets to be connected
+                        var connected = false
+                        while !connected {
+                            connected = try client.checkConnected()
+                        }
+                        // no-op
+                    } catch {
+                        print( "error")
+                        return
                     }
-                    // no-op
+
+                    let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
+
+                    while !(try client.isReady()) {
+                        // no-op
+                    }
+
+                    let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: txm, precompute: precompute, signatures: sigs)
+
+                    // cleanup sockets
+                    try client.cleanup(signatures: sigs)
+
+                    //                // verify the signature
+                    //                let tss = try getTssModule(tag: selected_tag)
+                    //                let publicKey = try tss.get_tss_pub_key()
+                    //                let keypoint = try KeyPoint(address: publicKey)
+                    //                let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+                    //
+                    //                var sigHex = ""
+                    //                if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+                    //                    sigHex = try! TSSHelpers.hexSignature(s: s, r: r, v: v)
+                    //                    print(sigHex)
+                    //                    alertContent = "Signature: " + sigHex
+                    //                    showAlert = true
+                    //                    print(try! TSSHelpers.hexSignature(s: s, r: r, v: v))
+                    //                } else {
+                    //                    exit(EXIT_FAILURE)
+                    //                }
+                    //                
+                    //                sigHex = "0x" + sigHex
+                    let signed = SignedTransaction(transaction: tx, v: Int(v), r: r.serialize(), s: s.serialize())
+
+                    let hash = signed.hash!.web3.hexString
+                    alertContent = "transaction hash: " + hash
+                    showAlert = true
                 } catch {
-                    print( "error")
-                    return
+                    alertContent = "Signing could not be completed. please try again"
+                    showAlert = true
                 }
-                
-                let precompute = try! client.precompute(serverCoeffs: coeffs, signatures: sigs)
 
                 while !(try! client.isReady()) {
                     // no-op
-                    // TODO: fix it, better handling required
                 }
                 
                 
