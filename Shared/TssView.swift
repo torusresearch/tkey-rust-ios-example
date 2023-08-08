@@ -404,7 +404,7 @@ struct TssView: View {
                         showAlert = true
                     }
                 } catch {
-                    alertContent = "Signature could not be verified"
+                    alertContent = "Signing could not be completed. please try again"
                     showAlert = true
                 }
             }
@@ -480,7 +480,7 @@ struct TssView: View {
                     alertContent = "transaction hash: " + hash
                     showAlert = true
                 } catch {
-                    alertContent = "Signature could not be verified"
+                    alertContent = "Signing could not be completed. please try again"
                     showAlert = true
                 }
 
