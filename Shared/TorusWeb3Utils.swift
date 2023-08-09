@@ -55,5 +55,3 @@ public final class TorusWeb3Utils {
         return Wei(GWei * 1000000000)
     }
 }
-
-

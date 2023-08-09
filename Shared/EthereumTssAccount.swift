@@ -31,12 +31,11 @@ enum EthereumSignerError: Error {
     case unknownError
 }
 
-
 public class EthereumTssAccount: EthereumAccountProtocol {
     public let tssClient: TSSClient
-    public let publicKey: String;
+    public let publicKey: String
     public let authSigs: [String]
-    public let address: EthereumAddress;
+    public let address: EthereumAddress
     public let precompute: Precompute
 
     required public init(pubkey: String, tssClient: TSSClient, authSigs: [String], precompute: Precompute) throws {
@@ -77,13 +76,12 @@ public class EthereumTssAccount: EthereumAccountProtocol {
        public func signMessage(message: TypedData) throws -> String {
            throw CustomError.methodUnavailable
        }
-    
-    
+
         public func sign(transaction: EthereumTransaction) throws -> SignedTransaction {
            guard let raw = transaction.raw else {
                throw EthereumSignerError.emptyRawTransaction
            }
-            
+
             let msg = raw.web3.hexString
             guard let msgHash = transaction.hash?.toHexString() else {
                 throw RuntimeError("Could not get tx hash")
@@ -92,6 +90,6 @@ public class EthereumTssAccount: EthereumAccountProtocol {
 
             let encodedR = RLP.encodeBigInt(r)!
             let encodedS = RLP.encodeBigInt(s)!
-            return SignedTransaction(transaction: transaction, v: Int(v), r: encodedR , s: encodedS)
+            return SignedTransaction(transaction: transaction, v: Int(v), r: encodedR, s: encodedS)
        }
 }

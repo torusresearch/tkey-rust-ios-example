@@ -126,4 +126,3 @@ public struct RLP {
         return Data(bytes.reversed())
     }
 }
-

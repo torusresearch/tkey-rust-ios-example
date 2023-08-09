@@ -2,6 +2,7 @@ import SwiftUI
 import tkey_pkg
 import TorusUtils
 import FetchNodeDetails
+import CommonSources
 
 enum SpinnerLocation {
     case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
@@ -36,8 +37,10 @@ struct ThresholdKeyView: View {
     @State private var verifier: String!
     @State private var verifierId: String!
     @State private var tssModules: [String: TssModule] = [:]
-
     @State private var showTss = false
+    @State private var nodeDetails: AllNodeDetailsModel?
+    @State private var torusUtils: TorusUtils?
+
     //    @State
 
     func resetAppState() {
@@ -68,7 +71,7 @@ struct ThresholdKeyView: View {
             if showTss {
 
                 List {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss)
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils)
                 }
             } else {
 
@@ -164,19 +167,19 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-                                    let torusUtils = TorusUtils( enableOneKey: true,
+                                    torusUtils = TorusUtils( enableOneKey: true,
 //                                                                 allowHost: "https://signer.tor.us/api/allow",
                                                                  network: .sapphire(.SAPPHIRE_DEVNET)
 //                                                                 metadataHost: "https://sapphire-dev-2-1.authnetwork.dev/metadata",
 //                                                                 clientId: "YOUR_CLIENT_ID"
                                                              )
                                     let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
-                                    let nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
+                                    nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
 
-                                    tssEndpoint = nodeDetails.torusNodeTSSEndpoints
+                                    tssEndpoint = nodeDetails!.torusNodeTSSEndpoints
                                     print(verifier!)
                                     print(verifierId!)
-                                    guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails, torusUtils: torusUtils )
+                                    guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails)
 
                                     else {
                                         alertContent = "Failed to create service provider"
