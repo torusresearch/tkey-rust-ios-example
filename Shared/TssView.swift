@@ -1,26 +1,26 @@
 import BigInt
+import CommonSources
+import CryptoKit
+import FetchNodeDetails
 import Foundation
 import SwiftUI
 import tkey_pkg
+import TorusUtils
 import tss_client_swift
 import web3
-import CryptoKit
 
-func helperTssClient ( threshold_key: ThresholdKey, tssModule: TssModule, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String] ) async throws -> (TSSClient, [String: String]) {
-    let selected_tag = try tssModule.get_tss_tag()
-    let (tssIndex, tssShare) = try tssModule.get_tss_share(factorKey: factorKey)
-    let tssNonce = try tssModule.get_tss_nonce()
+func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String], nodeDetails: AllNodeDetailsModel, torusUtils: TorusUtils) async throws -> (TSSClient, [String: String]) {
+    let selected_tag = try TssModule.get_tss_tag(threshold_key: threshold_key)
+    let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+    let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
 
     // generate a random nonce for sessionID
-    let randomKey = BigUInt(SECP256K1.generatePrivateKey()!)
+    let randomKey = BigUInt(tss_client_swift.SECP256K1.generatePrivateKey()!)
     let random = BigInt(sign: .plus, magnitude: randomKey) + BigInt(Date().timeIntervalSince1970)
     let sessionNonce = TSSHelpers.hashMessage(message: String(random))
     // create the full session string
     let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
-
-    guard let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: String(tssNonce)) else {
-        throw RuntimeError("Could not get tss public address info")
-    }
+    let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
     let nodeIndexes = tssPublicAddressInfo.nodeIndexes
     let userTssIndex = BigInt(tssIndex, radix: 16)!
     // total parties, including the client
@@ -35,14 +35,14 @@ func helperTssClient ( threshold_key: ThresholdKey, tssModule: TssModule, factor
     let shareUnsigned = BigUInt(tssShare, radix: 16)!
     let share = BigInt(sign: .plus, magnitude: shareUnsigned)
 
-    let publicKey = try tssModule.get_tss_pub_key()
+    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
     let keypoint = try KeyPoint(address: publicKey)
     let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
-    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({Int32($0)}), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
+    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({ Int32($0) }), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
 
     return (client, coeffs)
- }
+}
 
 struct TssView: View {
     @Binding var threshold_key: ThresholdKey!
@@ -51,8 +51,8 @@ struct TssView: View {
     @Binding var signatures: [[String: Any]]!
     @Binding var tssEndpoints: [String]!
     @Binding var showTss: Bool
-
-    @State var tssModules: [String: TssModule] = [:]
+    @Binding var nodeDetails: AllNodeDetailsModel?
+    @Binding var torusUtils: TorusUtils?
     @State var showAlert: Bool = false
     @State private var selected_tag: String = ""
     @State private var alertContent = ""
@@ -70,13 +70,6 @@ struct TssView: View {
     @State var sigHex = false
     @State var allFactorPub: [String] = []
     @State var tss_pub_key: String = ""
-
-    func getTssModule(tag: String) throws -> TssModule {
-        guard let tss = tssModules[tag] else {
-            throw RuntimeError("tss not found")
-        }
-        return tss
-    }
 
     var body: some View {
         Button(action: {
@@ -105,10 +98,8 @@ struct TssView: View {
                             let factorPub = try factorKey.toPublic()
                             // use input to create tag tss share
                             do {
-                                print(try threshold_key.get_all_tss_tag())
-                                let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
-                                try tss.create_tagged_tss_share(deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2)
-                                tssModules[tag] = tss
+                                print(try threshold_key.get_all_tss_tags())
+                                try await TssModule.create_tagged_tss_share(threshold_key: self.threshold_key, tss_tag: tag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
                                 // set factor key into keychain
                                 try KeychainInterface.save(item: factorKey.hex, key: saveId)
 
@@ -124,22 +115,12 @@ struct TssView: View {
                     }
                 }) { Text("create new tagged tss") }
             }
-        }.onAppear {
-            Task {
-                let allTags = try threshold_key.get_all_tss_tag()
-                // instantate tssModule
-                for tag in allTags {
-                    let tss = try await TssModule(threshold_key: threshold_key, tss_tag: tag)
-                    // add to state
-                    tssModules[tag] = tss
-                }
-            }
         }.alert(isPresented: $showAlert) {
             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
         }
 
         if tss_pub_key != "" {
-            Text("Tss public key for " + selected_tag )
+            Text("Tss public key for " + selected_tag)
             Text(tss_pub_key)
 
             Section(header: Text("Tss : " + selected_tag + " : FactorPub")) {
@@ -149,16 +130,17 @@ struct TssView: View {
             }
         }
 
-        if !tssModules.isEmpty {
+        let tss_tags = try! threshold_key.get_all_tss_tags()
+
+        if !tss_tags.isEmpty {
             Section(header: Text("Tss Module")) {
-                ForEach(Array(tssModules.keys), id: \.self) { key in
+                ForEach(tss_tags, id: \.self) { key in
                     HStack {
                         Button(action: {
                             Task {
                                 selected_tag = key
-                                let tss = try getTssModule(tag: key)
-                                tss_pub_key = try tss.get_tss_pub_key()
-                                allFactorPub = try tss.get_all_factor_pub()
+                                tss_pub_key = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
+                                allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
                                 print(allFactorPub)
                             }
                         }) { Text(key) }
@@ -168,9 +150,7 @@ struct TssView: View {
         }
 
         if !selected_tag.isEmpty {
-
             Section(header: Text("Tss : " + selected_tag)) {
-
                 HStack {
                     Button(action: {
                         Task {
@@ -179,8 +159,7 @@ struct TssView: View {
                             let saveId = selected_tag + ":" + "0"
                             let factorKey = try KeychainInterface.fetch(key: saveId)
                             // get tss share using factor key
-                            let tss = try getTssModule(tag: selected_tag)
-                            let (tssIndex, tssShare) = try tss.get_tss_share(factorKey: factorKey)
+                            let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
                             print("tssIndex:" + tssIndex)
                             print("tssShare:" + tssShare)
                             alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
@@ -204,7 +183,7 @@ struct TssView: View {
                             Task {
                                 do {
                                     let checkSaveId = selected_tag + ":" + "1"
-                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
+                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId)
                                     if checkFactorKey != "" {
                                         alertContent = "There is existing backup Factor Key"
                                         showAlert = true
@@ -218,17 +197,16 @@ struct TssView: View {
 
                                 // use input to generate tss share with index 3
                                 let saveId = selected_tag + ":" + "0"
-                                let factorKey = try KeychainInterface.fetch(key: saveId )
-                                let tss = try getTssModule(tag: selected_tag)
+                                let factorKey = try KeychainInterface.fetch(key: saveId)
                                 let tssShareIndex = Int32(3)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-                                try await tss.add_factor_pub(factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex )
+                                try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                                 let saveNewFactorId = selected_tag + ":" + "1"
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
                                 // show factor key used
 
-                                let (newTssIndex, newTssShare) = try tss.get_tss_share(factorKey: newFactorKey.hex)
+                                let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
                             }
@@ -237,7 +215,7 @@ struct TssView: View {
                         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                             windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                         }
-                    }) { Text( selected_tag + " : add factor pub") }
+                    }) { Text(selected_tag + " : add factor pub") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
@@ -255,7 +233,7 @@ struct TssView: View {
                             Task {
                                 do {
                                     let checkSaveId = selected_tag + ":" + "2"
-                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId )
+                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId)
                                     if checkFactorKey != "" {
                                         alertContent = "There is existing copied Factor Key"
                                         showAlert = true
@@ -269,26 +247,25 @@ struct TssView: View {
 
                                 // get existing factor key
                                 let saveId = selected_tag + ":" + "0"
-                                let factorKey = try KeychainInterface.fetch(key: saveId )
+                                let factorKey = try KeychainInterface.fetch(key: saveId)
                                 // use input to generate tss share with index 3
-                                let tss = try getTssModule(tag: selected_tag)
                                 let tssShareIndex = Int32(2)
-                                try tss.copy_factor_pub(factorKey: factorKey, newFactorPub: newFactorPub, tss_index: tssShareIndex)
+                                try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: tssShareIndex)
 
                                 let saveNewFactorId = selected_tag + ":" + "2"
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
                                 // show factor key used
 
-                                let (newTssIndex, newTssShare) = try tss.get_tss_share(factorKey: newFactorKey.hex)
+                                let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
                                 // copy factor pub
                             }
                         }))
                         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                          windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                            windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
                         }
-                    }) { Text( selected_tag + " : copy factor pub") }
+                    }) { Text(selected_tag + " : copy factor pub") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
@@ -301,14 +278,14 @@ struct TssView: View {
                             var deleteFactorKey: String?
                             var targetSaveId = selected_tag + ":" + "1"
                             do {
-                                deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId )
+                                deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId)
                                 if deleteFactorKey == "" {
                                     throw RuntimeError("")
                                 }
                             } catch {
                                 do {
                                     targetSaveId = selected_tag + ":" + "2"
-                                    deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId )
+                                    deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId)
                                 } catch {
                                     alertContent = "There is no extra factor key to be deleted"
                                     showAlert = true
@@ -330,18 +307,16 @@ struct TssView: View {
                             let deleteFactorPK = PrivateKey(hex: deleteFactorKey)
 
                             let saveId = selected_tag + ":" + "0"
-                            let factorKey = try KeychainInterface.fetch(key: saveId )
-
-                            let tss = try getTssModule(tag: selected_tag)
+                            let factorKey = try KeychainInterface.fetch(key: saveId)
                             let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-                            try await tss.delete_factor_pub(factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic())
+                            try await TssModule.delete_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic(), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                             print("done delete factor pub")
                             try KeychainInterface.save(item: "", key: targetSaveId)
 
                             alertContent = "deleted factor key :" + deleteFactorKey
                             showAlert = true
                         }
-                    }) { Text( selected_tag + " : delete factor pub") }
+                    }) { Text(selected_tag + " : delete factor pub") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
@@ -349,14 +324,13 @@ struct TssView: View {
         }
         Button(action: {
             Task {
-
                 do {
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                     // get the factor key information
 
                     let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
                     // Create tss Client using helper
-                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, tssModule: getTssModule(tag: selected_tag), factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
+                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                     // wait for sockets to connect
                     var connected = false
@@ -390,8 +364,7 @@ struct TssView: View {
                     try client.cleanup(signatures: sigs)
 
                     // verify the signature
-                    let tss = try getTssModule(tag: selected_tag)
-                    let publicKey = try tss.get_tss_pub_key()
+                    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
                     let keypoint = try KeyPoint(address: publicKey)
                     let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
@@ -409,6 +382,6 @@ struct TssView: View {
                     showAlert = true
                 }
             }
-        }) { Text("Sign") }// .disabled( !signingData )
+        }) { Text("Sign") } // .disabled( !signingData )
     }
 }

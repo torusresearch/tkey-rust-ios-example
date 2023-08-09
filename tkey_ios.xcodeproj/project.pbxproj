@@ -896,7 +896,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tkey/tkey-ios";
 			requirement = {
-				branch = "feat/v2-tss-test";
+				branch = "feat/v2-tss";
 				kind = branch;
 			};
 		};
