@@ -18,6 +18,8 @@
 		A3F814CD2A82D8B300018736 /* RLP.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CB2A82D8B300018736 /* RLP.swift */; };
 		A3F814CF2A82DACE00018736 /* TorusWeb3Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */; };
 		A3F814D02A82DACE00018736 /* TorusWeb3Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */; };
+		A3F814D22A8335C900018736 /* TssClientHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814D12A8335C900018736 /* TssClientHelper.swift */; };
+		A3F814D32A8335C900018736 /* TssClientHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814D12A8335C900018736 /* TssClientHelper.swift */; };
 		B30B6B2928BCC8AC00812C1E /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2828BCC8AC00812C1E /* Tests_iOS.swift */; };
 		B30B6B2B28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B2A28BCC8AC00812C1E /* Tests_iOSLaunchTests.swift */; };
 		B30B6B3528BCC8AC00812C1E /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B3428BCC8AC00812C1E /* Tests_macOS.swift */; };
@@ -77,6 +79,7 @@
 		A3F814C82A82C40900018736 /* EthereumTssAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTssAccount.swift; sourceTree = "<group>"; };
 		A3F814CB2A82D8B300018736 /* RLP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLP.swift; sourceTree = "<group>"; };
 		A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorusWeb3Utils.swift; sourceTree = "<group>"; };
+		A3F814D12A8335C900018736 /* TssClientHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TssClientHelper.swift; sourceTree = "<group>"; };
 		B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tkey_iosApp.swift; sourceTree = "<group>"; };
 		B30B6B1128BCC8A900812C1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B30B6B1228BCC8AC00812C1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -157,6 +160,7 @@
 				B3E5316829EC4ED000174AF1 /* LoaderView.swift */,
 				F0E2AC432A73A3C900F6C17A /* TssView.swift */,
 				A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */,
+				A3F814D12A8335C900018736 /* TssClientHelper.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -385,6 +389,7 @@
 				B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				A3F814CC2A82D8B300018736 /* RLP.swift in Sources */,
+				A3F814D22A8335C900018736 /* TssClientHelper.swift in Sources */,
 				14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				A3F814CF2A82DACE00018736 /* TorusWeb3Utils.swift in Sources */,
@@ -403,6 +408,7 @@
 				B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				A3F814CD2A82D8B300018736 /* RLP.swift in Sources */,
+				A3F814D32A8335C900018736 /* TssClientHelper.swift in Sources */,
 				14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				A3F814D02A82DACE00018736 /* TorusWeb3Utils.swift in Sources */,

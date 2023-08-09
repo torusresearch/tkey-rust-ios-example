@@ -9,47 +9,12 @@ import TorusUtils
 import tss_client_swift
 import web3
 
-func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String], nodeDetails: AllNodeDetailsModel, torusUtils: TorusUtils) async throws -> (TSSClient, [String: String]) {
-    let selected_tag = try TssModule.get_tss_tag(threshold_key: threshold_key)
-    let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
-    let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
-
-    // generate a random nonce for sessionID
-    let randomKey = BigUInt(tss_client_swift.SECP256K1.generatePrivateKey()!)
-    let random = BigInt(sign: .plus, magnitude: randomKey) + BigInt(Date().timeIntervalSince1970)
-    let sessionNonce = TSSHelpers.hashMessage(message: String(random))
-    // create the full session string
-    let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
-
-    let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
-
-    let nodeIndexes = tssPublicAddressInfo.nodeIndexes
-    let userTssIndex = BigInt(tssIndex, radix: 16)!
-    // total parties, including the client
-    let parties = 4
-    // index of the client, last index of partiesIndexes
-    let clientIndex = Int32(parties - 1)
-
-    let (urls, socketUrls, partyIndexes, nodeInd) = try TSSHelpers.generateEndpoints(parties: parties, clientIndex: Int(clientIndex), nodeIndexes: nodeIndexes, urls: tssEndpoints)
-
-    let coeffs = try TSSHelpers.getServerCoefficients(participatingServerDKGIndexes: nodeInd.map({ BigInt($0) }), userTssIndex: userTssIndex)
-
-    let shareUnsigned = BigUInt(tssShare, radix: 16)!
-    let share = BigInt(sign: .plus, magnitude: shareUnsigned)
-
-    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-    let keypoint = try KeyPoint(address: publicKey)
-    let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
-
-    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({ Int32($0) }), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
-
-    return (client, coeffs)
-}
-
 struct TssView: View {
+    
     @Binding var threshold_key: ThresholdKey!
     @Binding var verifier: String!
     @Binding var verifierId: String!
+
     @Binding var signatures: [[String: Any]]!
     @Binding var tssEndpoints: [String]!
     @Binding var showTss: Bool
@@ -324,16 +289,31 @@ struct TssView: View {
                 }
             }
         }
+
         Button(action: {
             Task {
                 do {
-                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-                    // get the factor key information
 
+                    let tssModule = try getTssModule(tag: selected_tag)
+                    
+                    let selected_tag = try tssModule.get_tss_tag()
+                    
                     let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
-                    // Create tss Client using helper
-                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
+                    let (tssIndex, tssShare) = try tssModule.get_tss_share(factorKey: factorKey)
+                    let tssNonce = try tssModule.get_tss_nonce()
+                    guard let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: String(tssNonce)) else {
+                        throw RuntimeError("Could not get tss public address info")
+                    };
+
+                    let publicKey = try tssModule.get_tss_pub_key();
+                    let keypoint = try KeyPoint(address: publicKey)
+                    let fullTssPubKey = try "04" + keypoint.getX() + keypoint.getY()
+                    
+                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                    let (client, coeffs) = try helperTssClient(selected_tag: selected_tag, tssNonce: tssNonce, publicKey: publicKey, tssShare: tssShare, tssIndex: tssIndex, nodeIndexes: tssPublicAddressInfo.nodeIndexes, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
+                    
                     // wait for sockets to connect
                     var connected = false
                     while !connected {
@@ -366,9 +346,10 @@ struct TssView: View {
                     try client.cleanup(signatures: sigs)
 
                     // verify the signature
-                    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let keypoint = try KeyPoint(address: publicKey)
-                    let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+                    let tss = try getTssModule(tag: selected_tag)
+                    let tssPubKey = try tss.get_tss_pub_key()
+                    let tssKeyPoint = try KeyPoint(address: tssPubKey)
+                    let fullAddress = try "04" + tssKeyPoint.getX() + tssKeyPoint.getY()
 
                     if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
                         let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
@@ -384,6 +365,63 @@ struct TssView: View {
                     showAlert = true
                 }
             }
-        }) { Text("Sign") } // .disabled( !signingData )
+        }) { Text("Sign") }// .disabled( !signingData )
+        
+
+        Button(action: {
+            Task {
+                do {
+
+                    let tssModule = try getTssModule(tag: selected_tag)
+                    
+                    let selected_tag = try tssModule.get_tss_tag()
+                    
+                    let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
+
+                    let (tssIndex, tssShare) = try tssModule.get_tss_share(factorKey: factorKey)
+                    let tssNonce = try tssModule.get_tss_nonce()
+                    guard let tssPublicAddressInfo = try await threshold_key.serviceProvider?.getTssPubAddress(tssTag: selected_tag, nonce: String(tssNonce)) else {
+                        throw RuntimeError("Could not get tss public address info")
+                    }
+                    
+                    let finalPubKey = try tssModule.get_tss_pub_key()
+                    print("get_tss_pub_key", finalPubKey)
+                    
+                    let publicKey = try tssModule.get_tss_pub_key()
+                    let fullTssPubKey = try KeyPoint(address: publicKey)
+                    
+                    // step 2. getting signature
+                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+
+                    let tssAccount = try EthereumTssAccount(evmAddress: "0x67199B200e91D005418015fDFac01390C89FCD6c", pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
+                    
+                    let RPC_URL = "https://rpc.ankr.com/eth_goerli";
+                    let chainID = 5
+                    let web3Client = EthereumClient(url: URL(string: RPC_URL)!)
+                    
+                    let amount = 0.001
+                    let toAddress = tssAccount.address
+                    let fromAddress = tssAccount.address
+                    let gasPrice = try await web3Client.eth_gasPrice()
+                    let maxTipInGwie = BigUInt(TorusWeb3Utils.toEther(Gwie: BigUInt(amount)))
+                    let totalGas = gasPrice + maxTipInGwie
+                    let gasLimit = BigUInt(21000)
+
+                    let amtInGwie = TorusWeb3Utils.toWei(ether: amount)
+                    let nonce = try await web3Client.eth_getTransactionCount(address: fromAddress, block: .Latest)
+                    let transaction = EthereumTransaction(from: fromAddress, to: toAddress, value: amtInGwie, data: Data(), nonce: nonce + 1, gasPrice: totalGas, gasLimit: gasLimit, chainId: chainID)
+                     let signed = try tssAccount.sign(transaction: transaction)
+//                    let val = try await web3Client.eth_sendRawTransaction(transaction, withAccount: tssAccount)
+
+                    alertContent = "transaction signature: " + (signed.hash?.toHexString() ?? "")
+                    showAlert = true
+                } catch {
+                    alertContent = "Signing could not be completed. please try again"
+                    showAlert = true
+                }
+                
+                
+            }
+        }) { Text("transaction signing: send eth") }
     }
 }

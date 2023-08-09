@@ -35,6 +35,8 @@ struct ThresholdKeyView: View {
     @State private var signatures: [[String: Any]]!
     @State private var tssEndpoint: [String]!
     @State private var verifier: String!
+    @State private var evmAddress: String!
+
     @State private var verifierId: String!
     @State private var tssModules: [String: TssModule] = [:]
     @State private var showTss = false
@@ -124,6 +126,8 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
+                                    
+                                    evmAddress = fetchKey
 
                                     guard let verifierLocal = userData["verifier"] as? String, let verifierIdLocal = userData["verifierId"] as? String else {
                                         alertContent = "Failed to get verifier or verifierId from userinfo"
@@ -357,6 +361,7 @@ struct ThresholdKeyView: View {
                                                     showAlert = true
                                                     return
                                                 }
+                                                evmAddress = fetchKey
 
                                                 let saveId = fetchKey + ":" + String(shareCount)
                                                 // save the security question share locally

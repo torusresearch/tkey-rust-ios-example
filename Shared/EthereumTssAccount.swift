@@ -11,7 +11,7 @@ import secp256k1
 import tss_client_swift
 import CryptoKit
 import tkey_pkg
-
+import BigInt
 public enum CustomError: Error {
     case unknownError
     case methodUnavailable
@@ -32,22 +32,35 @@ enum EthereumSignerError: Error {
 }
 
 public class EthereumTssAccount: EthereumAccountProtocol {
-    public let tssClient: TSSClient
-    public let publicKey: String
+    public let selectedTag: String
+    public let verifier: String
+    public let factorKey: String
+    public let verifierID: String
+    public let publicKey: KeyPoint;
     public let authSigs: [String]
-    public let address: EthereumAddress
-    public let precompute: Precompute
+    public let tssNonce:  Int32
+    public let tssShare:  String
+    public let tssIndex:  String
+    public let nodeIndexes: [Int]
+    public let tssEndpoints: [String]
+    public let address: EthereumAddress;
 
-    required public init(pubkey: String, tssClient: TSSClient, authSigs: [String], precompute: Precompute) throws {
-           self.tssClient = tssClient
-           self.precompute = precompute
+    required public init(evmAddress: String,pubkey: KeyPoint, factorKey: String, tssNonce: Int32, tssShare: String, tssIndex: String, selectedTag: String, verifier: String, verifierID: String, nodeIndexes: [Int], tssEndpoints: [String], authSigs: [String]) throws {
+           self.factorKey = factorKey
+           self.selectedTag = selectedTag
+           self.verifier = verifier
+           self.verifierID = verifierID
            self.publicKey = pubkey
-           let pubKeyHash = Data(pubkey.utf8).sha3(.keccak256)
-           let address = pubKeyHash.subdata(in: 12 ..< pubKeyHash.count)
-           self.address = EthereumAddress(address.hexString)
+           self.nodeIndexes = nodeIndexes
+           self.tssEndpoints = tssEndpoints
+           self.tssNonce = tssNonce
+           self.tssIndex = tssIndex
+           self.tssShare = tssShare
+           self.address = EthereumAddress(evmAddress)
            self.authSigs = authSigs
-           print("address", address.hexString, self.address.value)
+           print("address", evmAddress, self.address.value)
        }
+
 
        public func sign(data: Data) throws -> Data {
            throw CustomError.methodUnavailable
@@ -78,18 +91,44 @@ public class EthereumTssAccount: EthereumAccountProtocol {
        }
 
         public func sign(transaction: EthereumTransaction) throws -> SignedTransaction {
+            
+            let fullPubKey = try "04" + self.publicKey.getX()  + self.publicKey.getY()
+                        // Create tss Client using helper
+            let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: fullPubKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
+
+         
+            // Wait for sockets to be connected
+            var connected = false
+            while !connected {
+                connected = try client.checkConnected()
+            }
+           
+
+            let precompute = try client.precompute(serverCoeffs: coeffs, signatures: self.authSigs)
+
+            while !(try client.isReady()) {
+                // no-op
+            }
+
+
            guard let raw = transaction.raw else {
                throw EthereumSignerError.emptyRawTransaction
            }
 
             let msg = raw.web3.hexString
-            guard let msgHash = transaction.hash?.toHexString() else {
-                throw RuntimeError("Could not get tx hash")
-            }
-            let (s, r, v) = try! self.tssClient.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: self.precompute, signatures: self.authSigs)
+            let msgHash = TSSHelpers.hashMessage(message: msg)
+            let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: self.authSigs)
 
-            let encodedR = RLP.encodeBigInt(r)!
-            let encodedS = RLP.encodeBigInt(s)!
-            return SignedTransaction(transaction: transaction, v: Int(v), r: encodedR, s: encodedS)
+            var modifiedV = v;
+            if (modifiedV <= 1) {
+               modifiedV = modifiedV + 27;
+            }
+            try! client.cleanup(signatures: self.authSigs)
+
+            let encodedR = RLP.encodeBigUInt(r.magnitude)!
+            let encodedS = RLP.encodeBigUInt(s.magnitude)!
+            let rSerialized = BigUInt(r)
+            print("r val", rSerialized.serialize(),  r.magnitude.serialize(), r.serialize().hexString, s.magnitude.serialize(), s.serialize().hexString)
+            return SignedTransaction(transaction: transaction, v: Int(modifiedV), r: encodedR, s: encodedS)
        }
 }
