@@ -155,7 +155,6 @@ struct ThresholdKeyView: View {
                                     shareCount += 1
                                 } while !finishedFetch
 
-                                print("share count ", shareCount)
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {

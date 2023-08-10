@@ -34,11 +34,11 @@ class LoginModel: ObservableObject {
             // SFA MODE, enableOneKey = true
             let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .CYAN, enableOneKey: true )
             var data = try await tdsdk.triggerLogin()
+            
             let resp = RetrieveSharesResponseModel.init(publicKey: data["publicAddress"] as! String, privateKey: data["privateKey"] as! String, nonce: data["nonce"] as! BigUInt, typeOfUser: data["typeOfUser"] as! TypeOfUser)
             let postboxkey = tdsdk.torusUtils.getPostBoxKey(torusKey: resp)
             data["postboxKey"] = postboxkey
 
-            // migration workaround
             if resp.typeOfUser == TypeOfUser.v1 {
                 if resp.nonce == BigUInt(0) {
                     data["upgraded"] = false
@@ -53,9 +53,9 @@ class LoginModel: ObservableObject {
                 }
             }
 
-            let fixdata = data
+            let immutableData = data
             await MainActor.run(body: {
-                self.userData = fixdata
+                self.userData = immutableData
                 loggedIn = true
             })
         }
