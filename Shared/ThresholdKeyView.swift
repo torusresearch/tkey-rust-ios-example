@@ -126,7 +126,7 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-                                    
+
                                     evmAddress = fetchKey
 
                                     guard let verifierLocal = userData["verifier"] as? String, let verifierIdLocal = userData["verifierId"] as? String else {

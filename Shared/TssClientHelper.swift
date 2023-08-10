@@ -1,4 +1,3 @@
-
 import BigInt
 import Foundation
 import SwiftUI
@@ -6,8 +5,7 @@ import tkey_pkg
 import tss_client_swift
 import web3
 
-
-public func helperTssClient (selected_tag: String,tssNonce: Int32, publicKey: String, tssShare: String, tssIndex:String, nodeIndexes: [Int], factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String] ) throws -> (TSSClient, [String: String]) {
+public func helperTssClient (selected_tag: String, tssNonce: Int32, publicKey: String, tssShare: String, tssIndex: String, nodeIndexes: [Int], factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String] ) throws -> (TSSClient, [String: String]) {
 
     // generate a random nonce for sessionID
     let randomKey = BigUInt(SECP256K1.generatePrivateKey()!)
@@ -15,8 +13,7 @@ public func helperTssClient (selected_tag: String,tssNonce: Int32, publicKey: St
     let sessionNonce = TSSHelpers.hashMessage(message: String(random))
     // create the full session string
     let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
-    
-    
+
     let userTssIndex = BigInt(tssIndex, radix: 16)!
     // total parties, including the client
     let parties = 4
