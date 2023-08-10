@@ -31,6 +31,8 @@
 		B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
 		B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
 		DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
+		F0B741C02A8246BE001E4734 /* SFAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B741BF2A8246BE001E4734 /* SFAView.swift */; };
+		F0B741C12A8246BE001E4734 /* SFAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B741BF2A8246BE001E4734 /* SFAView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +83,7 @@
 		B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdKeyView.swift; sourceTree = "<group>"; };
 		B3E5316829EC4ED000174AF1 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		B3E5316E29EE75CA00174AF1 /* KeyChain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
+		F0B741BF2A8246BE001E4734 /* SFAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFAView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +143,7 @@
 				14446F3529CD642100B7EFE2 /* LoginView.swift */,
 				14446F3829CD644100B7EFE2 /* LoginModel.swift */,
 				B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */,
+				F0B741BF2A8246BE001E4734 /* SFAView.swift */,
 				B3E5316829EC4ED000174AF1 /* LoaderView.swift */,
 			);
 			path = Shared;
@@ -369,6 +373,7 @@
 				14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				B30B6B3828BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
+				F0B741C02A8246BE001E4734 /* SFAView.swift in Sources */,
 				B3E5316929EC4ED000174AF1 /* LoaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -383,6 +388,7 @@
 				14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */,
 				B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */,
 				B30B6B3928BCC8AC00812C1E /* tkey_iosApp.swift in Sources */,
+				F0B741C12A8246BE001E4734 /* SFAView.swift in Sources */,
 				B3E5316A29EC4ED000174AF1 /* LoaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -873,7 +879,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = master;
+				branch = "add-usertype-and-nonce";
 				kind = branch;
 			};
 		};
@@ -881,7 +887,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
 			requirement = {
-				branch = master;
+				branch = feat/delete_1_of_1;
 				kind = branch;
 			};
 		};

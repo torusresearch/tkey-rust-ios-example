@@ -7,6 +7,7 @@ enum SpinnerLocation {
 
 struct ThresholdKeyView: View {
     @State var userData: [String: Any]
+    @Binding var mfaSet: Bool
     @State private var showAlert = false
     @State private var alertContent = ""
     @State private var totalShares = 0
@@ -75,14 +76,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 showSpinner = SpinnerLocation.init_reconstruct_btn
 
-                                guard let fetchKey = userData["publicAddress"] as? String else {
-                                    alertContent = "Failed to get public address from userinfo"
-                                    showAlert = true
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
-                                }
-
-                                guard let postboxkey = userData["privateKey"] as? String else {
+                                guard let postboxkey = userData["postboxKey"] as? String else {
                                     alertContent = "Failed to get postboxkey"
                                     showAlert = true
                                     showSpinner = SpinnerLocation.nowhere
@@ -107,24 +101,42 @@ struct ThresholdKeyView: View {
                                     storage_layer: storage_layer,
                                     service_provider: service_provider,
                                     enable_logging: true,
-                                    manual_sync: false) else {
+                                    manual_sync: true) else {
                                         alertContent = "Failed to create threshold key"
                                         showAlert = true
                                         showSpinner = SpinnerLocation.nowhere
                                         return
-                                    }
+                                }
 
                                 threshold_key = thresholdKey
 
-                                guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
-                                    alertContent = "Failed to get key details"
-                                    showAlert = true
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
+                                let key_details: KeyDetails
+                                let upgraded = userData["upgraded"] as! Bool
+
+                                if !upgraded {
+                                    let importKey = userData["privateKey"] as? String
+
+                                    guard let key_details_guard = try? await threshold_key.initialize( import_key: importKey, never_initialize_new_key: false, include_local_metadata_transitions: false, delete_1_of_1: true) else {
+                                        alertContent = "Failed to get key details"
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+                                    key_details = key_details_guard
+                                } else {
+                                    guard let key_details_guard = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
+                                        alertContent = "Failed to get key details"
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+                                    key_details = key_details_guard
                                 }
 
                                 totalShares = Int(key_details.total_shares)
                                 threshold = Int(key_details.threshold)
+                                let fetchKey = try key_details.pub_key.getAsCompressedPublicKey(format: "elliptic-compressed")
+
                                 tkeyInitalized = true
 
                                 // fetch all locally available shares for this google account
@@ -142,6 +154,8 @@ struct ThresholdKeyView: View {
                                     }
                                     shareCount += 1
                                 } while !finishedFetch
+
+                                print("share count ", shareCount)
                                 // There are 0 locally available shares for this tkey
                                 if shareCount == 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
@@ -153,7 +167,7 @@ struct ThresholdKeyView: View {
                                     }
                                     var shareIndexes = try threshold_key.get_shares_indexes()
                                     shareIndexes.removeAll(where: {$0 == "1"})
-                                   
+
                                     let saveId = fetchKey + ":0"
 
                                     guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[0], shareType: nil) else {
@@ -164,7 +178,6 @@ struct ThresholdKeyView: View {
                                         return
                                     }
 
-
                                     guard let _ = try? KeychainInterface.save(item: share, key: saveId) else {
                                         alertContent = "Failed to save share"
                                         resetAccount = true
@@ -172,8 +185,7 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-                                    
-                                
+
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
                                         alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
                                         resetAccount = true
@@ -187,6 +199,7 @@ struct ThresholdKeyView: View {
                                     tkeyReconstructed = true
                                     resetAccount = false
                                     showSpinner = SpinnerLocation.nowhere
+
                                 }
                                 // existing account
                                 else {
@@ -204,7 +217,7 @@ struct ThresholdKeyView: View {
                                     }
 
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                        
+
                                         alertContent = "Failed to reconstruct key with available shares."
                                         resetAccount = true
                                         showAlert = true
@@ -218,6 +231,9 @@ struct ThresholdKeyView: View {
                                     tkeyReconstructed = true
                                     resetAccount = false
                                 }
+
+                                try await threshold_key.sync_local_metadata_transistions()
+
                                 showSpinner = SpinnerLocation.nowhere
                             }
                         }) {
@@ -229,7 +245,7 @@ struct ThresholdKeyView: View {
                             Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                         }
                     }
-                    
+
                     HStack {
                         Text("Enter SecurityQuestion password and reconstruct tkey & save share locally")
                         Spacer()
@@ -251,7 +267,7 @@ struct ThresholdKeyView: View {
                                         if result {
                                             // save this share locally
                                             let shareIndexes = try threshold_key.get_shares_indexes()
-                                            
+
                                             // let's get the device share index
                                             var securityQuestionShareIndex = ""
                                             if shareIndexes[0] == "1" {
@@ -259,21 +275,21 @@ struct ThresholdKeyView: View {
                                             } else {
                                                 securityQuestionShareIndex = shareIndexes[0]
                                             }
-                                            
+
                                             let share = try threshold_key.output_share(shareIndex: securityQuestionShareIndex, shareType: nil)
-                                            
+
                                             guard let fetchKey = userData["publicAddress"] as? String else {
                                                 alertContent = "Failed to get public address from userinfo"
                                                 showAlert = true
                                                 return
                                             }
-                                            
+
                                             let saveId = fetchKey + ":" + String(shareCount)
-                                            //save the security question share locally
+                                            // save the security question share locally
                                             try KeychainInterface.save(item: share, key: saveId)
-                                            
+
                                             guard let detail = try? await threshold_key.reconstruct() else {
-                                                
+
                                                 alertContent = "Failed to reconstruct key."
                                                 resetAccount = true
                                                 showAlert = true
@@ -285,7 +301,7 @@ struct ThresholdKeyView: View {
                                             showAlert = true
                                             tkeyReconstructed = true
                                             resetAccount = false
-                                            
+
                                         } else {
                                             alertContent = "password incorrect"
                                         }
@@ -306,7 +322,6 @@ struct ThresholdKeyView: View {
                     }.disabled(!tkeyInitalized)
                         .opacity(!tkeyInitalized ? 0.5 : 1)
 
-                    
                     HStack {
                         Text("Get key details")
                         Spacer()
@@ -342,6 +357,8 @@ struct ThresholdKeyView: View {
                                     let shares = try await threshold_key.generate_new_share()
                                     let index = shares.hex
                                     let key_details = try threshold_key.get_key_details()
+
+                                    try await threshold_key.sync_local_metadata_transistions()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
                                     shareIndexCreated = index
@@ -367,6 +384,8 @@ struct ThresholdKeyView: View {
                             Task {
                                 do {
                                     try await threshold_key.delete_share(share_index: shareIndexCreated)
+                                    try await threshold_key.sync_local_metadata_transistions()
+
                                     let key_details = try threshold_key.get_key_details()
                                     totalShares = Int(key_details.total_shares)
                                     threshold = Int(key_details.threshold)
@@ -397,7 +416,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     alertContent = "Resetting your accuont.."
                                     do {
-                                        let postboxkey = userData["privateKey"] as! String
+                                        let postboxkey = userData["postboxKey"] as! String
                                         let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
                                         let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
                                         let temp_threshold_key = try ThresholdKey(
@@ -412,6 +431,7 @@ struct ThresholdKeyView: View {
                                         resetAccount = false
                                         alertContent = "Account reset successful"
 
+                                        try await threshold_key.sync_local_metadata_transistions()
                                         resetAppState() // Allow reinitialize
                                     } catch {
                                         alertContent = "Reset failed"
@@ -441,7 +461,7 @@ struct ThresholdKeyView: View {
                         Task {
                             showInputPasswordAlert.toggle()
                         }
-                        }){
+                        }) {
                             Text("")
                         }.alert("Enter Password", isPresented: $showInputPasswordAlert) {
                             SecureField("Password", text: $password)
@@ -450,7 +470,8 @@ struct ThresholdKeyView: View {
                                     do {
                                         showSpinner = SpinnerLocation.add_password_btn
                                         let question = "what's your password?"
-                                        let _ = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: password)
+                                        _ = try await SecurityQuestionModule.generate_new_share(threshold_key: threshold_key, questions: question, answer: password)
+                                        try await threshold_key.sync_local_metadata_transistions()
 
                                         let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
@@ -458,6 +479,8 @@ struct ThresholdKeyView: View {
 
                                         alertContent = "New password share created with password: \(password)"
                                         password = ""
+
+                                        try await threshold_key.sync_local_metadata_transistions()
                                         showAlert = true
                                     } catch {
                                         alertContent = "Generate new share with password failed. It's because password share already exists, or execution went wrong"
@@ -466,7 +489,7 @@ struct ThresholdKeyView: View {
                                     showSpinner = SpinnerLocation.nowhere
                                 }
                             })
-                            Button("Cancel", role: .cancel){}
+                            Button("Cancel", role: .cancel) {}
                         } message: {
                             Text("Enter the password and generate new security question share. Please set your password securely")
                         }
@@ -475,10 +498,8 @@ struct ThresholdKeyView: View {
                         }
                         .disabled(showSpinner == SpinnerLocation.change_password_btn)
                         .opacity(showSpinner == SpinnerLocation.change_password_btn ? 0.5 : 1)
-                    
+
                     }
- 
-                     
 
                     HStack {
                         Text("Change password")
@@ -504,6 +525,7 @@ struct ThresholdKeyView: View {
                                         // reset the password var to empty. we would not want to keep secret in state for longer.
                                         password = ""
                                         _ = try await SecurityQuestionModule.change_question_and_answer(threshold_key: threshold_key, questions: question, answer: answer)
+                                        try await threshold_key.sync_local_metadata_transistions()
                                         let key_details = try threshold_key.get_key_details()
                                         totalShares = Int(key_details.total_shares)
                                         threshold = Int(key_details.threshold)
@@ -586,6 +608,7 @@ struct ThresholdKeyView: View {
                                 do {
                                     let seedPhraseToChange = "object brass success calm lizard science syrup planet exercise parade honey impulse"
                                     try await SeedPhraseModule.change_phrase(threshold_key: threshold_key, old_phrase: "seed sock milk update focus rotate barely fade car face mechanic mercy", new_phrase: seedPhraseToChange)
+                                    try await threshold_key.sync_local_metadata_transistions()
                                     phrase = seedPhraseToChange
                                     alertContent = "change seed phrase complete"
                                 } catch {
@@ -632,6 +655,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 do {
                                     try await SeedPhraseModule.delete_seed_phrase(threshold_key: threshold_key, phrase: phrase)
+                                    try await threshold_key.sync_local_metadata_transistions()
                                     phrase = ""
                                     alertContent = "delete seed phrase complete"
                                 } catch {
@@ -656,6 +680,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 do {
                                     let shareStore = try await threshold_key.generate_new_share()
+                                    try await threshold_key.sync_local_metadata_transistions()
                                     let index = shareStore.hex
 
                                     let key_details = try threshold_key.get_key_details()
@@ -692,6 +717,7 @@ struct ThresholdKeyView: View {
                                 do {
                                     let key_module = try PrivateKey.generate()
                                     let result = try await PrivateKeysModule.set_private_key(threshold_key: threshold_key, key: key_module.hex, format: "secp256k1n")
+                                    try await threshold_key.sync_local_metadata_transistions()
 
                                     if result {
                                         alertContent = "Setting private key completed"

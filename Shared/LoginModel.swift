@@ -1,5 +1,7 @@
 import Foundation
 import CustomAuth
+import TorusUtils
+import BigInt
 
 class LoginModel: ObservableObject {
     @Published var loggedIn: Bool = false
@@ -29,10 +31,31 @@ class LoginModel: ObservableObject {
                                          verifier: "google-lrc",
                                          redirectURL: "tdsdk://tdsdk/oauthCallback",
                                          browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
-            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET)
-            let data = try await tdsdk.triggerLogin()
+            // SFA MODE, enableOneKey = true
+            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .CYAN, enableOneKey: true )
+            var data = try await tdsdk.triggerLogin()
+            let resp = RetrieveSharesResponseModel.init(publicKey: data["publicAddress"] as! String, privateKey: data["privateKey"] as! String, nonce: data["nonce"] as! BigUInt, typeOfUser: data["typeOfUser"] as! TypeOfUser)
+            let postboxkey = tdsdk.torusUtils.getPostBoxKey(torusKey: resp)
+            data["postboxKey"] = postboxkey
+
+            // migration workaround
+            if resp.typeOfUser == TypeOfUser.v1 {
+                if resp.nonce == BigUInt(0) {
+                    data["upgraded"] = false
+                } else {
+                    data["upgraded"] = true
+                }
+            } else if resp.typeOfUser == TypeOfUser.v2 {
+                if resp.nonce == BigUInt(0) {
+                    data["upgraded"] = true
+                } else {
+                    data["upgraded"] = false
+                }
+            }
+
+            let fixdata = data
             await MainActor.run(body: {
-                self.userData = data
+                self.userData = fixdata
                 loggedIn = true
             })
         }
