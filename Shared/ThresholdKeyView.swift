@@ -151,8 +151,11 @@ struct ThresholdKeyView: View {
                                 }
 
                                 threshold_key = thresholdKey
-                                let retData = try await threshold_key.storage_layer_get_metadata(private_key: sfaKey )
-                                print(retData)
+//                                let retData = try await threshold_key.storage_layer_get_metadata(private_key: sfaKey )
+//                                print(retData)
+
+                                print("nonce :" + nonce.serialize().toHexString() )
+                                print("postbox :" + postboxKey )
 
                                 let key_details: KeyDetails
 //                                let upgraded = userData["upgraded"] as! Bool
@@ -171,14 +174,13 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-//                                    if typeOfUser == TypeOfUser.v1 {
-//
-//                                        let data = [ "message": "__ONE_KEY_ADD_NONCE__", "data": nonce.serialize().toHexString()]
-//                                        let jsonData = try! JSONSerialization.data(withJSONObject: data)
-//                                        let jsonStr = String(data: jsonData, encoding: .utf8)!
-//                                        try! threshold_key.add_local_metadata_transitions(input_json: jsonStr, private_key: sfaKey )
-//                                    }
-//                                    threshold_key
+                                    if typeOfUser == TypeOfUser.v1 {
+
+                                        let data = [ "message": "__ONE_KEY_ADD_NONCE__", "data": nonce.serialize().toHexString()]
+                                        let jsonData = try! JSONSerialization.data(withJSONObject: data)
+                                        let jsonStr = String(data: jsonData, encoding: .utf8)!
+                                        try! threshold_key.add_local_metadata_transitions(input_json: jsonStr, private_key: sfaKey )
+                                    }
 
                                     key_details = key_details_guard
                                 } else {
@@ -215,7 +217,7 @@ struct ThresholdKeyView: View {
                                 } while !finishedFetch
 
                                 // There are 0 locally available shares for this tkey
-                                if shareCount == 0 {
+                                if shareCount == 0 || key_details.required_shares <= 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
                                         alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
                                         resetAccount = true
@@ -261,6 +263,7 @@ struct ThresholdKeyView: View {
                                 }
                                 // existing account
                                 else {
+                                    print(shares)
                                     // import shares
                                     for item in shares {
                                         do {

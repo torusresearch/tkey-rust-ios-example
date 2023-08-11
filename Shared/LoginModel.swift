@@ -32,7 +32,7 @@ class LoginModel: ObservableObject {
                                          redirectURL: "tdsdk://tdsdk/oauthCallback",
                                          browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
             // SFA MODE, enableOneKey = true
-            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .CYAN, enableOneKey: true )
+            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET, enableOneKey: true )
             var data = try await tdsdk.triggerLogin()
 
             let resp = RetrieveSharesResponseModel.init(publicKey: data["publicAddress"] as! String, privateKey: data["privateKey"] as! String, nonce: data["nonce"] as! BigUInt, typeOfUser: data["typeOfUser"] as! TypeOfUser)
