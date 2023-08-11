@@ -45,7 +45,7 @@ struct SFAView: View {
             }
         }.onAppear {
             sfaPrivateKey = userData["privateKey"] as! String
-            sfaPostboxkey = userData["postboxKey"] as! String
+//            sfaPostboxkey = userData["postboxKey"] as! String
             sfaNonce = (userData["nonce"] as! BigUInt).serialize().toHexString()
         }
     }
