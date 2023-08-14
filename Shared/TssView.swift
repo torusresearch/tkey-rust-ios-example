@@ -401,10 +401,10 @@ struct TssView: View {
                     let amtInGwie = TorusWeb3Utils.toWei(ether: amount)
                     let nonce = try await web3Client.eth_getTransactionCount(address: fromAddress, block: .Latest)
                     let transaction = EthereumTransaction(from: fromAddress, to: toAddress, value: amtInGwie, data: Data(), nonce: nonce + 1, gasPrice: totalGas, gasLimit: gasLimit, chainId: chainID)
-                    let signed = try tssAccount.sign(transaction: transaction)
-                    // let val = try await web3Client.eth_sendRawTransaction(transaction, withAccount: tssAccount)
-
-                    alertContent = "transaction signature: " + (signed.hash?.toHexString() ?? "")
+                    // let signed = try tssAccount.sign(transaction: transaction)
+                    let val = try await web3Client.eth_sendRawTransaction(transaction, withAccount: tssAccount)
+                    alertContent = "transaction sent"
+                    // alertContent = "transaction signature: " + //(signed.hash?.toHexString() ?? "")
                     showAlert = true
                 } catch {
                     alertContent = "Signing could not be completed. please try again"

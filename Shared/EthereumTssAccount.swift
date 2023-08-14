@@ -120,8 +120,9 @@ public class EthereumTssAccount: EthereumAccountProtocol {
              */
 
             var modifiedV = v
-            if modifiedV <= 1 {
-               // modifiedV =  // modifiedV + 27
+            let chainId = UInt8(try transaction.chainId ?? { throw EthereumSignerError.unknownError }())
+            if v <= 1 {
+                modifiedV = v + chainId * 2 + 35
             }
 
             try! client.cleanup(signatures: self.authSigs)
