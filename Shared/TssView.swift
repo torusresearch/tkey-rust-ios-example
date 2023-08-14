@@ -333,48 +333,53 @@ struct TssView: View {
                     let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                     // wait for sockets to connect
-                    var connected = false
-                    while !connected {
-                        connected = try client.checkConnected()
-                    }
+                    let connected = try client.checkConnected()
 
-                    // Create a precompute, each server also creates a precompute.
-                    // This calls setup() followed by precompute() for all parties
-                    // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
-                    // This will also fail if a single failure notification is received.
-                    // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
-                    // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
-                    let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
+                    if connected {
+                        // Create a precompute, each server also creates a precompute.
+                        // This calls setup() followed by precompute() for all parties
+                        // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
+                        // This will also fail if a single failure notification is received.
+                        // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
+                        // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
+                        let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
 
-                    while !(try client.isReady()) {
-                        // no-op
-                    }
+                        let ready = try client.isReady()
 
-                    // hash a message
-                    let msg = "hello world"
-                    let msgHash = TSSHelpers.hashMessage(message: msg)
+                        if ready {
+                            // hash a message
+                            let msg = "hello world"
+                            let msgHash = TSSHelpers.hashMessage(message: msg)
 
-                    // signs a hashed message, collecting signature fragments from the servers
-                    // this function signs locally to produce its' own fragment
-                    // this is combined with the server fragments
-                    // local_verify is then used with the client precompute to produce a full signature and return the components
-                    let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
+                            // signs a hashed message, collecting signature fragments from the servers
+                            // this function signs locally to produce its' own fragment
+                            // this is combined with the server fragments
+                            // local_verify is then used with the client precompute to produce a full signature and return the components
+                            let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
 
-                    // cleanup sockets
-                    try client.cleanup(signatures: sigs)
+                            // cleanup sockets
+                            try client.cleanup(signatures: sigs)
 
-                    // verify the signature
-                    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let keypoint = try KeyPoint(address: publicKey)
-                    let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+                            // verify the signature
+                            let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
+                            let keypoint = try KeyPoint(address: publicKey)
+                            let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
-                    if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
-                        let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
-                        alertContent = "Signature: " + sigHex
-                        showAlert = true
-                        print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
+                            if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+                                let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
+                                alertContent = "Signature: " + sigHex
+                                showAlert = true
+                                print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
+                            } else {
+                                alertContent = "Signature could not be verified"
+                                showAlert = true
+                            }
+                        } else {
+                            alertContent = "Client is not ready, please try again"
+                            showAlert = true
+                        }
                     } else {
-                        alertContent = "Signature could not be verified"
+                        alertContent = "Client is not connected, please try again"
                         showAlert = true
                     }
                 } catch {
