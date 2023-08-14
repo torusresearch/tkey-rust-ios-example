@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -305,7 +305,7 @@
 				};
 			};
 			buildConfigurationList = B30B6B0E28BCC8A900812C1E /* Build configuration list for PBXProject "tkey_ios" */;
-			compatibilityVersion = "Xcode 13.0";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -880,7 +880,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = feat/sapphire;
+				branch = alpha;
 				kind = branch;
 			};
 		};
@@ -888,15 +888,15 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/tss-client-swift/";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 1.0.3;
+				kind = exactVersion;
+				version = 1.0.6;
 			};
 		};
 		F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tkey/tkey-ios";
 			requirement = {
-				branch = "feat/v2-tss";
+				branch = alpha;
 				kind = branch;
 			};
 		};
