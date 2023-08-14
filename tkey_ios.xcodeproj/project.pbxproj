@@ -904,7 +904,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = feat/sapphire;
+				branch = alpha;
 				kind = branch;
 			};
 		};
@@ -920,7 +920,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tkey/tkey-ios";
 			requirement = {
-				branch = "feat/v2-tss";
+				branch = alpha;
 				kind = branch;
 			};
 		};
