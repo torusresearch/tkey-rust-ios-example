@@ -127,9 +127,6 @@ public class EthereumTssAccount: EthereumAccountProtocol {
 
             try! client.cleanup(signatures: self.authSigs)
 
-            let encodedR = RLP.encodeBigInt(r)!
-            let encodedS = RLP.encodeBigInt(s)!
-
             guard let signature = Data(hexString: try TSSHelpers.hexSignature(s: s, r: r, v: modifiedV)) else { throw EthereumSignerError.unknownError }
 
             return SignedTransaction(transaction: transaction, signature: signature)
