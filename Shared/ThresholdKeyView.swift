@@ -1,6 +1,9 @@
 import SwiftUI
 import tkey_pkg
 
+import TorusUtils
+import BigInt
+
 enum SpinnerLocation {
     case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
 }
@@ -24,6 +27,7 @@ struct ThresholdKeyView: View {
     @State private var showChangePasswordAlert = false
     @State private var password = ""
     @State private var showSpinner = SpinnerLocation.nowhere
+    @State private var sfaKey = ""
 
     func resetAppState() {
         totalShares = 0
@@ -76,54 +80,71 @@ struct ThresholdKeyView: View {
                             Task {
                                 showSpinner = SpinnerLocation.init_reconstruct_btn
 
-                                guard let postboxkey = userData["postboxKey"] as? String else {
-                                    alertContent = "Failed to get postboxkey"
+                                guard let typeOfUser = userData["typeOfUser"] as? TypeOfUser, let upgraded = userData["upgraded"] as? Bool, var nonce = userData["nonce"] as? BigUInt, let sfakey = userData["privateKey"] as? String else {
+                                    alertContent = "Failed to get typeofuser or upgraded"
                                     showAlert = true
                                     showSpinner = SpinnerLocation.nowhere
                                     return
                                 }
+                                sfaKey = sfakey
+                                var postboxKey = sfaKey
 
-                                guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
-                                    alertContent = "Failed to create storage layer"
-                                    showAlert = true
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
+                                // getPostboxkeyAndNonce
+                                if !upgraded {
+                                    let result = try getPostboxKeyAndNonce(sfaKey: sfaKey, typeOfUser: typeOfUser, nonce: nonce)
+                                    postboxKey = result.0
+                                    nonce = result.1
                                 }
 
-                                guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey) else {
-                                    alertContent = "Failed to create service provider"
-                                    showAlert = true
-                                    showSpinner = SpinnerLocation.nowhere
-                                    return
-                                }
-
-                                guard let thresholdKey = try? ThresholdKey(
-                                    storage_layer: storage_layer,
-                                    service_provider: service_provider,
-                                    enable_logging: true,
-                                    manual_sync: true) else {
-                                        alertContent = "Failed to create threshold key"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                }
-
-                                threshold_key = thresholdKey
+                                print("nonce :" + nonce.serialize().toHexString() )
+                                print("postbox :" + postboxKey )
 
                                 let key_details: KeyDetails
-                                let upgraded = userData["upgraded"] as! Bool
 
                                 if !upgraded {
                                     let importKey = userData["privateKey"] as? String
 
-                                    guard let key_details_guard = try? await threshold_key.initialize( import_key: importKey, never_initialize_new_key: false, include_local_metadata_transitions: false, delete_1_of_1: true) else {
-                                        alertContent = "Failed to get key details"
+                                    do {
+                                        let result = try await upgradeSFAToMFA(importKey: importKey!, sfaKey: sfakey, postboxKey: postboxKey, nonce: nonce, typeOfUser: typeOfUser)
+                                        threshold_key = result.0
+                                        key_details = result.1
+                                        try await threshold_key.sync_local_metadata_transistions()
+                                    } catch {
+                                        alertContent = "Failed to create threshold key"
                                         showAlert = true
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
-                                    key_details = key_details_guard
+
                                 } else {
+                                    // User already upgraded to MFA, we are login into MFA account
+                                    guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
+                                        alertContent = "Failed to create storage layer"
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+
+                                    guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxKey) else {
+                                        alertContent = "Failed to create service provider"
+                                        showAlert = true
+                                        showSpinner = SpinnerLocation.nowhere
+                                        return
+                                    }
+
+                                    guard let thresholdKey = try? ThresholdKey(
+                                        storage_layer: storage_layer,
+                                        service_provider: service_provider,
+                                        enable_logging: true,
+                                        manual_sync: true) else {
+                                            alertContent = "Failed to create threshold key"
+                                            showAlert = true
+                                            showSpinner = SpinnerLocation.nowhere
+                                            return
+                                    }
+
+                                    threshold_key = thresholdKey
+
                                     guard let key_details_guard = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
                                         alertContent = "Failed to get key details"
                                         showAlert = true
@@ -156,7 +177,7 @@ struct ThresholdKeyView: View {
                                 } while !finishedFetch
 
                                 // There are 0 locally available shares for this tkey
-                                if shareCount == 0 {
+                                if shareCount == 0 || key_details.required_shares <= 0 {
                                     guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
                                         alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
                                         resetAccount = true
@@ -169,7 +190,7 @@ struct ThresholdKeyView: View {
 
                                     let saveId = fetchKey + ":0"
 
-                                    guard let share = try? thresholdKey.output_share(shareIndex: shareIndexes[0], shareType: nil) else {
+                                    guard let share = try? threshold_key.output_share(shareIndex: shareIndexes[0], shareType: nil) else {
                                         alertContent = "Failed to output share"
                                         resetAccount = true
                                         showAlert = true
@@ -202,6 +223,7 @@ struct ThresholdKeyView: View {
                                 }
                                 // existing account
                                 else {
+                                    print(shares)
                                     // import shares
                                     for item in shares {
                                         do {
@@ -223,6 +245,9 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
+                                    
+                                    try await threshold_key.sync_local_metadata_transistions()
+
 
                                     reconstructedKey = reconstructionDetails.key
                                     alertContent = "\(reconstructedKey) is the private key"
@@ -231,7 +256,6 @@ struct ThresholdKeyView: View {
                                     resetAccount = false
                                 }
 
-                                try await threshold_key.sync_local_metadata_transistions()
 
                                 showSpinner = SpinnerLocation.nowhere
                             }
@@ -415,7 +439,7 @@ struct ThresholdKeyView: View {
                                     showAlert = true
                                     alertContent = "Resetting your accuont.."
                                     do {
-                                        let postboxkey = userData["postboxKey"] as! String
+                                        let postboxkey = sfaKey // userData["postboxKey"] as! String
                                         let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
                                         let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
                                         let temp_threshold_key = try ThresholdKey(

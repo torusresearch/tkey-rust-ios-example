@@ -32,26 +32,12 @@ class LoginModel: ObservableObject {
                                          redirectURL: "tdsdk://tdsdk/oauthCallback",
                                          browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
             // SFA MODE, enableOneKey = true
-            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .CYAN, enableOneKey: true )
+            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET, enableOneKey: true )
             var data = try await tdsdk.triggerLogin()
-            
-            let resp = RetrieveSharesResponseModel.init(publicKey: data["publicAddress"] as! String, privateKey: data["privateKey"] as! String, nonce: data["nonce"] as! BigUInt, typeOfUser: data["typeOfUser"] as! TypeOfUser)
-            let postboxkey = tdsdk.torusUtils.getPostBoxKey(torusKey: resp)
-            data["postboxKey"] = postboxkey
 
-            if resp.typeOfUser == TypeOfUser.v1 {
-                if resp.nonce == BigUInt(0) {
-                    data["upgraded"] = false
-                } else {
-                    data["upgraded"] = true
-                }
-            } else if resp.typeOfUser == TypeOfUser.v2 {
-                if resp.nonce == BigUInt(0) {
-                    data["upgraded"] = true
-                } else {
-                    data["upgraded"] = false
-                }
-            }
+            let resp = RetrieveSharesResponseModel.init(publicKey: data["publicAddress"] as! String, privateKey: data["privateKey"] as! String, nonce: data["nonce"] as! BigUInt, typeOfUser: data["typeOfUser"] as! TypeOfUser)
+
+            data["upgraded"] = checkForUpgradedAccount(typeOfUser: resp.typeOfUser, nonce: resp.nonce)
 
             let immutableData = data
             await MainActor.run(body: {
