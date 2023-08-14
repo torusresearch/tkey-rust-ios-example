@@ -24,7 +24,7 @@
       "location" : "https://github.com/torusresearch/customauth-swift-sdk",
       "state" : {
         "branch" : "add-usertype-and-nonce",
-        "revision" : "63783e423238998d5748880b47a0a2fffb96e16a"
+        "revision" : "153d6da456a4867463563167f663e7ff93d199cf"
       }
     },
     {
@@ -60,7 +60,7 @@
       "location" : "https://github.com/torusresearch/libtkey-pkg/",
       "state" : {
         "branch" : "feat/delete_1_of_1",
-        "revision" : "e4f4f3f69aefba7b0a8f0c1aee6bf6fea0544ca2"
+        "revision" : "7f9212dea6c486a7008a71ebc8f57bc95caf8d00"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/torus-utils-swift.git",
       "state" : {
-        "branch" : "fix/v2-login",
-        "revision" : "47b5d1a1959e4fa4a5feeaa487a78e8c6789901f"
+        "revision" : "5545ce7e4d00e1a5821434c4b673258235dd05d5",
+        "version" : "5.1.1"
       }
     },
     {
