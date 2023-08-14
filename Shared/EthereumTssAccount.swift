@@ -56,7 +56,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
            self.tssNonce = tssNonce
            self.tssIndex = tssIndex
            self.tssShare = tssShare
-           self.address = EthereumAddress(evmAddress)
+        self.address = EthereumAddress(evmAddress)
            self.authSigs = authSigs
        }
 
@@ -93,14 +93,14 @@ public class EthereumTssAccount: EthereumAccountProtocol {
             let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: self.publicKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
 
             // Wait for sockets to be connected
-            var connected = try client.checkConnected()
+            let connected = try client.checkConnected()
             if !(connected) {
                 throw EthereumSignerError.unknownError
             }
 
             let precompute = try client.precompute(serverCoeffs: coeffs, signatures: self.authSigs)
 
-           var ready = try client.isReady()
+            let ready = try client.isReady()
             if !(ready) {
                 throw EthereumSignerError.unknownError
             }

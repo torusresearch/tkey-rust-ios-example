@@ -380,10 +380,12 @@ struct TssView: View {
                     // get the uncompressed public key, empty format returns uncompressed
                     let fullTssPubKey = try KeyPoint(address: finalPubKey).getAsCompressedPublicKey(format: "")
 
+                    let evmAddress = Data(hexString: TSSHelpers.hashMessage(message: fullTssPubKey))?.suffix(20).hexString ?? ""
+
                     // step 2. getting signature
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
 
-                    let tssAccount = try EthereumTssAccount(evmAddress: "0x67199B200e91D005418015fDFac01390C89FCD6c", pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
+                    let tssAccount = try EthereumTssAccount(evmAddress: "0x\(evmAddress)", pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
 
                     let RPC_URL = "https://rpc.ankr.com/eth_goerli"
                     let chainID = 5
