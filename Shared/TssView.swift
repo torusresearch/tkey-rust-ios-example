@@ -319,7 +319,7 @@ struct TssView: View {
 
                         let ready = try client.isReady()
 
-                        if !(ready) {
+                        if ready {
 
                             // hash a message
                             let msg = "hello world"
@@ -370,16 +370,15 @@ struct TssView: View {
                     let factorKey = try KeychainInterface.fetch(key: selected_tag + ":0")
 
                     let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+
                     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
+
                     let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                     let finalPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    print("get_tss_pub_key", finalPubKey)
-
-                    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
 
                     // get the uncompressed public key, empty format returns uncompressed
-                    let fullTssPubKey = try KeyPoint(address: publicKey).getAsCompressedPublicKey(format: "")
+                    let fullTssPubKey = try KeyPoint(address: finalPubKey).getAsCompressedPublicKey(format: "")
 
                     // step 2. getting signature
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
