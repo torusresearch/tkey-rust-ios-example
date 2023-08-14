@@ -72,11 +72,13 @@ struct TssView: View {
     @State var tss_pub_key: String = ""
 
     var body: some View {
-        Button(action: {
-            Task {
-                showTss = false
-            }
-        }) { Text("TKey Demo") }
+        Section(header: Text("TSS Example")){
+            Button(action: {
+                Task {
+                    showTss = false
+                }
+            }) { Text("Home") }
+        }
 
         Section(header: Text("Tss Module")) {
             HStack {
@@ -102,7 +104,6 @@ struct TssView: View {
                                 try await TssModule.create_tagged_tss_share(threshold_key: self.threshold_key, tss_tag: tag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
                                 // set factor key into keychain
                                 try KeychainInterface.save(item: factorKey.hex, key: saveId)
-
                                 alertContent = factorKey.hex
                             } catch {
                                 print("error tss")
@@ -133,7 +134,7 @@ struct TssView: View {
         let tss_tags = try! threshold_key.get_all_tss_tags()
 
         if !tss_tags.isEmpty {
-            Section(header: Text("Tss Module")) {
+            Section(header: Text("TSS Tag")) {
                 ForEach(tss_tags, id: \.self) { key in
                     HStack {
                         Button(action: {
@@ -142,6 +143,7 @@ struct TssView: View {
                                 tss_pub_key = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
                                 allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
                                 print(allFactorPub)
+                                signingData = true
                             }
                         }) { Text(key) }
                     }
@@ -150,10 +152,11 @@ struct TssView: View {
         }
 
         if !selected_tag.isEmpty {
-            Section(header: Text("Tss : " + selected_tag)) {
+            Section(header: Text("TSS : " + selected_tag)) {
                 HStack {
                     Button(action: {
                         Task {
+                            
                             // show input popup for factor key input
                             // get factor key into keychain if input is empty
                             let saveId = selected_tag + ":" + "0"
@@ -382,6 +385,6 @@ struct TssView: View {
                     showAlert = true
                 }
             }
-        }) { Text("Sign") } // .disabled( !signingData )
+        }) { Text("Sign") }.disabled( !signingData )
     }
 }
