@@ -13,7 +13,7 @@ struct LoginView: View {
                         vm.loginWithCustomAuth()
                 },
                 label: {
-                    Text("Sign In With Google")
+                    Text("Sign In with Google")
                 }
             ).disabled(clicked)
 

@@ -265,7 +265,7 @@ struct ThresholdKeyView: View {
                                         }
 
                                         reconstructedKey = reconstructionDetails.key
-                                        alertContent = "\(reconstructedKey) is the private key"
+                                        alertContent = "\(reconstructedKey) is the postbox key"
                                         showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false

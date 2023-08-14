@@ -17,8 +17,8 @@ struct ContentView: View {
                 if vm.loggedIn {
                     ThresholdKeyView(userData: vm.userData)
                         .tabItem {
-                            Image(systemName: "person")
-                            Text("Profile")
+                            Image(systemName: "house.circle")
+                            Text("Home")
                         }
                 } else {
                     LoginView(vm: vm)
