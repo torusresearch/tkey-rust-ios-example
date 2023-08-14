@@ -1,11 +1,11 @@
-# Web3Auth tKey iOS Example with Google verifier
+# Web3Auth MPC tKey iOS Example with Google login.
 
-[![Web3Auth](https://img.shields.io/badge/Web3Auth-SDK-blue)](https://web3auth.io/docs/sdk/core-kit/mpc-tkey-ios)
-[![Web3Auth](https://img.shields.io/badge/Web3Auth-Community-cyan)](https://community.web3auth.io)
+[![Web3Auth](https://img.shields.io/badge/Web3Auth-SDK-green)](https://web3auth.io/docs/sdk/core-kit/mpc-tkey-ios)
+[![Web3Auth](https://img.shields.io/badge/Web3Auth-Community-cyan)](https://web3auth.io/community)
 
-[Join our Community Portal](https://community.web3auth.io/) to get support and stay up to date with the latest news and updates.
+[Join our Community Portal](https://web3auth.io/community) to get support and stay up to date with the latest news and updates.
 
-This example demonstrates how to use Web3Auth's tKey in iOS.
+This example demonstrates how to use Web3Auth's MPC tKey iOS SDK in your iOS app.
 
 ## How to Use
 
@@ -40,10 +40,6 @@ After complete building, you can login via your google account.
 If you don't have tKey, you can make your own tkey account by clicking this button, using customAuth sdk.
 If you already have your account, existing account can be used as well.
 
-## Main Page
-
-![mainPage](https://github-production-user-asset-6210df.s3.amazonaws.com/6962565/239817058-d3eb7adb-e6d7-4fc3-b36b-2772ccb20e1a.png)
-
 ### how to start
 
 Once you have the final tkey from initialize and reconstruct tkey, you can test all the features.
@@ -52,7 +48,11 @@ This means that both shares will be required for login. (2/2 setting).
 
 On the other hand, if you log in with an existing account, you would need to have the saved shares for the reconstruction to succeed.
 
-### TSS Demo
+## Main Page
+
+![mainPage](https://github-production-user-asset-6210df.s3.amazonaws.com/6962565/260447115-8ca1dfee-a204-4426-b4b6-9d0310ed7c28.png)
+
+### MPC (TSS Page)
 
 Click on TSS Demo button to test the TSS module.
 
