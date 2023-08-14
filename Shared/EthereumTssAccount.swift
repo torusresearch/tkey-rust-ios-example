@@ -36,7 +36,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
     public let verifier: String
     public let factorKey: String
     public let verifierID: String
-    public let publicKey: KeyPoint
+    public let publicKey: String
     public let authSigs: [String]
     public let tssNonce: Int32
     public let tssShare: String
@@ -45,7 +45,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
     public let tssEndpoints: [String]
     public let address: EthereumAddress
 
-    required public init(evmAddress: String, pubkey: KeyPoint, factorKey: String, tssNonce: Int32, tssShare: String, tssIndex: String, selectedTag: String, verifier: String, verifierID: String, nodeIndexes: [Int], tssEndpoints: [String], authSigs: [String]) throws {
+    required public init(evmAddress: String, pubkey: String, factorKey: String, tssNonce: Int32, tssShare: String, tssIndex: String, selectedTag: String, verifier: String, verifierID: String, nodeIndexes: [Int], tssEndpoints: [String], authSigs: [String]) throws {
            self.factorKey = factorKey
            self.selectedTag = selectedTag
            self.verifier = verifier
@@ -90,10 +90,8 @@ public class EthereumTssAccount: EthereumAccountProtocol {
        }
 
         public func sign(transaction: EthereumTransaction) throws -> SignedTransaction {
-
-            let fullPubKey = try "04" + self.publicKey.getX()  + self.publicKey.getY()
                         // Create tss Client using helper
-            let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: fullPubKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
+            let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: self.publicKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
 
             // Wait for sockets to be connected
             var connected = false
@@ -127,7 +125,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
             let encodedR = RLP.encodeBigInt(modifiedR)!
             let encodedS = RLP.encodeBigInt(s)!
             let rSerialized = BigUInt(r)
-            print("r val", rSerialized.serialize(),     r.magnitude.serialize(), r.serialize().hexString, s.magnitude.serialize(), s.serialize().hexString)
+            print("r val", rSerialized.serialize(),       r.magnitude.serialize(), r.serialize().hexString, s.magnitude.serialize(), s.serialize().hexString)
             return SignedTransaction(transaction: transaction, v: Int(modifiedV), r: encodedR, s: encodedS)
        }
 }

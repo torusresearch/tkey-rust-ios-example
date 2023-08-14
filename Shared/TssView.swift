@@ -301,8 +301,6 @@ struct TssView: View {
                     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
                     let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                     let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    // let keypoint = try KeyPoint(address: publicKey)
-                    // let fullTssPubKey = try "04" + keypoint.getX() + keypoint.getY()
 
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
 
@@ -341,10 +339,9 @@ struct TssView: View {
 
                     // verify the signature
                     let tssPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let tssKeyPoint = try KeyPoint(address: tssPubKey)
-                    let fullAddress = try "04" + tssKeyPoint.getX() + tssKeyPoint.getY()
+                    let tssKeyAddress = try KeyPoint(address: tssPubKey).getAsCompressedPublicKey(format: "")
 
-                    if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+                    if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: tssKeyAddress)) {
                         let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
                         alertContent = "Signature: " + sigHex
                         showAlert = true
@@ -375,7 +372,9 @@ struct TssView: View {
                     print("get_tss_pub_key", finalPubKey)
 
                     let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let fullTssPubKey = try KeyPoint(address: publicKey)
+
+                    // get the uncompressed public key, empty format returns uncompressed
+                    let fullTssPubKey = try KeyPoint(address: publicKey).getAsCompressedPublicKey(format: "")
 
                     // step 2. getting signature
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
