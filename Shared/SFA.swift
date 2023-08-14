@@ -29,17 +29,18 @@ public func checkForUpgradedAccount ( typeOfUser: TypeOfUser, nonce: BigUInt ) -
 
 public func getPostboxKeyAndNonce (sfaKey: String, typeOfUser: TypeOfUser, nonce: BigUInt) throws -> ( String, BigUInt ) {
     var postboxKey: String = sfaKey
-    var newNonce: BigUInt = nonce
+    var finalNonce: BigUInt = nonce
     if typeOfUser == TypeOfUser.v1 {
         //                              user v1 and upgrade is false -> generate nonce, add to finalkey -> postboxkey
         if nonce == 0 {
             let modulusValue = BigInt("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", radix: 16)!
             let random = try PrivateKey.generate().hex
-            newNonce = BigUInt(hex: random)!
+            let newNonce = BigUInt(hex: random)!
             let key = BigInt(sfaKey, radix: 16)!
-            let result = key + BigInt(sign: .plus, magnitude: nonce)
+            let result = key + BigInt(sign: .plus, magnitude: newNonce)
             let modResult = result.modulus(modulusValue)
             postboxKey =  modResult.serialize().toHexString()
+            finalNonce = newNonce
         }
     } else {
         //                              user v2 and upgrade is false -> finalkey substract nonce from sdk -> postboxkey
@@ -51,7 +52,7 @@ public func getPostboxKeyAndNonce (sfaKey: String, typeOfUser: TypeOfUser, nonce
             postboxKey =  modResult.serialize().toHexString()
         }
     }
-    return ( postboxKey, newNonce )
+    return ( postboxKey, finalNonce )
 }
 
 public func upgradeSFAToMFA (importKey: String, sfaKey: String, postboxKey: String, nonce: BigUInt, typeOfUser: TypeOfUser) async throws -> (ThresholdKey, KeyDetails) {

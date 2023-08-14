@@ -19,8 +19,7 @@ struct ContentView: View {
                 ProgressView()
             } else {
                 if vm.loggedIn {
-//                    let upgraded = vm.userData["upgraded"] as! Bool
-                    let upgraded = false
+                    let upgraded = vm.userData["upgraded"] as! Bool
                     if !mfaSet && !upgraded {
                         SFAView(userData: vm.userData, mfaSet: $mfaSet).tabItem {
                         }

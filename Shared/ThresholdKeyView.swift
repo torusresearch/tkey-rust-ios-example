@@ -102,13 +102,13 @@ struct ThresholdKeyView: View {
                                 let key_details: KeyDetails
 
                                 if !upgraded {
-                                    // Importing SFA key into MFA Tkey
                                     let importKey = userData["privateKey"] as? String
 
                                     do {
                                         let result = try await upgradeSFAToMFA(importKey: importKey!, sfaKey: sfakey, postboxKey: postboxKey, nonce: nonce, typeOfUser: typeOfUser)
                                         threshold_key = result.0
                                         key_details = result.1
+                                        try await threshold_key.sync_local_metadata_transistions()
                                     } catch {
                                         alertContent = "Failed to create threshold key"
                                         showAlert = true
@@ -245,6 +245,9 @@ struct ThresholdKeyView: View {
                                         showSpinner = SpinnerLocation.nowhere
                                         return
                                     }
+                                    
+                                    try await threshold_key.sync_local_metadata_transistions()
+
 
                                     reconstructedKey = reconstructionDetails.key
                                     alertContent = "\(reconstructedKey) is the private key"
@@ -253,9 +256,6 @@ struct ThresholdKeyView: View {
                                     resetAccount = false
                                 }
 
-                                try await threshold_key.sync_local_metadata_transistions()
-//                                  if v1 -> setNonce (generatedNonce)
-                                // setMetadata ( [{ message:  }] , [ postboxKey ] )
 
                                 showSpinner = SpinnerLocation.nowhere
                             }
