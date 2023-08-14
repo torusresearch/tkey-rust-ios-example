@@ -26,8 +26,6 @@ struct SFAView: View {
         VStack {
             Text("SFA Detail")
             Text("PrivateKey : " +  sfaPrivateKey  )
-            Text("PostboxKey : " + sfaPostboxkey )
-            Text("Nonce : " + sfaNonce )
 
             List {
                 Section {
@@ -45,7 +43,6 @@ struct SFAView: View {
             }
         }.onAppear {
             sfaPrivateKey = userData["privateKey"] as! String
-//            sfaPostboxkey = userData["postboxKey"] as! String
             sfaNonce = (userData["nonce"] as! BigUInt).serialize().toHexString()
         }
     }
