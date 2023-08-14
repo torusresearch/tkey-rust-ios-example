@@ -913,7 +913,7 @@
 			repositoryURL = "https://github.com/torusresearch/tss-client-swift/";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 1.0.3;
+				minimumVersion = 1.0.6;
 			};
 		};
 		F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */ = {
