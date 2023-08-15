@@ -126,10 +126,7 @@ struct ThresholdKeyView: View {
                 return
             }
             torusUtils = TorusUtils( enableOneKey: true,
-//                                                                 allowHost: "https://signer.tor.us/api/allow",
-                                         network: .sapphire(.SAPPHIRE_DEVNET)
-//                                                                 metadataHost: "https://sapphire-dev-2-1.authnetwork.dev/metadata",
-//                                                                 clientId: "YOUR_CLIENT_ID"
+                                     network: .sapphire(.SAPPHIRE_DEVNET)
                                      )
             let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
             nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
@@ -278,6 +275,8 @@ struct ThresholdKeyView: View {
                 resetAccount = false
                 showSpinner = SpinnerLocation.nowhere
             }
+            let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
+            metadataDescription = "\(defaultTssShareDescription)"
             showSpinner = SpinnerLocation.nowhere
         }
     }
@@ -292,15 +291,17 @@ struct ThresholdKeyView: View {
             } else {
 
             HStack {
-                VStack(alignment: .leading) {
-                    Text("TSS Pub Key: \(tssPublicKey)")
-                        .font(.subheadline)
-//                    Text("Metadata public key: \(metadataPublicKey)")
-//                        .font(.subheadline)
-                    Text("Metadata key: \(metadataKey)")
-                        .font(.subheadline)
-                    Text("With Factors/Shares: \(metadataDescription)")
-                        .font(.subheadline)
+                if metadataDescription != "" {
+                    VStack(alignment: .leading) {
+                        Text("TSS Pub Key: \(tssPublicKey)")
+                            .font(.subheadline)
+                        //                    Text("Metadata public key: \(metadataPublicKey)")
+                        //                        .font(.subheadline)
+                        Text("Metadata key: \(metadataKey)")
+                            .font(.subheadline)
+                        Text("With Factors/Shares: \(metadataDescription)")
+                            .font(.subheadline)
+                    }
                 }
                 Spacer()
             }
