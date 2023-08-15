@@ -76,7 +76,7 @@ struct ThresholdKeyView: View {
 
             if showTss {
                 List {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils)
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey)
                 }
             } else {
 
@@ -211,37 +211,25 @@ struct ThresholdKeyView: View {
                                     tkeyInitalized = true
 
                                     // public key of the metadatakey
-                                    metadataPublicKey = try key_details.pub_key.getAsCompressedPublicKey(format: "elliptic-compressed" )
+                                    metadataPublicKey = try key_details.pub_key.getAsCompressedPublicKey(format: "" )
 
                                     if key_details.required_shares > 0 {
                                         // exising user
-                                        // fetch all locally available shares for this google account
-                                        var shares: [String] = []
-                                        shareCount = 0
-                                        var finishedFetch = false
-                                        repeat {
-                                            let fetchId = metadataPublicKey + ":" + String(shareCount)
-                                            do {
-                                                let share = try KeychainInterface.fetch(key: fetchId)
-                                                shares.append(share)
-                                            } catch {
-                                                finishedFetch = true
-                                                break
-                                            }
-                                            shareCount += 1
-                                        } while !finishedFetch
+                                        let allTags = try threshold_key.get_all_tss_tags()
+                                        let tag = "default" // allTags[0]
 
-                                        // import shares
-                                        for item in shares {
-                                            do {
-                                                _ = try await threshold_key.input_factor_key(factorKey: item)
-                                            } catch {
-                                                alertContent = "Incorrect factor was used."
-                                                showAlert = true
-                                                resetAccount = true
-                                                showSpinner = SpinnerLocation.nowhere
-                                                return
-                                            }
+                                        let fetchId = metadataPublicKey + tag + ":0"
+                                        // fetch all locally available shares for this google account
+
+                                        do {
+                                            let factorKey = try KeychainInterface.fetch(key: fetchId)
+                                            try await threshold_key.input_factor_key(factorKey: factorKey)
+                                        } catch {
+                                            alertContent = "Incorrect factor was used."
+                                            showAlert = true
+                                            resetAccount = true
+                                            showSpinner = SpinnerLocation.nowhere
+                                            return
                                         }
 
                                         guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
@@ -259,17 +247,15 @@ struct ThresholdKeyView: View {
                                         tkeyReconstructed = true
                                         resetAccount = false
 
-                                        // initialize tss module
-                                        let allTags = try TssModule.get_all_tss_tags(threshold_key: threshold_key)
                                         // check if default in all tags else ??
-                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: "default")
+                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
 
                                         let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
 
                                         do {
-                                                Task {
-                                                    showTss = true
-                                                }
+                                            Task {
+                                                showTss = true
+                                            }
                                         }
                                     } else {
                                         // new user
@@ -288,28 +274,30 @@ struct ThresholdKeyView: View {
                                         let factorPub = try factorKey.toPublic()
                                         // use input to create tag tss share
                                         let tssIndex = Int32(2)
-                                        try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: "default", deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
+                                        let defaultTag = "default"
+                                        try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
 
-                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: "default")
+                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: defaultTag)
 
                                         // finding device share index
                                         var shareIndexes = try threshold_key.get_shares_indexes()
                                         shareIndexes.removeAll(where: {$0 == "1"})
 
-                                        let saveId = metadataPublicKey + ":0"
-
-                                        // save the factor key
+                                        // backup metadata share using factorKey
                                         try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndexes[0], factorKey: factorKey.hex)
                                         let description = [
                                             "module": "Device Factor key",
+                                            "tssTag": defaultTag,
                                             "tssShareIndex": tssIndex,
                                             "dateAdded": Date().timeIntervalSince1970
                                         ] as [String: Codable]
 //
                                         let json = try JSONSerialization.data(withJSONObject: description)
                                         let jsonStr = String(data: json, encoding: .utf8)!
-                                        try await threshold_key.add_share_description(key: factorKey.hex, description: jsonStr )
+                                        try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
 
+                                        let saveId = metadataPublicKey + defaultTag + ":0"
+                                        // save factor key in keychain ( this factor key should be saved in any where that is accessable by the device)
                                         guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: saveId) else {
                                             alertContent = "Failed to save factor key"
                                             resetAccount = true
