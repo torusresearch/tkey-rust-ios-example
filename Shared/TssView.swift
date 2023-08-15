@@ -74,6 +74,18 @@ struct TssView: View {
     @State var allFactorPub: [String] = []
     @State var tss_pub_key: String = ""
 
+    @State var showSpinner = false
+
+    func updateTag ( key: String) {
+        Task {
+            selected_tag = key
+            tss_pub_key = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
+            allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
+            print(allFactorPub)
+            signingData = true
+        }
+    }
+
     var body: some View {
         Section(header: Text("TSS Example")) {
             Button(action: {
@@ -81,6 +93,8 @@ struct TssView: View {
                     showTss = false
                 }
             }) { Text("Home") }
+        }.onAppear {
+            updateTag(key: "default")
         }
 
 //        Section(header: Text("Tss Module")) {
@@ -123,6 +137,26 @@ struct TssView: View {
 //            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
 //        }
 
+        let tss_tags = try! threshold_key.get_all_tss_tags()
+
+//        if !tss_tags.isEmpty {
+//            Section(header: Text("TSS Tag")) {
+//                ForEach(tss_tags, id: \.self) { key in
+//                    HStack {
+//                        Button(action: {
+//                            Task {
+//                                selected_tag = key
+//                                tss_pub_key = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
+//                                allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
+//                                print(allFactorPub)
+//                                signingData = true
+//                            }
+//                        }) { Text(key) }
+//                    }
+//                }
+//            }
+//        }
+
         if tss_pub_key != "" {
             Text("Tss public key for " + selected_tag)
             Text(tss_pub_key)
@@ -134,32 +168,16 @@ struct TssView: View {
             }
         }
 
-        let tss_tags = try! threshold_key.get_all_tss_tags()
-
-        if !tss_tags.isEmpty {
-            Section(header: Text("TSS Tag")) {
-                ForEach(tss_tags, id: \.self) { key in
-                    HStack {
-                        Button(action: {
-                            Task {
-                                selected_tag = key
-                                tss_pub_key = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                                allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
-                                print(allFactorPub)
-                                signingData = true
-                            }
-                        }) { Text(key) }
-                    }
-                }
-            }
-        }
-
         if !selected_tag.isEmpty {
             Section(header: Text("TSS : " + selected_tag)) {
                 HStack {
+                    if showSpinner {
+                        LoaderView()
+                    }
                     Button(action: {
-                        
+
                             Task {
+                                showSpinner = true
                                 // generate factor key if input is empty
                                 // derive factor pub
                                 let newFactorKey = try PrivateKey.generate()
@@ -188,17 +206,24 @@ struct TssView: View {
                                 // show factor key used
 
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
+                                updateTag(key: selected_tag)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
+                                showSpinner = false
                             }
                     }) { Text("Create New TSSShare Into Manual Backup Factor") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                }
+                }.disabled(showSpinner )
+                .opacity(showSpinner ? 0.5 : 1)
 
                 HStack {
+                    if showSpinner {
+                        LoaderView()
+                    }
                     Button(action: {
                             Task {
+                                showSpinner = true
                                 // generate factor key if input is empty
                                 // derive factor pub
                                 let newFactorKey = try PrivateKey.generate()
@@ -226,20 +251,26 @@ struct TssView: View {
                                 try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
 
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
+                                updateTag(key: selected_tag)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
-                                // copy factor pub
+                                showSpinner = false
                             }
                     }) { Text("Copy Existing TSS Share For New Factor Manual") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                }
+                }.disabled(showSpinner )
+                 .opacity(showSpinner ? 0.5 : 1)
 
                 HStack {
+                    if showSpinner {
+                        LoaderView()
+                    }
                     Button(action: {
                         Task {
                             // get factor key from keychain if input is empty
 
+                            showSpinner = true
                             var deleteFactorKey: String?
                             var deleteFactor: String?
                             do {
@@ -280,76 +311,89 @@ struct TssView: View {
                             try await TssModule.delete_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic(), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                             print("done delete factor pub")
                             try KeychainInterface.save(item: "", key: deleteFactor!)
-
+                            updateTag(key: selected_tag)
                             alertContent = "deleted factor key :" + deleteFactorKey
                             showAlert = true
+                            showSpinner = false
                         }
-                    }) { Text("Delete tKey Local Store (enables Recovery Flow)") }
+                    }) { Text("Delete Factor Pub") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                }
+                }.disabled(showSpinner )
+                    .opacity(showSpinner ? 0.5 : 1)
             }
         }
-        Button(action: {
-            Task {
-                do {
-                    let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
-                    // get the factor key information
-
-                    let factorKey = try KeychainInterface.fetch(key: metadataPublicKey + ":" + selected_tag + ":0")
-                    // Create tss Client using helper
-                    let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
-
-                    // wait for sockets to connect
-                    var connected = false
-                    while !connected {
-                        connected = try client.checkConnected()
-                    }
-
-                    // Create a precompute, each server also creates a precompute.
-                    // This calls setup() followed by precompute() for all parties
-                    // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
-                    // This will also fail if a single failure notification is received.
-                    // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
-                    // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
-                    let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
-
-                    while !(try client.isReady()) {
-                        // no-op
-                    }
-
-                    // hash a message
-                    let msg = "hello world"
-                    let msgHash = TSSHelpers.hashMessage(message: msg)
-
-                    // signs a hashed message, collecting signature fragments from the servers
-                    // this function signs locally to produce its' own fragment
-                    // this is combined with the server fragments
-                    // local_verify is then used with the client precompute to produce a full signature and return the components
-                    let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
-
-                    // cleanup sockets
-                    try client.cleanup(signatures: sigs)
-
-                    // verify the signature
-                    let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let keypoint = try KeyPoint(address: publicKey)
-                    let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
-
-                    if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
-                        let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
-                        alertContent = "Signature: " + sigHex
-                        showAlert = true
-                        print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
-                    } else {
-                        alertContent = "Signature could not be verified"
-                        showAlert = true
-                    }
-                } catch {
-                    alertContent = "Signing could not be completed. please try again"
-                    showAlert = true
-                }
+        HStack {
+            if showSpinner {
+                LoaderView()
             }
-        }) { Text("Sign Message") }.disabled( !signingData )
+
+            Button(action: {
+                Task {
+                    showSpinner = true
+                    do {
+                        let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                        // get the factor key information
+
+                        let factorKey = try KeychainInterface.fetch(key: metadataPublicKey + ":" + selected_tag + ":0")
+                        // Create tss Client using helper
+                        let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
+
+                        // wait for sockets to connect
+                        var connected = false
+                        while !connected {
+                            connected = try client.checkConnected()
+                        }
+
+                        // Create a precompute, each server also creates a precompute.
+                        // This calls setup() followed by precompute() for all parties
+                        // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
+                        // This will also fail if a single failure notification is received.
+                        // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
+                        // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
+                        let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
+
+                        while !(try client.isReady()) {
+                            // no-op
+                        }
+
+                        // hash a message
+                        let msg = "hello world"
+                        let msgHash = TSSHelpers.hashMessage(message: msg)
+
+                        // signs a hashed message, collecting signature fragments from the servers
+                        // this function signs locally to produce its' own fragment
+                        // this is combined with the server fragments
+                        // local_verify is then used with the client precompute to produce a full signature and return the components
+                        let (s, r, v) = try client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: sigs)
+
+                        // cleanup sockets
+                        try client.cleanup(signatures: sigs)
+
+                        // verify the signature
+                        let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
+                        let keypoint = try KeyPoint(address: publicKey)
+                        let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
+
+                        if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: fullAddress)) {
+                            let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
+                            alertContent = "Signature: " + sigHex
+                            showAlert = true
+                            print(try TSSHelpers.hexSignature(s: s, r: r, v: v))
+                        } else {
+                            alertContent = "Signature could not be verified"
+                            showAlert = true
+                        }
+                    } catch {
+                        alertContent = "Signing could not be completed. please try again"
+                        showAlert = true
+                    }
+                    showSpinner = false
+                }
+            }) { Text("Sign Message") }
+                .disabled( !signingData )
+                .disabled(showSpinner )
+                .opacity(showSpinner ? 0.5 : 1)
+        }
     }
 }

@@ -217,12 +217,6 @@ struct ThresholdKeyView: View {
                 let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
                 metadataDescription = "\(defaultTssShareDescription)"
                 print(defaultTssShareDescription)
-
-//                do {
-//                    Task {
-//                        showTss = true
-//                    }
-//                }
             } else {
                 // new user
                 guard (try? await threshold_key.reconstruct()) != nil else {
@@ -283,11 +277,6 @@ struct ThresholdKeyView: View {
                 tkeyReconstructed = true
                 resetAccount = false
                 showSpinner = SpinnerLocation.nowhere
-//                do {
-//                        Task {
-//                            showTss = true
-//                        }
-//                }
             }
             showSpinner = SpinnerLocation.nowhere
         }
@@ -327,22 +316,24 @@ struct ThresholdKeyView: View {
                     }.disabled( tkeyInitalized != true )
 
                     Section(header: Text("Basic functionality")) {
-                        HStack {
-                            Text("Initialize")
-                            Spacer()
-                            if showSpinner == SpinnerLocation.init_reconstruct_btn {
-                                LoaderView()
-                            }
-                            Button(action: {
-                                initialize()
+                        if !tkeyInitalized {
+                            HStack {
+                                Text("Initialize")
+                                Spacer()
+                                if showSpinner == SpinnerLocation.init_reconstruct_btn {
+                                    LoaderView()
+                                }
+                                Button(action: {
+                                    initialize()
 
-                            }) {
-                                Text("")
-                            }
-                            .disabled(showSpinner == SpinnerLocation.init_reconstruct_btn)
-                            .opacity(showSpinner == SpinnerLocation.init_reconstruct_btn ? 0.5 : 1)
-                            .alert(isPresented: $showAlert) {
-                                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                                }) {
+                                    Text("")
+                                }
+                                .disabled(showSpinner == SpinnerLocation.init_reconstruct_btn)
+                                .opacity(showSpinner == SpinnerLocation.init_reconstruct_btn ? 0.5 : 1)
+                                .alert(isPresented: $showAlert) {
+                                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                                }
                             }
                         }
 
@@ -445,6 +436,8 @@ struct ThresholdKeyView: View {
                     }
                 }
             }
+        }.onAppear {
+            initialize()
         }
     }
 }
