@@ -218,11 +218,11 @@ struct ThresholdKeyView: View {
                 metadataDescription = "\(defaultTssShareDescription)"
                 print(defaultTssShareDescription)
 
-                do {
-                    Task {
-                        showTss = true
-                    }
-                }
+//                do {
+//                    Task {
+//                        showTss = true
+//                    }
+//                }
             } else {
                 // new user
                 guard (try? await threshold_key.reconstruct()) != nil else {
@@ -283,11 +283,11 @@ struct ThresholdKeyView: View {
                 tkeyReconstructed = true
                 resetAccount = false
                 showSpinner = SpinnerLocation.nowhere
-                do {
-                        Task {
-                            showTss = true
-                        }
-                }
+//                do {
+//                        Task {
+//                            showTss = true
+//                        }
+//                }
             }
             showSpinner = SpinnerLocation.nowhere
         }
@@ -393,7 +393,7 @@ struct ThresholdKeyView: View {
                             .opacity(!tkeyInitalized ? 0.5 : 1)
 
                         HStack {
-                            Text("Reset account")
+                            Text("Reset Account (CAUTION)")
                             Spacer()
                             Button(action: {
                                 let alert = UIAlertController(title: "Reset Account", message: "This action will reset your account. Use it with extreme caution.", preferredStyle: .alert)

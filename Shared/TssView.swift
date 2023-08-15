@@ -83,45 +83,45 @@ struct TssView: View {
             }) { Text("Home") }
         }
 
-        Section(header: Text("Tss Module")) {
-            HStack {
-                Button(action: {
-                    // show input popup
-                    let alert = UIAlertController(title: "Enter New Tss Tag", message: nil, preferredStyle: .alert)
-                    alert.addTextField { textField in
-                        textField.placeholder = "New Tag"
-                    }
-                    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
-                        guard let textField = alert?.textFields?.first else { return }
-                        Task {
-                            let tag = textField.text ?? "default"
-                            let saveId = tag + ":0"
-                            // generate factor key
-                            let factorKey = try PrivateKey.generate()
-                            // derive factor pub
-                            let factorPub = try factorKey.toPublic()
-                            // use input to create tag tss share
-                            do {
-                                print(try threshold_key.get_all_tss_tags())
-                                try await TssModule.create_tagged_tss_share(threshold_key: self.threshold_key, tss_tag: tag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
-                                // set factor key into keychain
-                                try KeychainInterface.save(item: factorKey.hex, key: saveId)
-                                alertContent = factorKey.hex
-                            } catch {
-                                print("error tss")
-                            }
-                        }
-                    }))
-
-                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                        windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
-                    }
-                }) { Text("create new tagged tss") }
-            }
-        }.alert(isPresented: $showAlert) {
-            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-        }
+//        Section(header: Text("Tss Module")) {
+//            HStack {
+//                Button(action: {
+//                    // show input popup
+//                    let alert = UIAlertController(title: "Enter New Tss Tag", message: nil, preferredStyle: .alert)
+//                    alert.addTextField { textField in
+//                        textField.placeholder = "New Tag"
+//                    }
+//                    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+//                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
+//                        guard let textField = alert?.textFields?.first else { return }
+//                        Task {
+//                            let tag = textField.text ?? "default"
+//                            let saveId = tag + ":0"
+//                            // generate factor key
+//                            let factorKey = try PrivateKey.generate()
+//                            // derive factor pub
+//                            let factorPub = try factorKey.toPublic()
+//                            // use input to create tag tss share
+//                            do {
+//                                print(try threshold_key.get_all_tss_tags())
+//                                try await TssModule.create_tagged_tss_share(threshold_key: self.threshold_key, tss_tag: tag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: 2, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
+//                                // set factor key into keychain
+//                                try KeychainInterface.save(item: factorKey.hex, key: saveId)
+//                                alertContent = factorKey.hex
+//                            } catch {
+//                                print("error tss")
+//                            }
+//                        }
+//                    }))
+//
+//                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+//                        windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+//                    }
+//                }) { Text("create new tagged tss") }
+//            }
+//        }.alert(isPresented: $showAlert) {
+//            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+//        }
 
         if tss_pub_key != "" {
             Text("Tss public key for " + selected_tag)
@@ -158,41 +158,7 @@ struct TssView: View {
             Section(header: Text("TSS : " + selected_tag)) {
                 HStack {
                     Button(action: {
-                        Task {
-                            do {
-
-                                // show input popup for factor key input
-                                // get factor key into keychain if input is empty
-                                let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
-                                print(saveId)
-                                let factorKey = try KeychainInterface.fetch(key: saveId)
-                                print(factorKey)
-                                // get tss share using factor key
-                                let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
-                                print("tssIndex:" + tssIndex)
-                                print("tssShare:" + tssShare)
-                                alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
-                                showAlert = true
-                            } catch {
-                                alertContent = "Invalid key"
-                                showAlert = true
-                            }
-                        }
-                    }) { Text("Get tss share") }
-                }.alert(isPresented: $showAlert) {
-                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                }
-
-                HStack {
-                    Button(action: {
-                        // show input popup
-                        let alert = UIAlertController(title: "Key in Factor Key or randomly generated if left empty", message: nil, preferredStyle: .alert)
-                        alert.addTextField { textField in
-                            textField.placeholder = "Factor Key"
-                        }
-                        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
-                            guard (alert?.textFields?.first) != nil else { return }
+                        
                             Task {
                                 // generate factor key if input is empty
                                 // derive factor pub
@@ -225,27 +191,13 @@ struct TssView: View {
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
                             }
-                        }))
-
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                            windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
-                        }
-                    }) { Text("Create New Tss Share with Factor Pub") }
+                    }) { Text("Create New TSSShare Into Manual Backup Factor") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
 
                 HStack {
                     Button(action: {
-                        // show input popup
-                        let alert = UIAlertController(title: "Key in Factor Key or randomly generated if left empty", message: nil, preferredStyle: .alert)
-                        alert.addTextField { textField in
-                            textField.placeholder = "Factor Key"
-                        }
-
-                        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
-                            guard (alert?.textFields?.first) != nil else { return }
                             Task {
                                 // generate factor key if input is empty
                                 // derive factor pub
@@ -278,11 +230,7 @@ struct TssView: View {
                                 showAlert = true
                                 // copy factor pub
                             }
-                        }))
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                            windowScene.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
-                        }
-                    }) { Text("Copy Tss Share with Factor Pub") }
+                    }) { Text("Copy Existing TSS Share For New Factor Manual") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
@@ -336,7 +284,7 @@ struct TssView: View {
                             alertContent = "deleted factor key :" + deleteFactorKey
                             showAlert = true
                         }
-                    }) { Text("Delete Factor Pub") }
+                    }) { Text("Delete tKey Local Store (enables Recovery Flow)") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
