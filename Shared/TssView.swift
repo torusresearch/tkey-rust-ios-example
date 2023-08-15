@@ -188,6 +188,9 @@ struct TssView: View {
                                 let fetchId = metadataPublicKey + ":" + selected_tag + ":" + "0"
                                 let factorKey = try KeychainInterface.fetch(key: fetchId)
 
+                                let shareIndex = try await TssModule.find_device_share_index(threshold_key: threshold_key, factor_key: factorKey)
+                                try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndex, factorKey: newFactorKey.hex)
+
                                 // for now only tss index 2 and index 3 are supported
                                 let tssShareIndex = Int32(3)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
@@ -235,6 +238,9 @@ struct TssView: View {
                                 let factorKey = try KeychainInterface.fetch(key: fetchId)
 
                                 let (tssShareIndex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+
+                                let shareIndex = try await TssModule.find_device_share_index(threshold_key: threshold_key, factor_key: factorKey)
+                                try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndex, factorKey: newFactorKey.hex)
 
                                 // tssShareIndex provided will be cross checked with factorKey to prevent wrong tss share copied
                                 try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: Int32(tssShareIndex)!)
