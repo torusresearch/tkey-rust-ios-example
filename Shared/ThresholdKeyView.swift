@@ -323,7 +323,7 @@ struct ThresholdKeyView: View {
                             Task {
                                 showTss = true
                             }
-                        }) { Text("MPC Demo") }
+                        }) { Text("Signing functions") }
                     }.disabled( tkeyInitalized != true )
 
                     Section(header: Text("Basic functionality")) {

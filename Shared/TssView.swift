@@ -350,6 +350,6 @@ struct TssView: View {
                     showAlert = true
                 }
             }
-        }) { Text("Sign") }.disabled( !signingData )
+        }) { Text("Sign Message") }.disabled( !signingData )
     }
 }
