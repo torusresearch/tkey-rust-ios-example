@@ -243,8 +243,6 @@ struct ThresholdKeyView: View {
                                         }
 
                                         metadataKey = reconstructionDetails.key
-//                                        alertContent = "\(metadataKey) is the metadata key"
-//                                        showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
 
@@ -317,8 +315,6 @@ struct ThresholdKeyView: View {
                                         }
 
                                         metadataKey = reconstructionDetails.key
-//                                        alertContent = "\(metadataKey) is the metadata key"
-//                                        showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
                                         showSpinner = SpinnerLocation.nowhere
@@ -356,6 +352,25 @@ struct ThresholdKeyView: View {
                                         showAlert = true
                                     } catch {
                                         alertContent = "get key details failed"
+                                        showAlert = true
+                                    }
+
+                                }
+                            }) {
+                                Text("")
+                            }.alert(isPresented: $showAlert) {
+                                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                            }
+                        }.disabled(!tkeyInitalized)
+                            .opacity(!tkeyInitalized ? 0.5 : 1)
+                        
+                        HStack {
+                            Text("See Login Response")
+                            Spacer()
+                            Button(action: {
+                                Task {
+                                    do {
+                                        alertContent = "\(String(describing: userData))"
                                         showAlert = true
                                     }
 
