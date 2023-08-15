@@ -211,7 +211,7 @@ struct ThresholdKeyView: View {
                                     tkeyInitalized = true
 
                                     // public key of the metadatakey
-                                    metadataPublicKey = try key_details.pub_key.getAsCompressedPublicKey(format: "" )
+                                    metadataPublicKey = try key_details.pub_key.getPublicKey(format: .EllipticCompress )
 
                                     if key_details.required_shares > 0 {
                                         // exising user
@@ -219,8 +219,9 @@ struct ThresholdKeyView: View {
                                         print(allTags)
                                         let tag = "default" // allTags[0]
 
-                                        let fetchId = metadataPublicKey + tag + ":0"
+                                        let fetchId = metadataPublicKey + ":" + tag + ":0"
                                         // fetch all locally available shares for this google account
+                                        print(fetchId)
 
                                         do {
                                             let factorKey = try KeychainInterface.fetch(key: fetchId)
@@ -252,7 +253,7 @@ struct ThresholdKeyView: View {
                                         let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
                                         metadataDescription = "\(defaultTssShareDescription)"
                                         print(defaultTssShareDescription)
-                                        
+
                                         do {
                                             Task {
                                                 showTss = true
@@ -292,12 +293,11 @@ struct ThresholdKeyView: View {
                                             "tssShareIndex": tssIndex,
                                             "dateAdded": Date().timeIntervalSince1970
                                         ] as [String: Codable]
-//
-                                        let json = try JSONSerialization.data(withJSONObject: description)
-                                        let jsonStr = String(data: json, encoding: .utf8)!
+                                        let jsonStr = try factorDescription(dataObj: description)
+
                                         try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
 
-                                        let saveId = metadataPublicKey + defaultTag + ":0"
+                                        let saveId = metadataPublicKey + ":" + defaultTag + ":0"
                                         // save factor key in keychain ( this factor key should be saved in any where that is accessable by the device)
                                         guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: saveId) else {
                                             alertContent = "Failed to save factor key"
@@ -363,7 +363,7 @@ struct ThresholdKeyView: View {
                             }
                         }.disabled(!tkeyInitalized)
                             .opacity(!tkeyInitalized ? 0.5 : 1)
-                        
+
                         HStack {
                             Text("See Login Response")
                             Spacer()

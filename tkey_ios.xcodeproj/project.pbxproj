@@ -30,6 +30,8 @@
 		B3E5316F29EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
 		B3E5317029EE75CA00174AF1 /* KeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316E29EE75CA00174AF1 /* KeyChain.swift */; };
 		DD694C2D29713D2B00B34585 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
+		F00423A22A8B64D600F11B11 /* helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00423A12A8B64D600F11B11 /* helper.swift */; };
+		F00423A32A8B64D600F11B11 /* helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00423A12A8B64D600F11B11 /* helper.swift */; };
 		F0E2AC442A73A3C900F6C17A /* TssView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E2AC432A73A3C900F6C17A /* TssView.swift */; };
 		F0E2AC452A73A3C900F6C17A /* TssView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E2AC432A73A3C900F6C17A /* TssView.swift */; };
 		F0E2AC502A821B4900F6C17A /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = F0E2AC4F2A821B4900F6C17A /* ThresholdKey */; };
@@ -83,6 +85,7 @@
 		B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdKeyView.swift; sourceTree = "<group>"; };
 		B3E5316829EC4ED000174AF1 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		B3E5316E29EE75CA00174AF1 /* KeyChain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyChain.swift; sourceTree = "<group>"; };
+		F00423A12A8B64D600F11B11 /* helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helper.swift; sourceTree = "<group>"; };
 		F0E2AC432A73A3C900F6C17A /* TssView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TssView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -145,6 +148,7 @@
 				B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */,
 				B3E5316829EC4ED000174AF1 /* LoaderView.swift */,
 				F0E2AC432A73A3C900F6C17A /* TssView.swift */,
+				F00423A12A8B64D600F11B11 /* helper.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -368,6 +372,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F00423A22A8B64D600F11B11 /* helper.swift in Sources */,
 				14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
@@ -383,6 +388,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F00423A32A8B64D600F11B11 /* helper.swift in Sources */,
 				14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */,
 				B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,

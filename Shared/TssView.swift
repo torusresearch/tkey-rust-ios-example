@@ -158,19 +158,26 @@ struct TssView: View {
                 HStack {
                     Button(action: {
                         Task {
+                            do {
 
-                            // show input popup for factor key input
-                            // get factor key into keychain if input is empty
-                            let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
-                            let factorKey = try KeychainInterface.fetch(key: saveId)
-                            // get tss share using factor key
-                            let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
-                            print("tssIndex:" + tssIndex)
-                            print("tssShare:" + tssShare)
-                            alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
-                            showAlert = true
+                                // show input popup for factor key input
+                                // get factor key into keychain if input is empty
+                                let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
+                                print(saveId)
+                                let factorKey = try KeychainInterface.fetch(key: saveId)
+                                print(factorKey)
+                                // get tss share using factor key
+                                let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+                                print("tssIndex:" + tssIndex)
+                                print("tssShare:" + tssShare)
+                                alertContent = "tssIndex:" + tssIndex + "\n" + "tssShare:" + tssShare
+                                showAlert = true
+                            } catch {
+                                alertContent = "Invalid key"
+                                showAlert = true
+                            }
                         }
-                    }) { Text(selected_tag + " :get tss share") }
+                    }) { Text("Get tss share") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
@@ -203,12 +210,23 @@ struct TssView: View {
                                 // use input to generate tss share with index 3
                                 let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
                                 let factorKey = try KeychainInterface.fetch(key: saveId)
+
+                                // for now only tss index 2 and index 3 are supported
                                 let tssShareIndex = Int32(3)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                                 try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                                 let saveNewFactorId = metadataPublicKey + ":" + selected_tag + ":" + "1"
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
+
+                                let description = [
+                                    "module": "Manual Backup",
+                                    "tssTag": selected_tag,
+                                    "tssShareIndex": tssShareIndex,
+                                    "dateAdded": Date().timeIntervalSince1970
+                                ] as [String: Codable]
+                                let jsonStr = try factorDescription(dataObj: description)
+                                try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
                                 // show factor key used
 
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
@@ -254,13 +272,23 @@ struct TssView: View {
                                 // get existing factor key
                                 let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
                                 let factorKey = try KeychainInterface.fetch(key: saveId)
-                                // use input to generate tss share with index 3
-                                let tssShareIndex = Int32(2)
-                                try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: tssShareIndex)
+
+                                let (tssShareIndex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+
+                                // tssShareIndex provided will be cross checked with factorKey to prevent wrong tss share copied
+                                try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: Int32(tssShareIndex)!)
 
                                 let saveNewFactorId = metadataPublicKey + ":" + selected_tag + ":" + "2"
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
                                 // show factor key used
+                                let description = [
+                                    "module": "Manual Backup",
+                                    "tssTag": selected_tag,
+                                    "tssShareIndex": tssShareIndex,
+                                    "dateAdded": Date().timeIntervalSince1970
+                                ] as [String: Codable]
+                                let jsonStr = try factorDescription(dataObj: description)
+                                try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
 
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
@@ -334,7 +362,7 @@ struct TssView: View {
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                     // get the factor key information
 
-                    let factorKey = try KeychainInterface.fetch(key: metadataPublicKey + ":0")
+                    let factorKey = try KeychainInterface.fetch(key: metadataPublicKey + ":" + selected_tag + ":0")
                     // Create tss Client using helper
                     let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
