@@ -158,8 +158,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tkey/tkey-ios",
       "state" : {
-        "branch" : "alpha",
-        "revision" : "808e13c2338a65a8f5acff6e535034fb83258040"
+        "branch" : "feat/backup-share-to-factor-key",
+        "revision" : "fdcc1842873154a14ff76b46f77e8875cbd26965"
       }
     },
     {

@@ -74,21 +74,21 @@ struct ThresholdKeyView: View {
                 }
             } else {
 
-            HStack {
-                Image(systemName: "person")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                VStack(alignment: .leading) {
-//                    Text("Reconstructed key: \(reconstructedKey)")
+//            HStack {
+//                Image(systemName: "person")
+//                    .resizable()
+//                    .frame(width: 50, height: 50)
+//                VStack(alignment: .leading) {
+////                    Text("Reconstructed key: \(reconstructedKey)")
+////                        .font(.subheadline)
+//                    Text("total shares: \(totalShares)")
 //                        .font(.subheadline)
-                    Text("total shares: \(totalShares)")
-                        .font(.subheadline)
-                    Text("threshold: \(threshold)")
-                        .font(.subheadline)
-                }
-                Spacer()
-            }
-            .padding()
+//                    Text("threshold: \(threshold)")
+//                        .font(.subheadline)
+//                }
+//                Spacer()
+//            }
+//            .padding()
 
             List {
                     HStack {
@@ -265,7 +265,7 @@ struct ThresholdKeyView: View {
                                         }
 
                                         reconstructedKey = reconstructionDetails.key
-                                        alertContent = "\(reconstructedKey) is the postbox key"
+                                        alertContent = "\(reconstructedKey) is the metadata key"
                                         showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
@@ -301,7 +301,7 @@ struct ThresholdKeyView: View {
                                         }
 
                                         reconstructedKey = reconstructionDetails.key
-                                        alertContent = "\(reconstructedKey) is the postbox key"
+                                        alertContent = "\(reconstructedKey) is the metadata key"
                                         showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
@@ -405,35 +405,36 @@ struct ThresholdKeyView: View {
 //                        }.disabled(!tkeyInitalized)
 //                            .opacity(!tkeyInitalized ? 0.5 : 1)
 
-//                        HStack {
-//                            Text("Get key details")
-//                            Spacer()
-//                            Button(action: {
-//                                Task {
-//                                    do {
-//                                        let key_details = try threshold_key.get_key_details()
-//                                        totalShares = Int(key_details.total_shares)
-//                                        threshold = Int(key_details.threshold)
-//                                        if key_details.required_shares > 0 {
-//                                            alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are still required to be inserted to reconstruct the key."
-//                                        } else {
-//                                            alertContent = "There are \(totalShares) available shares."
-//                                        }
-//                                        showAlert = true
-//                                        showAlert = true
-//                                    } catch {
-//                                        alertContent = "get key details failed"
-//                                        showAlert = true
-//                                    }
-//
-//                                }
-//                            }) {
-//                                Text("")
-//                            }.alert(isPresented: $showAlert) {
-//                                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-//                            }
-//                        }.disabled(!tkeyInitalized)
-//                            .opacity(!tkeyInitalized ? 0.5 : 1)
+                        HStack {
+                            Text("Get key details")
+                            Spacer()
+                            Button(action: {
+                                Task {
+                                    do {
+                                        let key_details = try threshold_key.get_key_details()
+                                        print(key_details)
+                                        totalShares = Int(key_details.total_shares)
+                                        threshold = Int(key_details.threshold)
+                                        if key_details.required_shares > 0 {
+                                            alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are still required to be inserted to reconstruct the key."
+                                        } else {
+                                            alertContent = "There are \(totalShares) available shares."
+                                        }
+                                        showAlert = true
+                                        showAlert = true
+                                    } catch {
+                                        alertContent = "get key details failed"
+                                        showAlert = true
+                                    }
+
+                                }
+                            }) {
+                                Text("")
+                            }.alert(isPresented: $showAlert) {
+                                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                            }
+                        }.disabled(!tkeyInitalized)
+                            .opacity(!tkeyInitalized ? 0.5 : 1)
 
 //                        HStack {
 //                            Text("Generate new share")
