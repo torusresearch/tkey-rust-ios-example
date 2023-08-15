@@ -56,7 +56,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
            self.tssNonce = tssNonce
            self.tssIndex = tssIndex
            self.tssShare = tssShare
-        self.address = EthereumAddress(evmAddress)
+           self.address = EthereumAddress(evmAddress)
            self.authSigs = authSigs
        }
 
@@ -88,6 +88,7 @@ public class EthereumTssAccount: EthereumAccountProtocol {
            throw CustomError.methodUnavailable
        }
 
+    
         public func sign(transaction: EthereumTransaction) throws -> SignedTransaction {
                         // Create tss Client using helper
             let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: self.publicKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
@@ -109,25 +110,13 @@ public class EthereumTssAccount: EthereumAccountProtocol {
                throw EthereumSignerError.emptyRawTransaction
            }
 
-            let msg = raw.web3.hexString
-            let msgHash = TSSHelpers.hashMessage(message: msg)
-            let (s, r, v) = try! client.sign(message: msgHash, hashOnly: true, original_message: msg, precompute: precompute, signatures: self.authSigs)
-
-            /*
-             If block.number >= FORK_BLKNUM and CHAIN_ID is available, then when computing the hash of a transaction for the purposes of signing, instead of hashing only six rlp encoded elements (nonce, gasprice, startgas, to, value, data), you SHOULD hash nine rlp encoded elements (nonce, gasprice, startgas, to, value, data, chainid, 0, 0). If you do, then the v of the signature MUST be set to {0,1} + CHAIN_ID * 2 + 35 where {0,1} is the parity of the y value of the curve point for which r is the x-value in the secp256k1 signing process. If you choose to only hash 6 values, then v continues to be set to {0,1} + 27 as previously.
-
-             If block.number >= FORK_BLKNUM and v = CHAIN_ID * 2 + 35 or v = CHAIN_ID * 2 + 36, then when computing the hash of a transaction for purposes of recovering, instead of hashing six rlp encoded elements (nonce, gasprice, startgas, to, value, data), hash nine rlp encoded elements (nonce, gasprice, startgas, to, value, data, chainid, 0, 0). The currently existing signature scheme using v = 27 and v = 28 remains valid and continues to operate under the same rules as it did previously.
-             */
-
-            var modifiedV = v
-            let chainId = UInt8(try transaction.chainId ?? { throw EthereumSignerError.unknownError }())
-            if v <= 1 {
-                modifiedV = v + chainId * 2 + 35
-            }
+            let msgData = raw.web3.keccak256
+            let signingMessage = Data(msgData).base64EncodedString()
+            let (s, r, v) = try! client.sign(message: signingMessage, hashOnly: true, original_message: nil, precompute: precompute, signatures: self.authSigs)
 
             try! client.cleanup(signatures: self.authSigs)
 
-            guard let signature = Data(hexString: try TSSHelpers.hexSignature(s: s, r: r, v: modifiedV)) else { throw EthereumSignerError.unknownError }
+            guard let signature = Data(hexString: try TSSHelpers.hexSignature(s: s, r: r, v: v)) else { throw EthereumSignerError.unknownError }
 
             return SignedTransaction(transaction: transaction, signature: signature)
        }

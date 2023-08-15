@@ -377,15 +377,17 @@ struct TssView: View {
 
                     let finalPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
 
+                    
+                    let tssPubKeyPoint = try KeyPoint(address: finalPubKey)
                     // get the uncompressed public key, empty format returns uncompressed
-                    let fullTssPubKey = try KeyPoint(address: finalPubKey).getAsCompressedPublicKey(format: "")
+                    let fullTssPubKey = try tssPubKeyPoint.getAsCompressedPublicKey(format: "")
 
-                    let evmAddress = Data(hexString: TSSHelpers.hashMessage(message: fullTssPubKey))?.suffix(20).hexString ?? ""
+                    let evmAddress = try TorusWeb3Utils.generateAddressFromPubKey(publicKeyX: tssPubKeyPoint.getX(), publicKeyY: tssPubKeyPoint.getY())
 
                     // step 2. getting signature
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
 
-                    let tssAccount = try EthereumTssAccount(evmAddress: "0x\(evmAddress)", pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
+                    let tssAccount = try EthereumTssAccount(evmAddress: evmAddress, pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
 
                     let RPC_URL = "https://rpc.ankr.com/eth_goerli"
                     let chainID = 5
