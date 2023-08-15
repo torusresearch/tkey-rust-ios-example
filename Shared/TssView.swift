@@ -72,7 +72,7 @@ struct TssView: View {
     @State var tss_pub_key: String = ""
 
     var body: some View {
-        Section(header: Text("TSS Example")){
+        Section(header: Text("TSS Example")) {
             Button(action: {
                 Task {
                     showTss = false
@@ -156,7 +156,7 @@ struct TssView: View {
                 HStack {
                     Button(action: {
                         Task {
-                            
+
                             // show input popup for factor key input
                             // get factor key into keychain if input is empty
                             let saveId = selected_tag + ":" + "0"
