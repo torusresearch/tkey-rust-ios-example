@@ -21,6 +21,7 @@ struct ThresholdKeyView: View {
     @State private var threshold = 0
     @State private var metadataKey = ""
     @State private var metadataPublicKey = ""
+    @State private var metadataDescription = ""
     @State private var tssPublicKey = ""
     @State private var shareIndexCreated = ""
     @State private var phrase = ""
@@ -81,15 +82,14 @@ struct ThresholdKeyView: View {
             } else {
 
             HStack {
-                Image(systemName: "person")
-                    .resizable()
-                    .frame(width: 50, height: 50)
                 VStack(alignment: .leading) {
-                    Text("Metadata public key: \(metadataPublicKey)")
+                    Text("TSS Pub Key: \(tssPublicKey)")
                         .font(.subheadline)
+//                    Text("Metadata public key: \(metadataPublicKey)")
+//                        .font(.subheadline)
                     Text("Metadata key: \(metadataKey)")
                         .font(.subheadline)
-                    Text("TSS Pub Key: \(tssPublicKey)")
+                    Text("With Factors/Shares: \(metadataDescription)")
                         .font(.subheadline)
                 }
                 Spacer()
@@ -216,6 +216,7 @@ struct ThresholdKeyView: View {
                                     if key_details.required_shares > 0 {
                                         // exising user
                                         let allTags = try threshold_key.get_all_tss_tags()
+                                        print(allTags)
                                         let tag = "default" // allTags[0]
 
                                         let fetchId = metadataPublicKey + tag + ":0"
@@ -242,8 +243,8 @@ struct ThresholdKeyView: View {
                                         }
 
                                         metadataKey = reconstructionDetails.key
-                                        alertContent = "\(metadataKey) is the metadata key"
-                                        showAlert = true
+//                                        alertContent = "\(metadataKey) is the metadata key"
+//                                        showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
 
@@ -251,7 +252,9 @@ struct ThresholdKeyView: View {
                                         tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
 
                                         let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
-
+                                        metadataDescription = "\(defaultTssShareDescription)"
+                                        print(defaultTssShareDescription)
+                                        
                                         do {
                                             Task {
                                                 showTss = true
@@ -314,8 +317,8 @@ struct ThresholdKeyView: View {
                                         }
 
                                         metadataKey = reconstructionDetails.key
-                                        alertContent = "\(metadataKey) is the metadata key"
-                                        showAlert = true
+//                                        alertContent = "\(metadataKey) is the metadata key"
+//                                        showAlert = true
                                         tkeyReconstructed = true
                                         resetAccount = false
                                         showSpinner = SpinnerLocation.nowhere
@@ -339,46 +342,16 @@ struct ThresholdKeyView: View {
                         }
 
                         HStack {
-                            Text("Get key details")
-                            Spacer()
-                            Button(action: {
-                                Task {
-                                    do {
-                                        let key_details = try threshold_key.get_key_details()
-                                        print(key_details)
-                                        totalShares = Int(key_details.total_shares)
-                                        threshold = Int(key_details.threshold)
-                                        if key_details.required_shares > 0 {
-                                            alertContent = "There are \(totalShares) available shares. \(key_details.required_shares) are still required to be inserted to reconstruct the key."
-                                        } else {
-                                            alertContent = "There are \(totalShares) available shares."
-                                        }
-
-                                        showAlert = true
-                                    } catch {
-                                        alertContent = "get key details failed"
-                                        showAlert = true
-                                    }
-
-                                }
-                            }) {
-                                Text("")
-                            }.alert(isPresented: $showAlert) {
-                                Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
-                            }
-                        }.disabled(!tkeyInitalized)
-                            .opacity(!tkeyInitalized ? 0.5 : 1)
-
-                        HStack {
-                            Text("Get share description")
+                            Text("Key Details")
                             Spacer()
                             Button(action: {
                                 Task {
                                     do {
 
                                         let description = try threshold_key.get_share_descriptions()
+                                        metadataDescription = "\(description)"
 
-                                        alertContent = "description \(description) "
+                                        alertContent = "TSS Pub Key: \(tssPublicKey) \n Metadata key: \(metadataKey) \n With Factors/Shares: \(metadataDescription)"
 
                                         showAlert = true
                                     } catch {
@@ -424,6 +397,7 @@ struct ThresholdKeyView: View {
                                             try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
                                             tkeyInitalized = false
                                             tkeyReconstructed = false
+                                            metadataDescription = ""
                                             resetAccount = false
                                             alertContent = "Account reset successful"
 
