@@ -138,6 +138,7 @@ struct TssView: View {
 //        }
 
         let tss_tags = try! threshold_key.get_all_tss_tags()
+        
 
 //        if !tss_tags.isEmpty {
 //            Section(header: Text("TSS Tag")) {
@@ -161,7 +162,7 @@ struct TssView: View {
             Text("Tss public key for " + selected_tag)
             Text(tss_pub_key)
 
-            Section(header: Text("Tss : " + selected_tag + " : FactorPub")) {
+            Section(header: Text("Tss : " + selected_tag + " : Factors")) {
                 ForEach(Array(allFactorPub), id: \.self) { factorPub in
                     Text(factorPub)
                 }
@@ -316,7 +317,7 @@ struct TssView: View {
                             showAlert = true
                             showSpinner = false
                         }
-                    }) { Text("Delete Factor Pub") }
+                    }) { Text("Delete Most Recent Factor") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }.disabled(showSpinner )
