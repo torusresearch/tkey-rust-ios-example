@@ -20,7 +20,7 @@ func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: S
     let sessionNonce = TSSHelpers.hashMessage(message: String(random))
     // create the full session string
     let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
-    let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
+    let tssPublicAddressInfo = try await TssModule.get_dkg_pub_key(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
     let nodeIndexes = tssPublicAddressInfo.nodeIndexes
     let userTssIndex = BigInt(tssIndex, radix: 16)!
     // total parties, including the client
@@ -194,23 +194,14 @@ struct TssView: View {
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
                             guard (alert?.textFields?.first) != nil else { return }
                             Task {
-                                do {
-                                    let checkSaveId = metadataPublicKey + ":" + selected_tag + ":" + "1"
-                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId)
-                                    if checkFactorKey != "" {
-                                        alertContent = "There is existing backup Factor Key"
-                                        showAlert = true
-                                        return
-                                    }
-                                } catch {}
                                 // generate factor key if input is empty
                                 // derive factor pub
                                 let newFactorKey = try PrivateKey.generate()
                                 let newFactorPub = try newFactorKey.toPublic()
 
-                                // use input to generate tss share with index 3
-                                let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
-                                let factorKey = try KeychainInterface.fetch(key: saveId)
+                                // use exising factor to generate tss share with index 3 with new factor
+                                let fetchId = metadataPublicKey + ":" + selected_tag + ":" + "0"
+                                let factorKey = try KeychainInterface.fetch(key: fetchId)
 
                                 // for now only tss index 2 and index 3 are supported
                                 let tssShareIndex = Int32(3)
@@ -256,23 +247,14 @@ struct TssView: View {
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] _ in
                             guard (alert?.textFields?.first) != nil else { return }
                             Task {
-                                do {
-                                    let checkSaveId = metadataPublicKey + ":" + selected_tag + ":" + "2"
-                                    let checkFactorKey = try KeychainInterface.fetch(key: checkSaveId)
-                                    if checkFactorKey != "" {
-                                        alertContent = "There is existing copied Factor Key"
-                                        showAlert = true
-                                        return
-                                    }
-                                } catch {}
                                 // generate factor key if input is empty
                                 // derive factor pub
                                 let newFactorKey = try PrivateKey.generate()
-                                let newFactorPub = try newFactorKey.toPublic()
+                                let newFactorPub = try convertPublicKeyFormat(publicKey: newFactorKey.toPublic(), outFormat: .EllipticCompress)
 
                                 // get existing factor key
-                                let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
-                                let factorKey = try KeychainInterface.fetch(key: saveId)
+                                let fetchId = metadataPublicKey + ":" + selected_tag + ":" + "0"
+                                let factorKey = try KeychainInterface.fetch(key: fetchId)
 
                                 let (tssShareIndex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
 
@@ -311,7 +293,7 @@ struct TssView: View {
                             // get factor key from keychain if input is empty
 
                             var deleteFactorKey: String?
-                            var targetSaveId = metadataPublicKey + ":" + selected_tag + ":" + "1"
+                            var deleteFactor: String?
                             do {
                                 let allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
                                 print(allFactorPub)
@@ -319,9 +301,9 @@ struct TssView: View {
                                 let filterFactorPub = allFactorPub.filter({ $0 != deviceFactorPub })
                                 print(filterFactorPub)
 
-                                let deleteFactor = filterFactorPub[0]
+                                deleteFactor = filterFactorPub[0]
 
-                                deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId)
+                                deleteFactorKey = try KeychainInterface.fetch(key: deleteFactor!)
                                 if deleteFactorKey == "" {
                                     throw RuntimeError("")
                                 }
@@ -349,7 +331,7 @@ struct TssView: View {
                             let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                             try await TssModule.delete_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic(), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                             print("done delete factor pub")
-                            try KeychainInterface.save(item: "", key: targetSaveId)
+                            try KeychainInterface.save(item: "", key: deleteFactor!)
 
                             alertContent = "deleted factor key :" + deleteFactorKey
                             showAlert = true
