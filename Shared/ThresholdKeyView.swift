@@ -43,6 +43,7 @@ struct ThresholdKeyView: View {
     @State private var showTss = false
     @State private var nodeDetails: AllNodeDetailsModel?
     @State private var torusUtils: TorusUtils?
+    @State var deviceFactorPub: String = ""
 
     //    @State
 
@@ -52,7 +53,7 @@ struct ThresholdKeyView: View {
         metadataKey = ""
         metadataPublicKey=""
         tssPublicKey = ""
-
+        deviceFactorPub = ""
         shareIndexCreated = ""
 
         phrase = ""
@@ -72,12 +73,232 @@ struct ThresholdKeyView: View {
         }
     }
 
+    func initialize () {
+        Task {
+            showSpinner = SpinnerLocation.init_reconstruct_btn
+            guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
+                alertContent = "Failed to get public address from userinfo"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+
+            guard let verifierLocal = userData["verifier"] as? String, let verifierIdLocal = userData["verifierId"] as? String else {
+                alertContent = "Failed to get verifier or verifierId from userinfo"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+            verifier = verifierLocal
+            verifierId = verifierIdLocal
+
+            guard let postboxkey = finalKeyData["privKey"] as? String else {
+                alertContent = "Failed to get postboxkey"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+
+            print(finalKeyData)
+            guard let sessionData = userData["sessionData"] as? [String: Any] else {
+                alertContent = "Failed to get sessionData"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+            guard let sessionTokenData = sessionData["sessionTokenData"] as? [SessionToken] else {
+                alertContent = "Failed to get sessionTokenData"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+
+            signatures = sessionTokenData.map { token in
+                return [  "data": Data(hex: token.token)!.base64EncodedString(),
+                           "sig": token.signature ]
+            }
+            assert(signatures.isEmpty != true)
+
+            guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
+                alertContent = "Failed to create storage layer"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+            torusUtils = TorusUtils( enableOneKey: true,
+//                                                                 allowHost: "https://signer.tor.us/api/allow",
+                                         network: .sapphire(.SAPPHIRE_DEVNET)
+//                                                                 metadataHost: "https://sapphire-dev-2-1.authnetwork.dev/metadata",
+//                                                                 clientId: "YOUR_CLIENT_ID"
+                                     )
+            let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
+            nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
+
+            tssEndpoint = nodeDetails!.torusNodeTSSEndpoints
+            print(verifier!)
+            print(verifierId!)
+            guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails)
+
+            else {
+                alertContent = "Failed to create service provider"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+            let rss_comm = try RssComm()
+            guard let thresholdKey = try? ThresholdKey(
+                storage_layer: storage_layer,
+                service_provider: service_provider,
+                enable_logging: true,
+                manual_sync: false,
+                rss_comm: rss_comm) else {
+                alertContent = "Failed to create threshold key"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+
+            threshold_key = thresholdKey
+
+            guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
+                alertContent = "Failed to get key details"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+
+            totalShares = Int(key_details.total_shares)
+            threshold = Int(key_details.threshold)
+            tkeyInitalized = true
+
+            // public key of the metadatakey
+            metadataPublicKey = try key_details.pub_key.getPublicKey(format: .EllipticCompress )
+
+            if key_details.required_shares > 0 {
+                // exising user
+                let allTags = try threshold_key.get_all_tss_tags()
+                print(allTags)
+                let tag = "default" // allTags[0]
+
+                let fetchId = metadataPublicKey + ":" + tag + ":0"
+                // fetch all locally available shares for this google account
+                print(fetchId)
+
+                do {
+                    let factorKey = try KeychainInterface.fetch(key: fetchId)
+                    try await threshold_key.input_factor_key(factorKey: factorKey)
+                    let pk = PrivateKey(hex: factorKey)
+                    deviceFactorPub = try pk.toPublic()
+
+                } catch {
+                    alertContent = "Incorrect factor was used."
+                    showAlert = true
+                    resetAccount = true
+                    showSpinner = SpinnerLocation.nowhere
+                    return
+                }
+
+                guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+
+                    alertContent = "Failed to reconstruct key with available shares."
+                    resetAccount = true
+                    showAlert = true
+                    showSpinner = SpinnerLocation.nowhere
+                    return
+                }
+
+                metadataKey = reconstructionDetails.key
+                tkeyReconstructed = true
+                resetAccount = false
+
+                // check if default in all tags else ??
+                tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
+
+                let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
+                metadataDescription = "\(defaultTssShareDescription)"
+                print(defaultTssShareDescription)
+
+                do {
+                    Task {
+                        showTss = true
+                    }
+                }
+            } else {
+                // new user
+                guard (try? await threshold_key.reconstruct()) != nil else {
+                    alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
+                    resetAccount = true
+                    showAlert = true
+                    showSpinner = SpinnerLocation.nowhere
+                    return
+                }
+
+                // TSS Module Initialize - create default tag
+                // generate factor key
+                let factorKey = try PrivateKey.generate()
+                // derive factor pub
+                let factorPub = try factorKey.toPublic()
+                deviceFactorPub = factorPub
+                // use input to create tag tss share
+                let tssIndex = Int32(2)
+                let defaultTag = "default"
+                try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
+
+                tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: defaultTag)
+
+                // finding device share index
+                var shareIndexes = try threshold_key.get_shares_indexes()
+                shareIndexes.removeAll(where: {$0 == "1"})
+
+                // backup metadata share using factorKey
+                try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndexes[0], factorKey: factorKey.hex)
+                let description = [
+                    "module": "Device Factor key",
+                    "tssTag": defaultTag,
+                    "tssShareIndex": tssIndex,
+                    "dateAdded": Date().timeIntervalSince1970
+                ] as [String: Codable]
+                let jsonStr = try factorDescription(dataObj: description)
+
+                try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
+
+                let saveId = metadataPublicKey + ":" + defaultTag + ":0"
+                // save factor key in keychain ( this factor key should be saved in any where that is accessable by the device)
+                guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: saveId) else {
+                    alertContent = "Failed to save factor key"
+                    resetAccount = true
+                    showAlert = true
+                    showSpinner = SpinnerLocation.nowhere
+                    return
+                }
+
+                guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                    alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
+                    resetAccount = true
+                    showAlert = true
+                    return
+                }
+
+                metadataKey = reconstructionDetails.key
+                tkeyReconstructed = true
+                resetAccount = false
+                showSpinner = SpinnerLocation.nowhere
+                do {
+                        Task {
+                            showTss = true
+                        }
+                }
+            }
+            showSpinner = SpinnerLocation.nowhere
+        }
+    }
+
     var body: some View {
         VStack {
 
             if showTss {
                 List {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey)
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub)
                 }
             } else {
 
@@ -113,220 +334,8 @@ struct ThresholdKeyView: View {
                                 LoaderView()
                             }
                             Button(action: {
-                                Task {
-                                    showSpinner = SpinnerLocation.init_reconstruct_btn
-                                    guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
-                                        alertContent = "Failed to get public address from userinfo"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
+                                initialize()
 
-                                    guard let verifierLocal = userData["verifier"] as? String, let verifierIdLocal = userData["verifierId"] as? String else {
-                                        alertContent = "Failed to get verifier or verifierId from userinfo"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-                                    verifier = verifierLocal
-                                    verifierId = verifierIdLocal
-
-                                    guard let postboxkey = finalKeyData["privKey"] as? String else {
-                                        alertContent = "Failed to get postboxkey"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-
-                                    print(finalKeyData)
-                                    guard let sessionData = userData["sessionData"] as? [String: Any] else {
-                                        alertContent = "Failed to get sessionData"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-                                    guard let sessionTokenData = sessionData["sessionTokenData"] as? [SessionToken] else {
-                                        alertContent = "Failed to get sessionTokenData"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-
-                                    signatures = sessionTokenData.map { token in
-                                        return [  "data": Data(hex: token.token)!.base64EncodedString(),
-                                                   "sig": token.signature ]
-                                    }
-                                    assert(signatures.isEmpty != true)
-
-                                    guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
-                                        alertContent = "Failed to create storage layer"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-                                    torusUtils = TorusUtils( enableOneKey: true,
-//                                                                 allowHost: "https://signer.tor.us/api/allow",
-                                                                 network: .sapphire(.SAPPHIRE_DEVNET)
-//                                                                 metadataHost: "https://sapphire-dev-2-1.authnetwork.dev/metadata",
-//                                                                 clientId: "YOUR_CLIENT_ID"
-                                                             )
-                                    let fnd = NodeDetailManager(network: .sapphire(.SAPPHIRE_DEVNET))
-                                    nodeDetails = try await fnd.getNodeDetails(verifier: verifier, verifierID: verifierId)
-
-                                    tssEndpoint = nodeDetails!.torusNodeTSSEndpoints
-                                    print(verifier!)
-                                    print(verifierId!)
-                                    guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails)
-
-                                    else {
-                                        alertContent = "Failed to create service provider"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-                                    let rss_comm = try RssComm()
-                                    guard let thresholdKey = try? ThresholdKey(
-                                        storage_layer: storage_layer,
-                                        service_provider: service_provider,
-                                        enable_logging: true,
-                                        manual_sync: false,
-                                        rss_comm: rss_comm) else {
-                                        alertContent = "Failed to create threshold key"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-
-                                    threshold_key = thresholdKey
-
-                                    guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
-                                        alertContent = "Failed to get key details"
-                                        showAlert = true
-                                        showSpinner = SpinnerLocation.nowhere
-                                        return
-                                    }
-
-                                    totalShares = Int(key_details.total_shares)
-                                    threshold = Int(key_details.threshold)
-                                    tkeyInitalized = true
-
-                                    // public key of the metadatakey
-                                    metadataPublicKey = try key_details.pub_key.getPublicKey(format: .EllipticCompress )
-
-                                    if key_details.required_shares > 0 {
-                                        // exising user
-                                        let allTags = try threshold_key.get_all_tss_tags()
-                                        print(allTags)
-                                        let tag = "default" // allTags[0]
-
-                                        let fetchId = metadataPublicKey + ":" + tag + ":0"
-                                        // fetch all locally available shares for this google account
-                                        print(fetchId)
-
-                                        do {
-                                            let factorKey = try KeychainInterface.fetch(key: fetchId)
-                                            try await threshold_key.input_factor_key(factorKey: factorKey)
-                                        } catch {
-                                            alertContent = "Incorrect factor was used."
-                                            showAlert = true
-                                            resetAccount = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-
-                                            alertContent = "Failed to reconstruct key with available shares."
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        metadataKey = reconstructionDetails.key
-                                        tkeyReconstructed = true
-                                        resetAccount = false
-
-                                        // check if default in all tags else ??
-                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
-
-                                        let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
-                                        metadataDescription = "\(defaultTssShareDescription)"
-                                        print(defaultTssShareDescription)
-
-                                        do {
-                                            Task {
-                                                showTss = true
-                                            }
-                                        }
-                                    } else {
-                                        // new user
-                                        guard (try? await threshold_key.reconstruct()) != nil else {
-                                            alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        // TSS Module Initialize - create default tag
-                                        // generate factor key
-                                        let factorKey = try PrivateKey.generate()
-                                        // derive factor pub
-                                        let factorPub = try factorKey.toPublic()
-                                        // use input to create tag tss share
-                                        let tssIndex = Int32(2)
-                                        let defaultTag = "default"
-                                        try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
-
-                                        tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: defaultTag)
-
-                                        // finding device share index
-                                        var shareIndexes = try threshold_key.get_shares_indexes()
-                                        shareIndexes.removeAll(where: {$0 == "1"})
-
-                                        // backup metadata share using factorKey
-                                        try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndexes[0], factorKey: factorKey.hex)
-                                        let description = [
-                                            "module": "Device Factor key",
-                                            "tssTag": defaultTag,
-                                            "tssShareIndex": tssIndex,
-                                            "dateAdded": Date().timeIntervalSince1970
-                                        ] as [String: Codable]
-                                        let jsonStr = try factorDescription(dataObj: description)
-
-                                        try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
-
-                                        let saveId = metadataPublicKey + ":" + defaultTag + ":0"
-                                        // save factor key in keychain ( this factor key should be saved in any where that is accessable by the device)
-                                        guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: saveId) else {
-                                            alertContent = "Failed to save factor key"
-                                            resetAccount = true
-                                            showAlert = true
-                                            showSpinner = SpinnerLocation.nowhere
-                                            return
-                                        }
-
-                                        guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                                            alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
-                                            resetAccount = true
-                                            showAlert = true
-                                            return
-                                        }
-
-                                        metadataKey = reconstructionDetails.key
-                                        tkeyReconstructed = true
-                                        resetAccount = false
-                                        showSpinner = SpinnerLocation.nowhere
-                                        do {
-                                                Task {
-                                                    showTss = true
-                                                }
-                                        }
-                                    }
-
-                                    showSpinner = SpinnerLocation.nowhere
-                                }
                             }) {
                                 Text("")
                             }

@@ -54,6 +54,7 @@ struct TssView: View {
     @Binding var nodeDetails: AllNodeDetailsModel?
     @Binding var torusUtils: TorusUtils?
     @Binding var metadataPublicKey: String
+    @Binding var deviceFactorPub: String
 
     @State var showAlert: Bool = false
     @State private var selected_tag: String = ""
@@ -216,7 +217,7 @@ struct TssView: View {
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                                 try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
-                                let saveNewFactorId = metadataPublicKey + ":" + selected_tag + ":" + "1"
+                                let saveNewFactorId = newFactorPub
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
 
                                 let description = [
@@ -278,7 +279,7 @@ struct TssView: View {
                                 // tssShareIndex provided will be cross checked with factorKey to prevent wrong tss share copied
                                 try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: Int32(tssShareIndex)!)
 
-                                let saveNewFactorId = metadataPublicKey + ":" + selected_tag + ":" + "2"
+                                let saveNewFactorId = newFactorPub
                                 try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
                                 // show factor key used
                                 let description = [
@@ -312,19 +313,22 @@ struct TssView: View {
                             var deleteFactorKey: String?
                             var targetSaveId = metadataPublicKey + ":" + selected_tag + ":" + "1"
                             do {
+                                let allFactorPub = try await TssModule.get_all_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag)
+                                print(allFactorPub)
+                                // filterout device factor
+                                let filterFactorPub = allFactorPub.filter({ $0 != deviceFactorPub })
+                                print(filterFactorPub)
+
+                                let deleteFactor = filterFactorPub[0]
+
                                 deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId)
                                 if deleteFactorKey == "" {
                                     throw RuntimeError("")
                                 }
                             } catch {
-                                do {
-                                    targetSaveId = metadataPublicKey + ":" + selected_tag + ":" + "2"
-                                    deleteFactorKey = try KeychainInterface.fetch(key: targetSaveId)
-                                } catch {
-                                    alertContent = "There is no extra factor key to be deleted"
-                                    showAlert = true
-                                    return
-                                }
+                                alertContent = "There is no extra factor key to be deleted"
+                                showAlert = true
+                                return
                             }
                             guard let deleteFactorKey = deleteFactorKey else {
                                 alertContent = "There is no extra factor key to be deleted"
