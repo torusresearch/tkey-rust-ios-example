@@ -240,7 +240,7 @@ struct ThresholdKeyView: View {
                 let factorPub = try factorKey.toPublic()
                 deviceFactorPub = factorPub
                 // use input to create tag tss share
-                let tssIndex = Int32(3)
+                let tssIndex = Int32(2)
                 let defaultTag = "default"
                 try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
 

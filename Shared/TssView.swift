@@ -22,7 +22,7 @@ func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: S
     // create the full session string
     let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
     let tssPublicAddressInfo = try await TssModule.get_dkg_pub_key(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
-    
+
     let nodeIndexes = tssPublicAddressInfo.nodeIndexes
     let userTssIndex = BigInt(tssIndex, radix: 16)!
     // total parties, including the client
@@ -198,7 +198,7 @@ struct TssView: View {
                                 let (tssindex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
 
                                 // for now only tss index 2 and index 3 are supported
-                                let tssShareIndex = tssindex == "2" ? Int32(3) : Int32(2)
+                                let tssShareIndex = Int32(2)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                                 try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
