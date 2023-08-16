@@ -11,7 +11,8 @@ import web3
 
 func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String], nodeDetails: AllNodeDetailsModel, torusUtils: TorusUtils) async throws -> (TSSClient, [String: String]) {
     let selected_tag = try TssModule.get_tss_tag(threshold_key: threshold_key)
-    let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+    var (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+    print("tssIndex", tssIndex)
     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
 
     // generate a random nonce for sessionID
@@ -21,6 +22,7 @@ func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: S
     // create the full session string
     let session = TSSHelpers.assembleFullSession(verifier: verifier, verifierId: verifierId, tssTag: selected_tag, tssNonce: String(tssNonce), sessionNonce: sessionNonce)
     let tssPublicAddressInfo = try await TssModule.get_dkg_pub_key(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails, torusUtils: torusUtils)
+    
     let nodeIndexes = tssPublicAddressInfo.nodeIndexes
     let userTssIndex = BigInt(tssIndex, radix: 16)!
     // total parties, including the client
@@ -55,6 +57,8 @@ struct TssView: View {
     @Binding var torusUtils: TorusUtils?
     @Binding var metadataPublicKey: String
     @Binding var deviceFactorPub: String
+
+    @State var selectedFactorPub: String
 
     @State var showAlert: Bool = false
     @State private var selected_tag: String = ""
@@ -138,7 +142,6 @@ struct TssView: View {
 //        }
 
         let tss_tags = try! threshold_key.get_all_tss_tags()
-        
 
 //        if !tss_tags.isEmpty {
 //            Section(header: Text("TSS Tag")) {
@@ -177,22 +180,25 @@ struct TssView: View {
                     }
                     Button(action: {
 
-                            Task {
-                                showSpinner = true
+                        Task {
+                            showSpinner = true
+                            do {
                                 // generate factor key if input is empty
                                 // derive factor pub
                                 let newFactorKey = try PrivateKey.generate()
                                 let newFactorPub = try newFactorKey.toPublic()
 
                                 // use exising factor to generate tss share with index 3 with new factor
-                                let fetchId = metadataPublicKey + ":" + selected_tag + ":" + "0"
+                                let fetchId = selectedFactorPub
                                 let factorKey = try KeychainInterface.fetch(key: fetchId)
 
                                 let shareIndex = try await TssModule.find_device_share_index(threshold_key: threshold_key, factor_key: factorKey)
                                 try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndex, factorKey: newFactorKey.hex)
 
+                                let (tssindex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+
                                 // for now only tss index 2 and index 3 are supported
-                                let tssShareIndex = Int32(3)
+                                let tssShareIndex = tssindex == "2" ? Int32(3) : Int32(2)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                                 try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
@@ -207,14 +213,27 @@ struct TssView: View {
                                 ] as [String: Codable]
                                 let jsonStr = try factorDescription(dataObj: description)
                                 try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
-                                // show factor key used
 
+                                print(newFactorKey.hex)
+                                print(newFactorKey.hex.count)
+                                // copy to paste board on success generated factor
+                                UIPasteboard.general.string = newFactorKey.hex
+
+                                // show factor key used
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
+
+                                // Hack for testing
+                                selectedFactorPub = newFactorPub
                                 updateTag(key: selected_tag)
                                 alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
                                 showAlert = true
                                 showSpinner = false
+                            } catch {
+                                alertContent = "Invalid Factor Key"
+                                showAlert = true
+                                showSpinner = false
                             }
+                        }
                     }) { Text("Create New TSSShare Into Manual Backup Factor") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
@@ -228,40 +247,50 @@ struct TssView: View {
                     Button(action: {
                             Task {
                                 showSpinner = true
-                                // generate factor key if input is empty
-                                // derive factor pub
-                                let newFactorKey = try PrivateKey.generate()
-                                let newFactorPub = try convertPublicKeyFormat(publicKey: newFactorKey.toPublic(), outFormat: .EllipticCompress)
+                                do {
+                                    // generate factor key if input is empty
+                                    // derive factor pub
+                                    let newFactorKey = try PrivateKey.generate()
+                                    let newFactorPub = try convertPublicKeyFormat(publicKey: newFactorKey.toPublic(), outFormat: .EllipticCompress)
 
-                                // get existing factor key
-                                let fetchId = metadataPublicKey + ":" + selected_tag + ":" + "0"
-                                let factorKey = try KeychainInterface.fetch(key: fetchId)
+                                    // get existing factor key
+                                    let fetchId = selectedFactorPub
+                                    let factorKey = try KeychainInterface.fetch(key: fetchId)
 
-                                let (tssShareIndex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+                                    let (tssShareIndex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
 
-                                let shareIndex = try await TssModule.find_device_share_index(threshold_key: threshold_key, factor_key: factorKey)
-                                try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndex, factorKey: newFactorKey.hex)
+                                    let shareIndex = try await TssModule.find_device_share_index(threshold_key: threshold_key, factor_key: factorKey)
+                                    try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndex, factorKey: newFactorKey.hex)
 
-                                // tssShareIndex provided will be cross checked with factorKey to prevent wrong tss share copied
-                                try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: Int32(tssShareIndex)!)
+                                    // tssShareIndex provided will be cross checked with factorKey to prevent wrong tss share copied
+                                    try await TssModule.copy_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey, newFactorPub: newFactorPub, tss_index: Int32(tssShareIndex)!)
 
-                                let saveNewFactorId = newFactorPub
-                                try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
-                                // show factor key used
-                                let description = [
-                                    "module": "Manual Backup",
-                                    "tssTag": selected_tag,
-                                    "tssShareIndex": tssShareIndex,
-                                    "dateAdded": Date().timeIntervalSince1970
-                                ] as [String: Codable]
-                                let jsonStr = try factorDescription(dataObj: description)
-                                try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
+                                    let saveNewFactorId = newFactorPub
+                                    try KeychainInterface.save(item: newFactorKey.hex, key: saveNewFactorId)
+                                    // show factor key used
+                                    let description = [
+                                        "module": "Manual Backup",
+                                        "tssTag": selected_tag,
+                                        "tssShareIndex": tssShareIndex,
+                                        "dateAdded": Date().timeIntervalSince1970
+                                    ] as [String: Codable]
+                                    let jsonStr = try factorDescription(dataObj: description)
+                                    try await threshold_key.add_share_description(key: newFactorPub, description: jsonStr)
 
-                                let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
-                                updateTag(key: selected_tag)
-                                alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
-                                showAlert = true
-                                showSpinner = false
+                                    let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: newFactorKey.hex)
+
+                                    // copy to paste board on success generated factor
+                                    UIPasteboard.general.string = newFactorKey.hex
+
+                                    updateTag(key: selected_tag)
+                                    alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
+                                    showAlert = true
+                                    showSpinner = false
+                                } catch {
+                                    alertContent = "Invalid Factor Key"
+                                    showAlert = true
+                                    showSpinner = false
+                                }
                             }
                     }) { Text("Copy Existing TSS Share For New Factor Manual") }
                 }.alert(isPresented: $showAlert) {
@@ -298,32 +327,65 @@ struct TssView: View {
                                 showAlert = true
                                 return
                             }
-                            guard let deleteFactorKey = deleteFactorKey else {
-                                alertContent = "There is no extra factor key to be deleted"
-                                showAlert = true
-                                return
-                            }
-                            if deleteFactorKey == "" {
-                                alertContent = "There is no extra factor key to be deleted"
-                                showAlert = true
-                                return
-                            }
 
                             // delete factor pub
-                            let deleteFactorPK = PrivateKey(hex: deleteFactorKey)
+                            let deleteFactorPK = PrivateKey(hex: deleteFactorKey!)
 
-                            let saveId = metadataPublicKey + ":" + selected_tag + ":" + "0"
+                            let saveId = deviceFactorPub
                             let factorKey = try KeychainInterface.fetch(key: saveId)
                             let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                             try await TssModule.delete_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, delete_factor_pub: deleteFactorPK.toPublic(), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                             print("done delete factor pub")
                             try KeychainInterface.save(item: "", key: deleteFactor!)
                             updateTag(key: selected_tag)
-                            alertContent = "deleted factor key :" + deleteFactorKey
+                            alertContent = "deleted factor key :" + deleteFactorKey!
                             showAlert = true
                             showSpinner = false
                         }
                     }) { Text("Delete Most Recent Factor") }
+
+                }.alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                }.disabled(showSpinner )
+                    .opacity(showSpinner ? 0.5 : 1)
+
+                HStack {
+                    if showSpinner {
+                        LoaderView()
+                    }
+                    Button(action: {
+                        Task {
+                            var deleteFactorKey: String = ""
+                            do {
+                                showSpinner = true
+                                deleteFactorKey = try KeychainInterface.fetch(key: deviceFactorPub)
+                                if deleteFactorKey == "" {
+                                    throw RuntimeError("Key was deleted")
+                                }
+                            } catch {
+                                alertContent = "factor was deleted"
+                                showAlert = true
+                                showSpinner = false
+                            }
+                            do {
+                                let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                                try await TssModule.delete_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: deleteFactorKey, auth_signatures: sigs, delete_factor_pub: deviceFactorPub, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
+                                try KeychainInterface.save(item: "", key: deviceFactorPub)
+                                try KeychainInterface.save(item: "", key: metadataPublicKey)
+
+                                print("done delete factor pub")
+                                updateTag(key: selected_tag)
+                                alertContent = "deleted factor key :" + deleteFactorKey
+                                showAlert = true
+                                showSpinner = false
+                            } catch {
+                                alertContent = "unable to delete factor. Possible wrong factor key"
+                                showAlert = true
+                                showSpinner = false
+                            }
+
+                        }
+                    }) { Text("Delete Device Factor") }
                 }.alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }.disabled(showSpinner )
@@ -342,7 +404,7 @@ struct TssView: View {
                         let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                         // get the factor key information
 
-                        let factorKey = try KeychainInterface.fetch(key: metadataPublicKey + ":" + selected_tag + ":0")
+                        let factorKey = try KeychainInterface.fetch(key: selectedFactorPub)
                         // Create tss Client using helper
                         let (client, coeffs) = try await helperTssClient(threshold_key: threshold_key, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 

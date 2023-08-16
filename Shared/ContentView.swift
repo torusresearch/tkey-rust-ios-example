@@ -9,6 +9,7 @@ struct ContentView_Previews: PreviewProvider {
 struct ContentView: View {
     @StateObject var vm: LoginModel
     @State var showAlert = false
+    @State var seedPhrase = ""
     var body: some View {
         TabView {
             if vm.isLoading {

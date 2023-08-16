@@ -45,6 +45,9 @@ struct ThresholdKeyView: View {
     @State private var torusUtils: TorusUtils?
     @State var deviceFactorPub: String = ""
 
+    @State var showRecovery: Bool = false
+    @State var seedPhrase: String = ""
+
     //    @State
 
     func resetAppState() {
@@ -55,6 +58,7 @@ struct ThresholdKeyView: View {
         tssPublicKey = ""
         deviceFactorPub = ""
         shareIndexCreated = ""
+        showRecovery = false
 
         phrase = ""
         tkeyInitalized = false
@@ -176,22 +180,25 @@ struct ThresholdKeyView: View {
                 let allTags = try threshold_key.get_all_tss_tags()
                 print(allTags)
                 let tag = "default" // allTags[0]
-
-                let fetchId = metadataPublicKey + ":" + tag + ":0"
-                // fetch all locally available shares for this google account
-                print(fetchId)
+//
+                guard let factorPub = UserDefaults.standard.string(forKey: metadataPublicKey ) else {
+                    alertContent = "Failed to find device share."
+                    showAlert = true
+                    showSpinner = SpinnerLocation.nowhere
+                    showRecovery = true
+                    return
+                }
 
                 do {
-                    let factorKey = try KeychainInterface.fetch(key: fetchId)
+                    deviceFactorPub = factorPub
+                    let factorKey = try KeychainInterface.fetch(key: factorPub)
                     try await threshold_key.input_factor_key(factorKey: factorKey)
-                    let pk = PrivateKey(hex: factorKey)
-                    deviceFactorPub = try pk.toPublic()
-
                 } catch {
-                    alertContent = "Incorrect factor was used."
+                    alertContent = "Failed to find device share or Incorrect device share"
                     showAlert = true
                     resetAccount = true
                     showSpinner = SpinnerLocation.nowhere
+                    showRecovery = true
                     return
                 }
 
@@ -201,6 +208,7 @@ struct ThresholdKeyView: View {
                     resetAccount = true
                     showAlert = true
                     showSpinner = SpinnerLocation.nowhere
+                    showRecovery = true
                     return
                 }
 
@@ -214,6 +222,7 @@ struct ThresholdKeyView: View {
                 let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
                 metadataDescription = "\(defaultTssShareDescription)"
                 print(defaultTssShareDescription)
+
             } else {
                 // new user
                 guard (try? await threshold_key.reconstruct()) != nil else {
@@ -231,7 +240,7 @@ struct ThresholdKeyView: View {
                 let factorPub = try factorKey.toPublic()
                 deviceFactorPub = factorPub
                 // use input to create tag tss share
-                let tssIndex = Int32(2)
+                let tssIndex = Int32(3)
                 let defaultTag = "default"
                 try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
 
@@ -253,9 +262,11 @@ struct ThresholdKeyView: View {
 
                 try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
 
-                let saveId = metadataPublicKey + ":" + defaultTag + ":0"
-                // save factor key in keychain ( this factor key should be saved in any where that is accessable by the device)
-                guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: saveId) else {
+                // point metadata pubkey to factorPub
+                UserDefaults.standard.set(factorPub, forKey: metadataPublicKey)
+
+                // save factor key in keychain using factorPub ( this factor key should be saved in any where that is accessable by the device)
+                guard let _ = try? KeychainInterface.save(item: factorKey.hex, key: factorPub) else {
                     alertContent = "Failed to save factor key"
                     resetAccount = true
                     showAlert = true
@@ -281,13 +292,50 @@ struct ThresholdKeyView: View {
         }
     }
 
+    func recover (factorKey: String) async throws {
+        do {
+            try await threshold_key.input_factor_key(factorKey: factorKey)
+            let key_details = try await threshold_key.reconstruct()
+
+            metadataKey = key_details.key
+
+            // set to factorkey to keychain
+            let fk = PrivateKey(hex: factorKey)
+            let factorPub = try fk.toPublic()
+
+            UserDefaults.standard.set(factorPub, forKey: metadataPublicKey)
+            try KeychainInterface.save(item: factorKey, key: factorPub)
+
+            // set current deviceFactor
+            deviceFactorPub = factorPub
+
+            let tag = "default"
+            tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
+
+            let defaultTssShareDescription = try threshold_key.get_share_descriptions()
+            metadataDescription = "\(defaultTssShareDescription)"
+
+            tkeyReconstructed = true
+            resetAccount = false
+            showRecovery = false
+        } catch {
+            alertContent = "Invalid Seed Phrase"
+            showAlert = true
+        }
+    }
+
     var body: some View {
         VStack {
 
             if showTss {
                 List {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub)
+                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub, selectedFactorPub: deviceFactorPub)
                 }
+            } else if showRecovery {
+                RecoveryView( recover: recover, reset: reset).alert(isPresented: $showAlert) {
+                    Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+                }
+
             } else {
 
             HStack {
@@ -439,6 +487,40 @@ struct ThresholdKeyView: View {
             }
         }.onAppear {
             initialize()
+        }.alert(isPresented: $showAlert, content: {
+            Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
+        })
+    }
+
+    func reset () async throws {
+        showAlert = true
+        alertContent = "Resetting your accuont.."
+        do {
+            guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
+                alertContent = "Failed to get public address from userinfo"
+                showAlert = true
+                showSpinner = SpinnerLocation.nowhere
+                return
+            }
+            let postboxkey = finalKeyData["privKey"] as! String
+            let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
+            let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
+            let temp_threshold_key = try ThresholdKey(
+                storage_layer: temp_storage_layer,
+                service_provider: temp_service_provider,
+                enable_logging: true,
+                manual_sync: false)
+
+            try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+            tkeyInitalized = false
+            tkeyReconstructed = false
+            metadataDescription = ""
+            resetAccount = false
+            alertContent = "Account reset successful"
+
+            resetAppState() // Allow reinitialize
+        } catch {
+            alertContent = "Reset failed"
         }
     }
 }
