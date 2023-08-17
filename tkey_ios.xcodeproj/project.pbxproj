@@ -929,8 +929,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tkey/tkey-ios";
 			requirement = {
-				branch = "feat/backup-share-to-factor-key";
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = "1.1.0-alpha";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
