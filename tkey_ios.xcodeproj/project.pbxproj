@@ -212,6 +212,7 @@
 				B30B6B1428BCC8AC00812C1E /* Frameworks */,
 				B30B6B1528BCC8AC00812C1E /* Resources */,
 				DD7FD5B929641F40006C3B27 /* Embed Frameworks */,
+				F00423A72A8E137900F11B11 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -370,6 +371,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F00423A72A8E137900F11B11 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B30B6B1328BCC8AC00812C1E /* Sources */ = {
@@ -892,16 +913,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = alpha;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = "7.0.0-alpha";
 			};
 		};
 		B3B8BF5B2A73C66B007B6170 /* XCRemoteSwiftPackageReference "tss-client-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/tss-client-swift/";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 1.0.7;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.8;
 			};
 		};
 		F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */ = {

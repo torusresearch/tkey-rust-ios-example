@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/customauth-swift-sdk",
       "state" : {
-        "branch" : "alpha",
-        "revision" : "8c3357fbb16f300be0f0abe957c83644f7d007c7"
+        "revision" : "0e7898d7e415917f60615d0b9cf905a6f3137d76",
+        "version" : "7.0.0-alpha"
       }
     },
     {
@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "e866a626e105042a6a72a870c88b4c531ba05f83",
-        "version" : "2.24.0"
+        "revision" : "320bd978cceb8e88c125dcbb774943a92f6286e9",
+        "version" : "2.25.0"
       }
     },
     {
@@ -176,8 +176,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/torusresearch/tss-client-swift/",
       "state" : {
-        "revision" : "c45b9b76bbde1574a35cc410e2738f9c552c9c58",
-        "version" : "1.0.7"
+        "revision" : "90b9af48891a75b4b2c67c6301aa1579e16e445b",
+        "version" : "1.0.8"
       }
     },
     {

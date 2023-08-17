@@ -11,7 +11,7 @@ import web3
 
 func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: String, verifierId: String, tssEndpoints: [String], nodeDetails: AllNodeDetailsModel, torusUtils: TorusUtils) async throws -> (TSSClient, [String: String]) {
     let selected_tag = try TssModule.get_tss_tag(threshold_key: threshold_key)
-    var (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
+    let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
     print("tssIndex", tssIndex)
     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
 
@@ -36,12 +36,13 @@ func helperTssClient(threshold_key: ThresholdKey, factorKey: String, verifier: S
 
     let shareUnsigned = BigUInt(tssShare, radix: 16)!
     let share = BigInt(sign: .plus, magnitude: shareUnsigned)
+    let denormalizeShare = try TSSHelpers.denormalizeShare(participatingServerDKGIndexes: nodeInd.map({ BigInt($0) }), userTssIndex: userTssIndex, userTssShare: share)
 
     let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
     let keypoint = try KeyPoint(address: publicKey)
     let fullAddress = try "04" + keypoint.getX() + keypoint.getY()
 
-    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({ Int32($0) }), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
+    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({ Int32($0) }), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: denormalizeShare), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: fullAddress)))
 
     return (client, coeffs)
 }
@@ -164,7 +165,6 @@ struct TssView: View {
         if tss_pub_key != "" {
             Text("Tss public key for " + selected_tag)
             Text(tss_pub_key)
-
             Section(header: Text("Tss : " + selected_tag + " : Factors")) {
                 ForEach(Array(allFactorPub), id: \.self) { factorPub in
                     Text(factorPub)
@@ -198,7 +198,7 @@ struct TssView: View {
                                 let (tssindex, _ ) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
 
                                 // for now only tss index 2 and index 3 are supported
-                                let tssShareIndex = Int32(2)
+                                let tssShareIndex = tssindex == "2" ? Int32(3) : Int32(2)
                                 let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
                                 try await TssModule.add_factor_pub(threshold_key: threshold_key, tss_tag: selected_tag, factor_key: factorKey, auth_signatures: sigs, new_factor_pub: newFactorPub, new_tss_index: tssShareIndex, nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
