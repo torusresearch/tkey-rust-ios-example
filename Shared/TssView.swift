@@ -223,8 +223,10 @@ struct TssView: View {
 
                                 print(newFactorKey.hex)
                                 print(newFactorKey.hex.count)
+
+                                let mnemonic = try ShareSerializationModule.serialize_share(thresholdKey: thresholdKey, share: newFactorKey.hex, format: "mnemonic")
                                 // copy to paste board on success generated factor
-                                UIPasteboard.general.string = newFactorKey.hex
+                                UIPasteboard.general.string = mnemonic
 
                                 // show factor key used
                                 let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(thresholdKey: thresholdKey, tssTag: selectedTag, factorKey: newFactorKey.hex)
@@ -232,7 +234,8 @@ struct TssView: View {
                                 // Hack for testing
                                 selectedFactorPub = newFactorPub
                                 updateTag(key: selectedTag)
-                                alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
+                                alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex +
+                                "\n" + "mnemonic" + mnemonic
                                 showAlert = true
                                 showSpinner = false
                             } catch {
@@ -287,11 +290,17 @@ struct TssView: View {
 
                                     let (newTssIndex, newTssShare) = try await TssModule.get_tss_share(thresholdKey: thresholdKey, tssTag: selectedTag, factorKey: newFactorKey.hex)
 
+                                    let mnemonic = try ShareSerializationModule.serialize_share(thresholdKey: thresholdKey, share: newFactorKey.hex, format: "mnemonic")
+
+                                    print(mnemonic)
                                     // copy to paste board on success generated factor
-                                    UIPasteboard.general.string = newFactorKey.hex
+                                    UIPasteboard.general.string = mnemonic
+
+                                    print(UIPasteboard.general.string)
 
                                     updateTag(key: selectedTag)
-                                    alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex
+                                    alertContent = "tssIndex:" + newTssIndex + "\n" + "tssShare:" + newTssShare + "\n" + "newFactorKey" + newFactorKey.hex +
+                                    "\n" + "mnemonic" + mnemonic
                                     showAlert = true
                                     showSpinner = false
                                 } catch {
@@ -321,7 +330,8 @@ struct TssView: View {
                                 let allFactorPub = try await TssModule.get_all_factor_pub(thresholdKey: thresholdKey, tssTag: selectedTag)
                                 print(allFactorPub)
                                 // filterout device factor
-                                let filterFactorPub = allFactorPub.filter({ $0 != deviceFactorPub })
+                                let filterFactorPub0 = allFactorPub.filter({ $0 != deviceFactorPub })
+                                let filterFactorPub = filterFactorPub0.filter({ $0 != selectedTag })
                                 print(filterFactorPub)
 
                                 deleteFactor = filterFactorPub[0]

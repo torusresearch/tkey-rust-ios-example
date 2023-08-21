@@ -78,6 +78,10 @@ struct ThresholdKeyView: View {
         }
     }
 
+    func deserializeShare (seedPhrase: String) throws -> String {
+        return try ShareSerializationModule.deserialize_share(thresholdKey: thresholdKey, share: seedPhrase, format: "mnemonic")
+    }
+
 //    swiftlint:disable function_body_length
     func initialize () {
         Task {
@@ -339,7 +343,7 @@ struct ThresholdKeyView: View {
                             metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub, selectedFactorPub: deviceFactorPub)
                 }
             } else if showRecovery {
-                RecoveryView( recover: recover, reset: reset).alert(isPresented: $showAlert) {
+                RecoveryView( recover: recover, reset: reset, deserializeShare: deserializeShare).alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
 

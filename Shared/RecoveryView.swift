@@ -12,6 +12,7 @@ import tkey_pkg
 struct RecoveryView: View {
     var recover: (String) async throws -> Void
     var reset: () async throws -> Void
+    var deserializeShare: (String) throws -> String
     @State private var seedPharse: String = ""
 
     var body: some View {
@@ -22,7 +23,13 @@ struct RecoveryView: View {
 
                 Button(action: {
                     Task {
-                        let factorKey = seedPharse
+                        var factorKey = seedPharse
+                        do {
+                            factorKey = try deserializeShare(seedPharse)
+                        } catch {
+                            print(factorKey)
+                            print("fail to deserialize")
+                        }
                         try await recover( factorKey )
                     }
                 }, label: {
