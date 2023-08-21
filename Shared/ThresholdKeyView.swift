@@ -5,7 +5,7 @@ import FetchNodeDetails
 import CommonSources
 
 enum SpinnerLocation {
-    case add_password_btn, change_password_btn, init_reconstruct_btn, nowhere
+    case addPasswordBtn, changePasswordBtn, initReconstructBtn, nowhere
 }
 
 // struct TokenSignature: Codable {
@@ -13,6 +13,7 @@ enum SpinnerLocation {
 //    var sig: String // hex
 // }
 
+// swiftlint:disable type_body_length
 struct ThresholdKeyView: View {
     @State var userData: [String: Any]
     @State private var showAlert = false
@@ -28,7 +29,7 @@ struct ThresholdKeyView: View {
     @State private var tkeyInitalized = false
     @State private var tkeyReconstructed = false
     @State private var resetAccount = true
-    @State var threshold_key: ThresholdKey!
+    @State var thresholdKey: ThresholdKey!
     @State var shareCount = 0
     @State private var showInputPasswordAlert = false
     @State private var showChangePasswordAlert = false
@@ -77,9 +78,14 @@ struct ThresholdKeyView: View {
         }
     }
 
+    func deserializeShare (seedPhrase: String) throws -> String {
+        return try ShareSerializationModule.deserialize_share(thresholdKey: thresholdKey, share: seedPhrase, format: "mnemonic")
+    }
+
+//    swiftlint:disable function_body_length
     func initialize () {
         Task {
-            showSpinner = SpinnerLocation.init_reconstruct_btn
+            showSpinner = SpinnerLocation.initReconstructBtn
             guard let finalKeyData = userData["finalKeyData"] as? [String: Any] else {
                 alertContent = "Failed to get public address from userinfo"
                 showAlert = true
@@ -118,12 +124,12 @@ struct ThresholdKeyView: View {
             }
 
             signatures = sessionTokenData.map { token in
-                return [  "data": Data(hex: token.token)!.base64EncodedString(),
+                return [  "data": Data(hex: token.token).base64EncodedString(),
                            "sig": token.signature ]
             }
             assert(signatures.isEmpty != true)
 
-            guard let storage_layer = try? StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2) else {
+            guard let storageLayer = try? StorageLayer(enableLogging: true, hostUrl: "https://metadata.tor.us", serverTimeOffset: 2) else {
                 alertContent = "Failed to create storage layer"
                 showAlert = true
                 showSpinner = SpinnerLocation.nowhere
@@ -138,7 +144,7 @@ struct ThresholdKeyView: View {
             tssEndpoint = nodeDetails!.torusNodeTSSEndpoints
             print(verifier!)
             print(verifierId!)
-            guard let service_provider = try? ServiceProvider(enable_logging: true, postbox_key: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails)
+            guard let serviceProvider = try? ServiceProvider(enableLogging: true, postboxKey: postboxkey, useTss: true, verifier: verifier, verifierId: verifierId, nodeDetails: nodeDetails)
 
             else {
                 alertContent = "Failed to create service provider"
@@ -146,38 +152,38 @@ struct ThresholdKeyView: View {
                 showSpinner = SpinnerLocation.nowhere
                 return
             }
-            let rss_comm = try RssComm()
+            let rssComm = try RssComm()
             guard let thresholdKey = try? ThresholdKey(
-                storage_layer: storage_layer,
-                service_provider: service_provider,
-                enable_logging: true,
-                manual_sync: false,
-                rss_comm: rss_comm) else {
+                storageLayer: storageLayer,
+                serviceProvider: serviceProvider,
+                enableLogging: true,
+                manualSync: false,
+                rssComm: rssComm) else {
                 alertContent = "Failed to create threshold key"
                 showAlert = true
                 showSpinner = SpinnerLocation.nowhere
                 return
             }
 
-            threshold_key = thresholdKey
+            self.thresholdKey = thresholdKey
 
-            guard let key_details = try? await threshold_key.initialize(never_initialize_new_key: false, include_local_metadata_transitions: false) else {
+            guard let keyDetails = try? await thresholdKey.initialize(neverInitializeNewKey: false, includeLocalMetadataTransitions: false) else {
                 alertContent = "Failed to get key details"
                 showAlert = true
                 showSpinner = SpinnerLocation.nowhere
                 return
             }
 
-            totalShares = Int(key_details.total_shares)
-            threshold = Int(key_details.threshold)
+            totalShares = Int(keyDetails.totalShares)
+            threshold = Int(keyDetails.threshold)
             tkeyInitalized = true
 
             // public key of the metadatakey
-            metadataPublicKey = try key_details.pub_key.getPublicKey(format: .EllipticCompress )
+            metadataPublicKey = try keyDetails.pubKey.getPublicKey(format: .ellipticCompress )
 
-            if key_details.required_shares > 0 {
+            if keyDetails.requiredShares > 0 {
                 // exising user
-                let allTags = try threshold_key.get_all_tss_tags()
+                let allTags = try thresholdKey.get_all_tss_tags()
                 print(allTags)
                 let tag = "default" // allTags[0]
 //
@@ -192,7 +198,7 @@ struct ThresholdKeyView: View {
                 do {
                     deviceFactorPub = factorPub
                     let factorKey = try KeychainInterface.fetch(key: factorPub)
-                    try await threshold_key.input_factor_key(factorKey: factorKey)
+                    try await thresholdKey.input_factor_key(factorKey: factorKey)
                 } catch {
                     alertContent = "Failed to find device share or Incorrect device share"
                     showAlert = true
@@ -202,7 +208,7 @@ struct ThresholdKeyView: View {
                     return
                 }
 
-                guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
+                guard let reconstructionDetails = try? await thresholdKey.reconstruct() else {
 
                     alertContent = "Failed to reconstruct key with available shares."
                     resetAccount = true
@@ -217,7 +223,7 @@ struct ThresholdKeyView: View {
                 resetAccount = false
 
                 // check if default in all tags else ??
-                tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
+                tssPublicKey = try await TssModule.get_tss_pub_key(thresholdKey: thresholdKey, tssTag: tag )
 
                 let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
                 metadataDescription = "\(defaultTssShareDescription)"
@@ -225,8 +231,9 @@ struct ThresholdKeyView: View {
 
             } else {
                 // new user
-                guard (try? await threshold_key.reconstruct()) != nil else {
-                    alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required. If you have security question share, we suggest you to enter security question PW to recover your account"
+                guard (try? await thresholdKey.reconstruct()) != nil else {
+                    alertContent = "Failed to reconstruct key. \(keyDetails.requiredShares) more share(s) required." +
+                    " If you have security question share, we suggest you to enter security question PW to recover your account"
                     resetAccount = true
                     showAlert = true
                     showSpinner = SpinnerLocation.nowhere
@@ -242,16 +249,18 @@ struct ThresholdKeyView: View {
                 // use input to create tag tss share
                 let tssIndex = Int32(2)
                 let defaultTag = "default"
-                try await TssModule.create_tagged_tss_share(threshold_key: threshold_key, tss_tag: defaultTag, deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex, nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
+                try await TssModule.create_tagged_tss_share(thresholdKey: thresholdKey, tssTag: defaultTag,
+                                                            deviceTssShare: nil, factorPub: factorPub, deviceTssIndex: tssIndex,
+                                                            nodeDetails: self.nodeDetails!, torusUtils: self.torusUtils!)
 
-                tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: defaultTag)
+                tssPublicKey = try await TssModule.get_tss_pub_key(thresholdKey: thresholdKey, tssTag: defaultTag)
 
                 // finding device share index
-                var shareIndexes = try threshold_key.get_shares_indexes()
+                var shareIndexes = try thresholdKey.get_shares_indexes()
                 shareIndexes.removeAll(where: {$0 == "1"})
 
                 // backup metadata share using factorKey
-                try TssModule.backup_share_with_factor_key(threshold_key: threshold_key, shareIndex: shareIndexes[0], factorKey: factorKey.hex)
+                try TssModule.backup_share_with_factor_key(thresholdKey: thresholdKey, shareIndex: shareIndexes[0], factorKey: factorKey.hex)
                 let description = [
                     "module": "Device Factor key",
                     "tssTag": defaultTag,
@@ -260,7 +269,7 @@ struct ThresholdKeyView: View {
                 ] as [String: Codable]
                 let jsonStr = try factorDescription(dataObj: description)
 
-                try await threshold_key.add_share_description(key: factorPub, description: jsonStr )
+                try await thresholdKey.add_share_description(key: factorPub, description: jsonStr )
 
                 // point metadata pubkey to factorPub
                 UserDefaults.standard.set(factorPub, forKey: metadataPublicKey)
@@ -274,8 +283,8 @@ struct ThresholdKeyView: View {
                     return
                 }
 
-                guard let reconstructionDetails = try? await threshold_key.reconstruct() else {
-                    alertContent = "Failed to reconstruct key. \(key_details.required_shares) more share(s) required."
+                guard let reconstructionDetails = try? await thresholdKey.reconstruct() else {
+                    alertContent = "Failed to reconstruct key. \(keyDetails.requiredShares) more share(s) required."
                     resetAccount = true
                     showAlert = true
                     return
@@ -294,10 +303,10 @@ struct ThresholdKeyView: View {
 
     func recover (factorKey: String) async throws {
         do {
-            try await threshold_key.input_factor_key(factorKey: factorKey)
-            let key_details = try await threshold_key.reconstruct()
+            try await thresholdKey.input_factor_key(factorKey: factorKey)
+            let keyDetails = try await thresholdKey.reconstruct()
 
-            metadataKey = key_details.key
+            metadataKey = keyDetails.key
 
             // set to factorkey to keychain
             let fk = PrivateKey(hex: factorKey)
@@ -310,9 +319,9 @@ struct ThresholdKeyView: View {
             deviceFactorPub = factorPub
 
             let tag = "default"
-            tssPublicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: tag )
+            tssPublicKey = try await TssModule.get_tss_pub_key(thresholdKey: thresholdKey, tssTag: tag )
 
-            let defaultTssShareDescription = try threshold_key.get_share_descriptions()
+            let defaultTssShareDescription = try thresholdKey.get_share_descriptions()
             metadataDescription = "\(defaultTssShareDescription)"
 
             tkeyReconstructed = true
@@ -329,10 +338,12 @@ struct ThresholdKeyView: View {
 
             if showTss {
                 List {
-                    TssView(threshold_key: $threshold_key, verifier: $verifier, verifierId: $verifierId, signatures: $signatures, tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils, metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub, selectedFactorPub: deviceFactorPub)
+                    TssView(thresholdKey: $thresholdKey, verifier: $verifier, verifierId: $verifierId, signatures: $signatures,
+                            tssEndpoints: $tssEndpoint, showTss: $showTss, nodeDetails: $nodeDetails, torusUtils: $torusUtils,
+                            metadataPublicKey: $metadataPublicKey, deviceFactorPub: $deviceFactorPub, selectedFactorPub: deviceFactorPub)
                 }
             } else if showRecovery {
-                RecoveryView( recover: recover, reset: reset).alert(isPresented: $showAlert) {
+                RecoveryView( recover: recover, reset: reset, deserializeShare: deserializeShare).alert(isPresented: $showAlert) {
                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                 }
 
@@ -369,7 +380,7 @@ struct ThresholdKeyView: View {
                             HStack {
                                 Text("Initialize")
                                 Spacer()
-                                if showSpinner == SpinnerLocation.init_reconstruct_btn {
+                                if showSpinner == SpinnerLocation.initReconstructBtn {
                                     LoaderView()
                                 }
                                 Button(action: {
@@ -378,8 +389,8 @@ struct ThresholdKeyView: View {
                                 }) {
                                     Text("")
                                 }
-                                .disabled(showSpinner == SpinnerLocation.init_reconstruct_btn)
-                                .opacity(showSpinner == SpinnerLocation.init_reconstruct_btn ? 0.5 : 1)
+                                .disabled(showSpinner == SpinnerLocation.initReconstructBtn)
+                                .opacity(showSpinner == SpinnerLocation.initReconstructBtn ? 0.5 : 1)
                                 .alert(isPresented: $showAlert) {
                                     Alert(title: Text("Alert"), message: Text(alertContent), dismissButton: .default(Text("Ok")))
                                 }
@@ -393,7 +404,7 @@ struct ThresholdKeyView: View {
                                 Task {
                                     do {
 
-                                        let description = try threshold_key.get_share_descriptions()
+                                        let description = try thresholdKey.get_share_descriptions()
                                         metadataDescription = "\(description)"
 
                                         alertContent = "TSS Pub Key: \(tssPublicKey) \n Metadata key: \(metadataKey) \n With Factors/Shares: \(metadataDescription)"
@@ -449,16 +460,19 @@ struct ThresholdKeyView: View {
                                                 showSpinner = SpinnerLocation.nowhere
                                                 return
                                             }
-                                            let postboxkey = finalKeyData["privKey"] as! String
-                                            let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-                                            let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-                                            let temp_threshold_key = try ThresholdKey(
-                                                storage_layer: temp_storage_layer,
-                                                service_provider: temp_service_provider,
-                                                enable_logging: true,
-                                                manual_sync: false)
+                                            guard let postboxkey = finalKeyData["privKey"] as? String else {
+                                                throw RuntimeError("invalid private key")
+                                            }
 
-                                            try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+                                            let tempStorageLayer = try StorageLayer(enableLogging: true, hostUrl: "https://metadata.tor.us", serverTimeOffset: 2)
+                                            let tempServiceProvider = try ServiceProvider(enableLogging: true, postboxKey: postboxkey)
+                                            let tempThresholdKey = try ThresholdKey(
+                                                storageLayer: tempStorageLayer,
+                                                serviceProvider: tempServiceProvider,
+                                                enableLogging: true,
+                                                manualSync: false)
+
+                                            try await tempThresholdKey.storage_layer_set_metadata(privateKey: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
                                             tkeyInitalized = false
                                             tkeyReconstructed = false
                                             metadataDescription = ""
@@ -502,16 +516,18 @@ struct ThresholdKeyView: View {
                 showSpinner = SpinnerLocation.nowhere
                 return
             }
-            let postboxkey = finalKeyData["privKey"] as! String
-            let temp_storage_layer = try StorageLayer(enable_logging: true, host_url: "https://metadata.tor.us", server_time_offset: 2)
-            let temp_service_provider = try ServiceProvider(enable_logging: true, postbox_key: postboxkey)
-            let temp_threshold_key = try ThresholdKey(
-                storage_layer: temp_storage_layer,
-                service_provider: temp_service_provider,
-                enable_logging: true,
-                manual_sync: false)
+            guard let postboxkey = finalKeyData["privKey"] as? String else {
+                throw RuntimeError("Invalid Private Key")
+            }
+            let tempStorageLayer = try StorageLayer(enableLogging: true, hostUrl: "https://metadata.tor.us", serverTimeOffset: 2)
+            let tempServiceProvider = try ServiceProvider(enableLogging: true, postboxKey: postboxkey)
+            let tempThresholdKey = try ThresholdKey(
+                storageLayer: tempStorageLayer,
+                serviceProvider: tempServiceProvider,
+                enableLogging: true,
+                manualSync: false)
 
-            try await temp_threshold_key.storage_layer_set_metadata(private_key: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
+            try await tempThresholdKey.storage_layer_set_metadata(privateKey: postboxkey, json: "{ \"message\": \"KEY_NOT_FOUND\" }")
             tkeyInitalized = false
             tkeyReconstructed = false
             metadataDescription = ""
