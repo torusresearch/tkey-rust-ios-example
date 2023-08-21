@@ -34,9 +34,9 @@
 		F00423A32A8B64D600F11B11 /* helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00423A12A8B64D600F11B11 /* helper.swift */; };
 		F00423A52A8C841100F11B11 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00423A42A8C841100F11B11 /* RecoveryView.swift */; };
 		F00423A62A8C841100F11B11 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00423A42A8C841100F11B11 /* RecoveryView.swift */; };
+		F00423E52A8F3FB100F11B11 /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = F00423E42A8F3FB100F11B11 /* ThresholdKey */; };
 		F0E2AC442A73A3C900F6C17A /* TssView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E2AC432A73A3C900F6C17A /* TssView.swift */; };
 		F0E2AC452A73A3C900F6C17A /* TssView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E2AC432A73A3C900F6C17A /* TssView.swift */; };
-		F0E2AC502A821B4900F6C17A /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = F0E2AC4F2A821B4900F6C17A /* ThresholdKey */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,7 +99,7 @@
 			files = (
 				146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */,
 				B3B8BF5D2A73C66B007B6170 /* tss-client-swift in Frameworks */,
-				F0E2AC502A821B4900F6C17A /* ThresholdKey in Frameworks */,
+				F00423E52A8F3FB100F11B11 /* ThresholdKey in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,7 +222,7 @@
 			packageProductDependencies = (
 				146B0D6829CC01F7000473A8 /* CustomAuth */,
 				B3B8BF5C2A73C66B007B6170 /* tss-client-swift */,
-				F0E2AC4F2A821B4900F6C17A /* ThresholdKey */,
+				F00423E42A8F3FB100F11B11 /* ThresholdKey */,
 			);
 			productName = "tkey_ios (iOS)";
 			productReference = B30B6B1728BCC8AC00812C1E /* tkey_ios.app */;
@@ -325,7 +325,7 @@
 			packageReferences = (
 				146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */,
 				B3B8BF5B2A73C66B007B6170 /* XCRemoteSwiftPackageReference "tss-client-swift" */,
-				F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */,
+				F00423E32A8F3FB100F11B11 /* XCRemoteSwiftPackageReference "tkey-mpc-swift" */,
 			);
 			productRefGroup = B30B6B1828BCC8AC00812C1E /* Products */;
 			projectDirPath = "";
@@ -388,7 +388,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if test -d \"/opt/homebrew/bin/\"; then\n  PATH=\"/opt/homebrew/bin/:${PATH}\"\nfi\n\nexport PATH\n\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -925,12 +925,12 @@
 				minimumVersion = 1.0.8;
 			};
 		};
-		F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */ = {
+		F00423E32A8F3FB100F11B11 /* XCRemoteSwiftPackageReference "tkey-mpc-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/tkey/tkey-ios";
+			repositoryURL = "https://github.com/tkey/tkey-mpc-swift/";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = "1.1.0-alpha";
+				branch = fix/swiftLint;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -946,9 +946,9 @@
 			package = B3B8BF5B2A73C66B007B6170 /* XCRemoteSwiftPackageReference "tss-client-swift" */;
 			productName = "tss-client-swift";
 		};
-		F0E2AC4F2A821B4900F6C17A /* ThresholdKey */ = {
+		F00423E42A8F3FB100F11B11 /* ThresholdKey */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = F0E2AC4E2A821B4900F6C17A /* XCRemoteSwiftPackageReference "tkey-ios" */;
+			package = F00423E32A8F3FB100F11B11 /* XCRemoteSwiftPackageReference "tkey-mpc-swift" */;
 			productName = ThresholdKey;
 		};
 /* End XCSwiftPackageProductDependency section */
