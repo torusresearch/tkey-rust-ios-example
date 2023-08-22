@@ -373,7 +373,6 @@ struct TssView: View {
 
                     let finalPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
 
-                    
                     let tssPubKeyPoint = try KeyPoint(address: finalPubKey)
                     let fullTssPubKey = try tssPubKeyPoint.getPublicKey(format: PublicKeyEncoding.FullAddress)
 

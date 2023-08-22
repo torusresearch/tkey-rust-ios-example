@@ -10,7 +10,6 @@ import Foundation
 import web3
 import CryptoKit
 
-
 public typealias Ether = Double
 public typealias Wei = BigUInt
 
@@ -20,8 +19,7 @@ public func keccak256Data(_ data: Data) -> String {
 }
 
 public final class TorusWeb3Utils {
-    
-    
+
     public static func timeMinToSec(val: Double) -> Double {
         return val * 60
     }
@@ -63,17 +61,14 @@ public final class TorusWeb3Utils {
     public static func toWei(GWei: Double) -> Wei {
         return Wei(GWei * 1000000000)
     }
-    
-    
-
 
     public static func generateAddressFromPubKey(publicKeyX: String, publicKeyY: String) -> String {
         let publicKeyHex = "04" + publicKeyX.addLeading0sForLength64()  + publicKeyY.addLeading0sForLength64()
         let publicKeyData = Data(hexString: publicKeyHex)!
-        
+
         do {
             let publicKey = try P256.KeyAgreement.PublicKey(x963Representation: publicKeyData)
-            let publicKeyBytes = publicKey.rawRepresentation//.dropFirst().dropLast() // Remove the first byte (0x04)
+            let publicKeyBytes = publicKey.rawRepresentation// .dropFirst().dropLast() // Remove the first byte (0x04)
             let ethAddressLower = "0x" + keccak256Data(publicKeyBytes).suffix(40)
             return ethAddressLower.toChecksumAddress()
         } catch {

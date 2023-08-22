@@ -88,7 +88,6 @@ public class EthereumTssAccount: EthereumAccountProtocol {
            throw CustomError.methodUnavailable
        }
 
-    
         public func sign(transaction: EthereumTransaction) throws -> SignedTransaction {
                         // Create tss Client using helper
             let (client, coeffs) = try helperTssClient(selected_tag: self.selectedTag, tssNonce: self.tssNonce, publicKey: self.publicKey, tssShare: self.tssShare, tssIndex: self.tssIndex, nodeIndexes: self.nodeIndexes, factorKey: self.factorKey, verifier: self.verifier, verifierId: self.verifierID, tssEndpoints: self.tssEndpoints)
