@@ -27,9 +27,9 @@ public func helperTssClient (selected_tag: String, tssNonce: Int32, publicKey: S
     let shareUnsigned = BigUInt(tssShare, radix: 16)!
     let share = BigInt(sign: .plus, magnitude: shareUnsigned)
 
-    let address = try KeyPoint(address: publicKey).getAsCompressedPublicKey(format: "")
+    let uncompressedPubKey = try KeyPoint(address: publicKey).getPublicKey(format: PublicKeyEncoding.FullAddress)
 
-    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({Int32($0)}), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: address)))
+    let client = try TSSClient(session: session, index: Int32(clientIndex), parties: partyIndexes.map({Int32($0)}), endpoints: urls.map({ URL(string: $0 ?? "") }), tssSocketEndpoints: socketUrls.map({ URL(string: $0 ?? "") }), share: TSSHelpers.base64Share(share: share), pubKey: try TSSHelpers.base64PublicKey(pubKey: Data(hex: uncompressedPubKey)))
 
     return (client, coeffs)
  }

@@ -299,7 +299,7 @@ struct TssView: View {
 
                     let (tssIndex, tssShare) = try await TssModule.get_tss_share(threshold_key: threshold_key, tss_tag: selected_tag, factorKey: factorKey)
                     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
-                    let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
+                    let tssPublicAddressInfo = try await TssModule.get_dkg_pub_key(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
                     let publicKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
 
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
@@ -307,14 +307,9 @@ struct TssView: View {
                     let (client, coeffs) = try helperTssClient(selected_tag: selected_tag, tssNonce: tssNonce, publicKey: publicKey, tssShare: tssShare, tssIndex: tssIndex, nodeIndexes: tssPublicAddressInfo.nodeIndexes, factorKey: factorKey, verifier: verifier, verifierId: verifierId, tssEndpoints: tssEndpoints)
 
                     // wait for sockets to connect
-                    var connected = try client.checkConnected()
+                    let connected = try client.checkConnected()
                     if connected {
-                        // Create a precompute, each server also creates a precompute.
-                        // This calls setup() followed by precompute() for all parties
-                        // If meesages cannot be exchanged by all parties, between all parties, this will fail, since it will timeout waiting for socket messages.
-                        // This will also fail if a single failure notification is received.
-                        // ~puid_seed is the first message set exchanged, ~checkpt123_raw is the last message set exchanged.
-                        // Once ~checkpt123_raw is received, precompute_complete notifications should be received shortly thereafter.
+
                         let precompute = try client.precompute(serverCoeffs: coeffs, signatures: sigs)
 
                         let ready = try client.isReady()
@@ -336,9 +331,9 @@ struct TssView: View {
 
                             // verify the signature
                             let tssPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
-                            let tssKeyAddress = try KeyPoint(address: tssPubKey).getAsCompressedPublicKey(format: "")
+                            let uncompressedTssKey = try KeyPoint(address: tssPubKey).getPublicKey(format: PublicKeyEncoding.FullAddress)
 
-                            if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: tssKeyAddress)) {
+                            if TSSHelpers.verifySignature(msgHash: msgHash, s: s, r: r, v: v, pubKey: Data(hex: uncompressedTssKey)) {
                                 let sigHex = try TSSHelpers.hexSignature(s: s, r: r, v: v)
                                 alertContent = "Signature: " + sigHex
                                 showAlert = true
@@ -356,6 +351,7 @@ struct TssView: View {
                         showAlert = true
                     }
                 } catch {
+                    print("error", error)
                     alertContent = "Signing could not be completed. please try again"
                     showAlert = true
                 }
@@ -373,14 +369,13 @@ struct TssView: View {
 
                     let tssNonce = try TssModule.get_tss_nonce(threshold_key: threshold_key, tss_tag: selected_tag)
 
-                    let tssPublicAddressInfo = try await TssModule.getTssPubAddress(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
+                    let tssPublicAddressInfo = try await TssModule.get_dkg_pub_key(threshold_key: threshold_key, tssTag: selected_tag, nonce: String(tssNonce), nodeDetails: nodeDetails!, torusUtils: torusUtils!)
 
                     let finalPubKey = try await TssModule.get_tss_pub_key(threshold_key: threshold_key, tss_tag: selected_tag)
 
                     
                     let tssPubKeyPoint = try KeyPoint(address: finalPubKey)
-                    // get the uncompressed public key, empty format returns uncompressed
-                    let fullTssPubKey = try tssPubKeyPoint.getAsCompressedPublicKey(format: "")
+                    let fullTssPubKey = try tssPubKeyPoint.getPublicKey(format: PublicKeyEncoding.FullAddress)
 
                     let evmAddress = try TorusWeb3Utils.generateAddressFromPubKey(publicKeyX: tssPubKeyPoint.getX(), publicKeyY: tssPubKeyPoint.getY())
 
