@@ -12,10 +12,19 @@
     {
       "identity" : "bigint",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/attaswift/BigInt",
+      "location" : "https://github.com/attaswift/BigInt.git",
       "state" : {
         "revision" : "0ed110f7555c34ff468e72e1686e59721f2b0da6",
         "version" : "5.3.0"
+      }
+    },
+    {
+      "identity" : "collectionconcurrencykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JohnSundell/CollectionConcurrencyKit.git",
+      "state" : {
+        "revision" : "b4f23e24b5a1bff301efc5e70871083ca029ff95",
+        "version" : "0.2.0"
       }
     },
     {
@@ -66,7 +75,7 @@
     {
       "identity" : "secp256k1.swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/GigaBitcoin/secp256k1.swift.git",
+      "location" : "https://github.com/GigaBitcoin/secp256k1.swift",
       "state" : {
         "revision" : "1a14e189def5eaa92f839afdd2faad8e43b61a6e",
         "version" : "0.12.2"
@@ -82,12 +91,30 @@
       }
     },
     {
+      "identity" : "sourcekitten",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/SourceKitten.git",
+      "state" : {
+        "revision" : "b6dc09ee51dfb0c66e042d2328c017483a1a5d56",
+        "version" : "0.34.1"
+      }
+    },
+    {
       "identity" : "starscream",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/daltoniam/Starscream",
       "state" : {
         "revision" : "df8d82047f6654d8e4b655d1b1525c64e1059d21",
         "version" : "4.0.4"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "8f4d2753f0e4778c76d5f05ad16c74f707390531",
+        "version" : "1.2.3"
       }
     },
     {
@@ -154,6 +181,42 @@
       }
     },
     {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-syntax.git",
+      "state" : {
+        "revision" : "59ed009d2c4a5a6b78f75a25679b6417ac040dcf",
+        "version" : "509.0.0-swift-DEVELOPMENT-SNAPSHOT-2023-07-04-a"
+      }
+    },
+    {
+      "identity" : "swiftlint",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/realm/SwiftLint",
+      "state" : {
+        "revision" : "9eaecbedce469a51bd8487effbd4ab46ec8384ae",
+        "version" : "0.52.4"
+      }
+    },
+    {
+      "identity" : "swiftytexttable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scottrhoyt/SwiftyTextTable.git",
+      "state" : {
+        "revision" : "c6df6cf533d120716bff38f8ff9885e1ce2a4ac3",
+        "version" : "0.9.0"
+      }
+    },
+    {
+      "identity" : "swxmlhash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drmohundro/SWXMLHash.git",
+      "state" : {
+        "revision" : "a853604c9e9a83ad9954c7e3d2a565273982471f",
+        "version" : "7.0.2"
+      }
+    },
+    {
       "identity" : "tkey-mpc-swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tkey/tkey-mpc-swift",
@@ -181,6 +244,15 @@
       }
     },
     {
+      "identity" : "web3-swift-mpc-provider",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tkey/web3-swift-mpc-provider",
+      "state" : {
+        "branch" : "feat/tx-signing",
+        "revision" : "9eed0ad534809c04b36617df47fa8b4d8a7f83ad"
+      }
+    },
+    {
       "identity" : "web3.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/argentlabs/web3.swift",
@@ -196,6 +268,15 @@
       "state" : {
         "revision" : "53fe0639a98903858d0196b699720decb42aee7b",
         "version" : "2.14.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "0d9ee7ea8c4ebd4a489ad7a73d5c6cad55d6fed3",
+        "version" : "5.0.6"
       }
     }
   ],

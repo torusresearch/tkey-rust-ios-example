@@ -8,6 +8,7 @@ import tkey_pkg
 import TorusUtils
 import tss_client_swift
 import web3
+import Web3SwiftMpcProvider
 
 struct TssView: View {
 
@@ -380,8 +381,10 @@ struct TssView: View {
 
                     // step 2. getting signature
                     let sigs: [String] = try signatures.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }
+                    
+                    let ethTssAccountParams = EthTssAccountParams(publicKey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
 
-                    let tssAccount = try EthereumTssAccount(evmAddress: evmAddress, pubkey: fullTssPubKey, factorKey: factorKey, tssNonce: tssNonce, tssShare: tssShare, tssIndex: tssIndex, selectedTag: selected_tag, verifier: verifier, verifierID: verifierId, nodeIndexes: tssPublicAddressInfo.nodeIndexes, tssEndpoints: tssEndpoints, authSigs: sigs)
+                    let tssAccount = try EthereumTssAccount(params: ethTssAccountParams)
 
                     let RPC_URL = "https://rpc.ankr.com/eth_goerli"
                     let chainID = 5

@@ -7,14 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		143023672A98DFEB003BEAE7 /* Web3SwiftMpcProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 143023662A98DFEB003BEAE7 /* Web3SwiftMpcProvider */; };
 		14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
 		14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3529CD642100B7EFE2 /* LoginView.swift */; };
 		14446F3929CD644100B7EFE2 /* LoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* LoginModel.swift */; };
 		14446F3A29CD644100B7EFE2 /* LoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14446F3829CD644100B7EFE2 /* LoginModel.swift */; };
 		146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 146B0D6829CC01F7000473A8 /* CustomAuth */; };
 		A38F28992A94DF190003D3B8 /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = A38F28982A94DF190003D3B8 /* ThresholdKey */; };
-		A3F814C92A82C40900018736 /* EthereumTssAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814C82A82C40900018736 /* EthereumTssAccount.swift */; };
-		A3F814CA2A82C40900018736 /* EthereumTssAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814C82A82C40900018736 /* EthereumTssAccount.swift */; };
 		A3F814CC2A82D8B300018736 /* RLP.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CB2A82D8B300018736 /* RLP.swift */; };
 		A3F814CD2A82D8B300018736 /* RLP.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CB2A82D8B300018736 /* RLP.swift */; };
 		A3F814CF2A82DACE00018736 /* TorusWeb3Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */; };
@@ -78,7 +77,6 @@
 /* Begin PBXFileReference section */
 		14446F3529CD642100B7EFE2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		14446F3829CD644100B7EFE2 /* LoginModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginModel.swift; sourceTree = "<group>"; };
-		A3F814C82A82C40900018736 /* EthereumTssAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTssAccount.swift; sourceTree = "<group>"; };
 		A3F814CB2A82D8B300018736 /* RLP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLP.swift; sourceTree = "<group>"; };
 		A3F814CE2A82DACE00018736 /* TorusWeb3Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorusWeb3Utils.swift; sourceTree = "<group>"; };
 		A3F814D12A8335C900018736 /* TssClientHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TssClientHelper.swift; sourceTree = "<group>"; };
@@ -107,6 +105,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */,
+				143023672A98DFEB003BEAE7 /* Web3SwiftMpcProvider in Frameworks */,
 				B3B8BF5D2A73C66B007B6170 /* tss-client-swift in Frameworks */,
 				A38F28992A94DF190003D3B8 /* ThresholdKey in Frameworks */,
 			);
@@ -152,7 +151,6 @@
 			isa = PBXGroup;
 			children = (
 				B3E5316E29EE75CA00174AF1 /* KeyChain.swift */,
-				A3F814C82A82C40900018736 /* EthereumTssAccount.swift */,
 				A3F814CB2A82D8B300018736 /* RLP.swift */,
 				B30B6B1028BCC8A900812C1E /* tkey_iosApp.swift */,
 				B30B6B1128BCC8A900812C1E /* ContentView.swift */,
@@ -234,6 +232,7 @@
 				146B0D6829CC01F7000473A8 /* CustomAuth */,
 				B3B8BF5C2A73C66B007B6170 /* tss-client-swift */,
 				A38F28982A94DF190003D3B8 /* ThresholdKey */,
+				143023662A98DFEB003BEAE7 /* Web3SwiftMpcProvider */,
 			);
 			productName = "tkey_ios (iOS)";
 			productReference = B30B6B1728BCC8AC00812C1E /* tkey_ios.app */;
@@ -337,6 +336,7 @@
 				146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */,
 				B3B8BF5B2A73C66B007B6170 /* XCRemoteSwiftPackageReference "tss-client-swift" */,
 				A38F28972A94DF190003D3B8 /* XCRemoteSwiftPackageReference "tkey-mpc-swift" */,
+				143023652A98DFEB003BEAE7 /* XCRemoteSwiftPackageReference "web3-swift-mpc-provider" */,
 			);
 			productRefGroup = B30B6B1828BCC8AC00812C1E /* Products */;
 			projectDirPath = "";
@@ -389,7 +389,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				14446F3629CD642100B7EFE2 /* LoginView.swift in Sources */,
-				A3F814C92A82C40900018736 /* EthereumTssAccount.swift in Sources */,
 				B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3A28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				A3F814CC2A82D8B300018736 /* RLP.swift in Sources */,
@@ -409,7 +408,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				14446F3729CD642100B7EFE2 /* LoginView.swift in Sources */,
-				A3F814CA2A82C40900018736 /* EthereumTssAccount.swift in Sources */,
 				B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */,
 				B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */,
 				A3F814CD2A82D8B300018736 /* RLP.swift in Sources */,
@@ -906,6 +904,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		143023652A98DFEB003BEAE7 /* XCRemoteSwiftPackageReference "web3-swift-mpc-provider" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tkey/web3-swift-mpc-provider";
+			requirement = {
+				branch = "feat/tx-signing";
+				kind = branch;
+			};
+		};
 		146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
@@ -933,6 +939,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		143023662A98DFEB003BEAE7 /* Web3SwiftMpcProvider */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 143023652A98DFEB003BEAE7 /* XCRemoteSwiftPackageReference "web3-swift-mpc-provider" */;
+			productName = Web3SwiftMpcProvider;
+		};
 		146B0D6829CC01F7000473A8 /* CustomAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */;
