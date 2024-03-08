@@ -22,8 +22,7 @@
 		B30B6B3B28BCC8AC00812C1E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30B6B1128BCC8A900812C1E /* ContentView.swift */; };
 		B30B6B3C28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
 		B30B6B3D28BCC8AC00812C1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B30B6B1228BCC8AC00812C1E /* Assets.xcassets */; };
-		B37E79AF296EA60700C5F3F4 /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B37E79AE296EA60700C5F3F4 /* ThresholdKey */; };
-		B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */ = {isa = PBXBuildFile; productRef = B3A1F29C29667EC80066658F /* ThresholdKey */; };
+		B3DC45122B9AFFA4003420A6 /* tkey-swift in Frameworks */ = {isa = PBXBuildFile; productRef = B3DC45112B9AFFA4003420A6 /* tkey-swift */; };
 		B3E5316629EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */; };
 		B3E5316729EC4E7E00174AF1 /* ThresholdKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316529EC4E7E00174AF1 /* ThresholdKeyView.swift */; };
 		B3E5316929EC4ED000174AF1 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E5316829EC4ED000174AF1 /* LoaderView.swift */; };
@@ -88,8 +87,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3A1F29D29667EC80066658F /* ThresholdKey in Frameworks */,
 				146B0D6929CC01F7000473A8 /* CustomAuth in Frameworks */,
+				B3DC45122B9AFFA4003420A6 /* tkey-swift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,7 +103,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B37E79AF296EA60700C5F3F4 /* ThresholdKey in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -207,8 +205,8 @@
 			);
 			name = "tkey_ios (iOS)";
 			packageProductDependencies = (
-				B3A1F29C29667EC80066658F /* ThresholdKey */,
 				146B0D6829CC01F7000473A8 /* CustomAuth */,
+				B3DC45112B9AFFA4003420A6 /* tkey-swift */,
 			);
 			productName = "tkey_ios (iOS)";
 			productReference = B30B6B1728BCC8AC00812C1E /* tkey_ios.app */;
@@ -246,7 +244,6 @@
 			);
 			name = "Tests iOS";
 			packageProductDependencies = (
-				B37E79AE296EA60700C5F3F4 /* ThresholdKey */,
 			);
 			productName = "Tests iOS";
 			productReference = B30B6B2428BCC8AC00812C1E /* Tests iOS.xctest */;
@@ -310,8 +307,8 @@
 			);
 			mainGroup = B30B6B0A28BCC8A900812C1E;
 			packageReferences = (
-				B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */,
 				146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */,
+				B3DC45102B9AFFA4003420A6 /* XCRemoteSwiftPackageReference "tkey-swift" */,
 			);
 			productRefGroup = B30B6B1828BCC8AC00812C1E /* Products */;
 			projectDirPath = "";
@@ -873,16 +870,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/torusresearch/customauth-swift-sdk";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMinorVersion;
+				minimumVersion = 7.0.1;
 			};
 		};
-		B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */ = {
+		B3DC45102B9AFFA4003420A6 /* XCRemoteSwiftPackageReference "tkey-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/torusresearch/libtkey-pkg/";
+			repositoryURL = "https://github.com/tkey/tkey-swift";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -893,15 +890,10 @@
 			package = 146B0D6729CC01F7000473A8 /* XCRemoteSwiftPackageReference "customauth-swift-sdk" */;
 			productName = CustomAuth;
 		};
-		B37E79AE296EA60700C5F3F4 /* ThresholdKey */ = {
+		B3DC45112B9AFFA4003420A6 /* tkey-swift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */;
-			productName = ThresholdKey;
-		};
-		B3A1F29C29667EC80066658F /* ThresholdKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B3A1F29B29667EC80066658F /* XCRemoteSwiftPackageReference "libtkey-pkg" */;
-			productName = ThresholdKey;
+			package = B3DC45102B9AFFA4003420A6 /* XCRemoteSwiftPackageReference "tkey-swift" */;
+			productName = "tkey-swift";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
