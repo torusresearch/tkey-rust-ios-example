@@ -29,10 +29,10 @@ class LoginModel: ObservableObject {
                                          verifier: "google-lrc",
                                          redirectURL: "tdsdk://tdsdk/oauthCallback",
                                          browserRedirectURL: "https://scripts.toruswallet.io/redirect.html")
-            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .TESTNET)
+            let tdsdk = CustomAuth(aggregateVerifierType: .singleLogin, aggregateVerifier: "google-lrc", subVerifierDetails: [sub], network: .legacy(.TESTNET))
             let data = try await tdsdk.triggerLogin()
             await MainActor.run(body: {
-                self.userData = data
+                self.userData = data.userInfo
                 loggedIn = true
             })
         }
